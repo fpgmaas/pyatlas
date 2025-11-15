@@ -23,6 +23,9 @@ RUN pip install --no-cache-dir -r requirements-cpu.txt
 # Copy the rest of the application code
 COPY pylens /code/pylens/
 
+# Copy TOML config files
+COPY config.dev.toml config.prod.toml /code/
+
 # Make empty data directory
 RUN mkdir -p /code/data
 

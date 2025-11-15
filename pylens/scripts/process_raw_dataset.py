@@ -50,7 +50,7 @@ def write_csv(df, processed_dataset_path):
 
 def process_raw_dataset():
     load_dotenv()
-    config = Config()
+    config = Config.from_toml()
     df = read_raw_dataset(config.DATA_DIR / config.RAW_DATASET_CSV_NAME)
     if config.FRAC_DATA_TO_INCLUDE < 1.0:
         df = filter_top_packages(df, config.FRAC_DATA_TO_INCLUDE)

@@ -4,7 +4,7 @@ The setup script will:
 
 - Download and process the PyPI dataset and store the results in the `data` directory.
 - Create vector embeddings for the PyPI dataset.
-- If the `STORAGE_BACKEND` environment variable is set to `BLOB`: Upload the datasets to blob storage.
+- Upload the processed datasets to Azure Blob Storage.
 
 There are three ways to run the setup script:
 

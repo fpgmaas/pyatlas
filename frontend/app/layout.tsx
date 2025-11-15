@@ -6,10 +6,10 @@ import GoogleAnalytics from "./components/GoogleAnalytics";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PyPI Scout",
+  title: "PyLens",
   description: "Find Python packages on PyPI with natural language queries",
   openGraph: {
-    title: "PyPI Scout",
+    title: "PyLens",
     description: "Find Python packages on PyPI with natural language queries",
     images: [
       {
@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta property="og:title" content="PyPI Scout" />
+        <meta property="og:title" content="PyLens" />
         <meta
           property="og:description"
           content="Find Python packages on PyPI with natural language queries"

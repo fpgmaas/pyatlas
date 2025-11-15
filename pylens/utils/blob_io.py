@@ -51,3 +51,10 @@ class BlobIO:
     def exists(self, blob_name):
         blob_client = self.container_client.get_blob_client(blob_name)
         return blob_client.exists()
+
+    def download_to_file(self, blob_name: str, local_file_path: str) -> None:
+        """Download a blob to a local file path."""
+        blob_client = self.container_client.get_blob_client(blob_name)
+        with open(local_file_path, "wb") as download_file:
+            download_stream = blob_client.download_blob()
+            download_file.write(download_stream.readall())

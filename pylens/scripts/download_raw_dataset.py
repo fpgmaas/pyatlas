@@ -12,7 +12,7 @@ def download_raw_dataset():
     Downloads the dataset from a Google Drive link using the gdown library.
     """
     load_dotenv()
-    config = Config()
+    config = Config.from_toml()
 
     target_path = config.DATA_DIR / config.RAW_DATASET_CSV_NAME
     if target_path.exists():

@@ -1,0 +1,30 @@
+[app]
+name = "pylens"
+version = "0.0.1"
+description = "PyLens helps you find PyPI packages through natural language prompts"
+environment = "dev"
+
+[api]
+host = "0.0.0.0"
+port = 8080
+debug = true
+cors_origins = ["http://localhost:3000", "http://localhost:5173"]
+embeddings_model_name = "all-mpnet-base-v2"
+weight_similarity = 0.0
+weight_weekly_downloads = 1.0
+
+[etl]
+google_file_id = "1pNdyZ7WP5YImPwzr-AjPX-CDt3ZIzBM2"
+overwrite_download = true
+frac_data_to_include = 1.0
+
+[storage]
+data_folder = "data"
+# Skip download from blob if files exist locally (dev convenience)
+force_download_on_startup = false
+
+[files]
+raw_dataset_csv = "raw_dataset.csv"
+processed_dataset_csv = "processed_dataset.csv"
+dataset_for_api_csv = "dataset_for_api.csv"
+embeddings_parquet = "embeddings.parquet"

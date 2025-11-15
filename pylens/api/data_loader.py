@@ -3,7 +3,7 @@ from typing import Tuple
 
 import polars as pl
 
-from pylens.config import Config, StorageBackend
+from pylens.config import Config
 from pylens.utils.blob_io import BlobIO
 
 
@@ -12,47 +12,69 @@ class ApiDataLoader:
         self.config = config
 
     def load_dataset(self) -> Tuple[pl.DataFrame, pl.DataFrame]:
-        if self.config.STORAGE_BACKEND == StorageBackend.LOCAL:
-            df_packages, df_embeddings = self._load_local_dataset()
-        elif self.config.STORAGE_BACKEND == StorageBackend.BLOB:
-            df_packages, df_embeddings = self._load_blob_dataset()
-        else:
-            raise ValueError(f"Unexpected value found for STORAGE_BACKEND: {self.config.STORAGE_BACKEND}")  # noqa: TRY003
+        """
+        Load datasets from blob storage with local caching.
+
+        In prod: always download from blob on startup (force_download_on_startup=True)
+        In dev: skip download if files exist locally (force_download_on_startup=False)
+        """
+        # Ensure data directory exists
+        self.config.storage.data_folder.mkdir(parents=True, exist_ok=True)
+
+        # Download files from blob if needed
+        self._download_from_blob_if_needed()
+
+        # Load from local cache
+        df_packages, df_embeddings = self._load_from_local_cache()
 
         df_embeddings = self._drop_rows_from_embeddings_that_do_not_appear_in_packages(df_embeddings, df_packages)
         return df_packages, df_embeddings
 
-    def _load_local_dataset(self) -> Tuple[pl.DataFrame, pl.DataFrame]:
-        packages_dataset_path = self.config.DATA_DIR / self.config.DATASET_FOR_API_CSV_NAME
-        embeddings_dataset_path = self.config.DATA_DIR / self.config.EMBEDDINGS_PARQUET_NAME
+    def _download_from_blob_if_needed(self) -> None:
+        """Download datasets from blob storage if needed based on config."""
+        packages_path = self.config.storage.data_folder / self.config.files.dataset_for_api_csv
+        embeddings_path = self.config.storage.data_folder / self.config.files.embeddings_parquet
 
-        logging.info(f"Reading packages dataset from `{packages_dataset_path}`...")
-        df_packages = pl.read_csv(packages_dataset_path)
-        self._log_packages_dataset_info(df_packages)
+        # Check if we need to download
+        files_exist = packages_path.exists() and embeddings_path.exists()
+        should_download = self.config.storage.force_download_on_startup or not files_exist
 
-        logging.info(f"Reading embeddings from `{embeddings_dataset_path}`...")
-        df_embeddings = pl.read_parquet(embeddings_dataset_path)
-        self._log_embeddings_dataset_info(df_embeddings)
+        if not should_download:
+            logging.info("Files exist locally and force_download_on_startup=False, skipping download from blob")
+            return
 
-        return df_packages, df_embeddings
-
-    def _load_blob_dataset(self) -> Tuple[pl.DataFrame, pl.DataFrame]:
+        # Download from blob
         blob_io = BlobIO(
-            self.config.STORAGE_BACKEND_BLOB_ACCOUNT_NAME,
-            self.config.STORAGE_BACKEND_BLOB_CONTAINER_NAME,
-            self.config.STORAGE_BACKEND_BLOB_KEY,
+            self.config.storage.blob_account_name,
+            self.config.storage.blob_container_name,
+            self.config.storage.blob_account_key,
         )
 
         logging.info(
-            f"Downloading `{self.config.DATASET_FOR_API_CSV_NAME}` from container `{self.config.STORAGE_BACKEND_BLOB_CONTAINER_NAME}`..."
+            f"Downloading `{self.config.files.dataset_for_api_csv}` from blob container "
+            f"`{self.config.storage.blob_container_name}` to `{packages_path}`..."
         )
-        df_packages = blob_io.download_csv_to_df(self.config.DATASET_FOR_API_CSV_NAME)
+        blob_io.download_to_file(self.config.files.dataset_for_api_csv, str(packages_path))
+
+        logging.info(
+            f"Downloading `{self.config.files.embeddings_parquet}` from blob container "
+            f"`{self.config.storage.blob_container_name}` to `{embeddings_path}`..."
+        )
+        blob_io.download_to_file(self.config.files.embeddings_parquet, str(embeddings_path))
+
+        logging.info("Finished downloading files from blob storage")
+
+    def _load_from_local_cache(self) -> Tuple[pl.DataFrame, pl.DataFrame]:
+        """Load datasets from local cache directory."""
+        packages_path = self.config.storage.data_folder / self.config.files.dataset_for_api_csv
+        embeddings_path = self.config.storage.data_folder / self.config.files.embeddings_parquet
+
+        logging.info(f"Reading packages dataset from `{packages_path}`...")
+        df_packages = pl.read_csv(packages_path)
         self._log_packages_dataset_info(df_packages)
 
-        logging.info(
-            f"Downloading `{self.config.EMBEDDINGS_PARQUET_NAME}` from container `{self.config.STORAGE_BACKEND_BLOB_CONTAINER_NAME}`..."
-        )
-        df_embeddings = blob_io.download_parquet_to_df(self.config.EMBEDDINGS_PARQUET_NAME)
+        logging.info(f"Reading embeddings from `{embeddings_path}`...")
+        df_embeddings = pl.read_parquet(embeddings_path)
         self._log_embeddings_dataset_info(df_embeddings)
 
         return df_packages, df_embeddings

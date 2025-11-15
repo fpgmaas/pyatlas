@@ -1,7 +1,7 @@
 [project]
 name = "pylens"
 version = "0.0.1"
-description = "PyPI Scout helps you find PyPI packages through natural language prompts with the help of Large Language Models (LLMs)."
+description = "PyLens helps you find PyPI packages through natural language prompts with the help of Large Language Models (LLMs)."
 authors = [{ name = "Florian Maas", email = "ffpgmaas@gmail.com" }]
 requires-python = ">=3.9,<4.0"
 readme = "README.md"
@@ -14,6 +14,7 @@ dependencies = [
     "tqdm>=4.66.4,<5",
     "fastapi>=0.111.0,<0.112",
     "pydantic>=2.7.4,<3",
+    "pydantic-settings>=2.0.0,<3",
     "uvicorn>=0.30.1,<0.31",
     "gdown>=5.2.0,<6",
     "azure-storage-blob>=12.20.0,<13",
@@ -91,6 +92,7 @@ ignore = [
     "E501",
     # DoNotAssignLambda
     "E731",
+    "TRY003",
 ]
 
 [tool.ruff.format]

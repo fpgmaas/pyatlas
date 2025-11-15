@@ -22,6 +22,9 @@ RUN uv install --no-interaction --no-ansi --no-root --no-dev && \
 # Copy Python code to the Docker image
 COPY pylens /code/pylens/
 
+# Copy TOML config files
+COPY config.dev.toml config.prod.toml /code/
+
 # Make empty data directory
 RUN mkdir -p /code/data
 

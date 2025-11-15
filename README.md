@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="./static/pypi.svg" alt="PyPI Scout Logo" width="300">
+  <img src="./static/pypi.svg" alt="PyLens Logo" width="300">
 </p>
 
 <br/>
 <p align="center">
-  <img src="https://github.com/fpgmaas/pylens/blob/main/static/demo.gif?raw=true" alt="PyPI Scout Demo" width="700">
+  <img src="https://github.com/fpgmaas/pylens/blob/main/static/demo.gif?raw=true" alt="PyLens Demo" width="700">
 </p>
 
 ## What does this do?
@@ -29,16 +29,22 @@ The project uses the following technologies:
 
 ### Build and Setup
 
-#### 1. (Optional) **Create a `.env` file**
+#### 1. **Configure Environment**
 
-By default, all data will be stored on your local machine. It is also possible to store the data for the API on Azure Blob storage, and
-have the API read from there. To do so, create a `.env` file:
+The project uses Azure Blob Storage for data storage. Create a `.env` file with your credentials:
 
 ```sh
 cp .env.template .env
 ```
 
-and fill in the required fields.
+Fill in the required Azure Blob Storage credentials:
+
+- `PYLENS_ENV`: Set to `dev` for development or `prod` for production
+- `PYLENS_STORAGE__BLOB_ACCOUNT_NAME`: Your Azure storage account name
+- `PYLENS_STORAGE__BLOB_CONTAINER_NAME`: Your blob container name
+- `PYLENS_STORAGE__BLOB_ACCOUNT_KEY`: Your storage account key
+
+The application uses TOML config files (`config.dev.toml` and `config.prod.toml`) for environment-specific settings. In development, the API will cache blob files locally and skip re-downloading if they exist. In production, the API always downloads fresh data from blob storage on startup.
 
 #### 2. **Run the Setup Script**
 
@@ -46,7 +52,7 @@ The setup script will:
 
 - Download and process the PyPI dataset and store the results in the `data` directory.
 - Create vector embeddings for the PyPI dataset.
-- If the `STORAGE_BACKEND` environment variable is set to `BLOB`: Upload the datasets to blob storage.
+- Upload the processed datasets to Azure Blob Storage.
 
 There are three methods to run the setup script, dependent on if you have a NVIDIA GPU and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) installed. Please run the setup script using the method that is applicable for you:
 
@@ -56,7 +62,7 @@ There are three methods to run the setup script, dependent on if you have a NVID
 
 > [!NOTE]
 > The dataset contains approximately 100.000 packages on PyPI with more than 100 weekly downloads. To speed up local development,
-> you can lower the amount of packages that is processed locally by lowering the value of `FRAC_DATA_TO_INCLUDE` in `pylens/config.py`.
+> you can lower the amount of packages that is processed locally by lowering the value of `frac_data_to_include` in `config.dev.toml`.
 
 #### 3. **Run the Application**
 

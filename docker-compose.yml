@@ -9,6 +9,8 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/code/data
+    environment:
+      - PYLENS_ENV=dev
     env_file:
       - .env
 

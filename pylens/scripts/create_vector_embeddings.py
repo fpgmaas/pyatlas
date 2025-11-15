@@ -27,7 +27,7 @@ def create_vector_embeddings():
     setup_logging()
     load_dotenv()
 
-    config = Config()
+    config = Config.from_toml()
     df = read_processed_dataset(config.DATA_DIR / config.PROCESSED_DATASET_CSV_NAME)
     df = df.with_columns(
         summary_and_description_cleaned=pl.concat_str(pl.col("summary"), pl.lit(" - "), pl.col("description_cleaned"))
