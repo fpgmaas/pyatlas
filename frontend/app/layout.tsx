@@ -16,7 +16,7 @@ export const metadata: Metadata = {
         url: "/pypi-light.svg",
         width: 600,
         height: 300,
-        alt: "pypi-scout logo",
+        alt: "pylens logo",
       },
     ],
   },
@@ -38,7 +38,7 @@ export default function RootLayout({
         <meta property="og:image" content="/pypi-light.svg" />
         <meta property="og:image:width" content="600" />
         <meta property="og:image:height" content="300" />
-        <meta property="og:image:alt" content="pypi-scout logo" />
+        <meta property="og:image:alt" content="pylens logo" />
       </head>
       <body className={inter.className}>
         <GoogleAnalytics />

@@ -3,8 +3,8 @@ from typing import Tuple
 
 import polars as pl
 
-from pypi_scout.config import Config, StorageBackend
-from pypi_scout.utils.blob_io import BlobIO
+from pylens.config import Config, StorageBackend
+from pylens.utils.blob_io import BlobIO
 
 
 class ApiDataLoader:

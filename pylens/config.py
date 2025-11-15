@@ -36,7 +36,7 @@ class Config:
     EMBEDDINGS_PARQUET_NAME = "embeddings.parquet"
 
     # Google Drive file ID for downloading the raw dataset.
-    GOOGLE_FILE_ID = "12AH8PwKvZqRhXBf9uS1qRZq1-k3gIhhG"
+    GOOGLE_FILE_ID = "1pNdyZ7WP5YImPwzr-AjPX-CDt3ZIzBM2"
 
     # Fraction of the dataset to include in the vector database. This value determines the portion of top packages
     # (sorted by weekly downloads) to include. Increase this value to include a larger portion of the dataset, up to 1.0 (100%).
@@ -46,8 +46,8 @@ class Config:
     # Weights for the combined score calculation. Higher WEIGHT_SIMILARITY prioritizes
     # relevance based on text similarity, while higher WEIGHT_WEEKLY_DOWNLOADS prioritizes
     # packages with more weekly downloads.
-    WEIGHT_SIMILARITY = 0.5
-    WEIGHT_WEEKLY_DOWNLOADS = 0.5
+    WEIGHT_SIMILARITY = 0
+    WEIGHT_WEEKLY_DOWNLOADS = 1
 
     # Storage backend configuration. Can be either StorageBackend.LOCAL or StorageBackend.BLOB.
     # If StorageBackend.BLOB, the processed dataset will be uploaded to Blob, and the backend API

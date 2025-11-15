@@ -4,7 +4,7 @@ import numpy as np
 import polars as pl
 import pytest
 
-from pypi_scout.embeddings.simple_vector_database import SimpleVectorDatabase
+from pylens.embeddings.simple_vector_database import SimpleVectorDatabase
 
 
 @pytest.fixture

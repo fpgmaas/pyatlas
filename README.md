@@ -4,7 +4,7 @@
 
 <br/>
 <p align="center">
-  <img src="https://github.com/fpgmaas/pypi-scout/blob/main/static/demo.gif?raw=true" alt="PyPI Scout Demo" width="700">
+  <img src="https://github.com/fpgmaas/pylens/blob/main/static/demo.gif?raw=true" alt="PyPI Scout Demo" width="700">
 </p>
 
 ## What does this do?
@@ -50,13 +50,13 @@ The setup script will:
 
 There are three methods to run the setup script, dependent on if you have a NVIDIA GPU and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) installed. Please run the setup script using the method that is applicable for you:
 
-- [Option 1: Using Poetry](SETUP.md#option-1-using-poetry)
+- [Option 1: Using uv](SETUP.md#option-1-using-uv)
 - [Option 2: Using Docker with NVIDIA GPU and NVIDIA Container Toolkit](SETUP.md#option-2-using-docker-with-nvidia-gpu-and-nvidia-container-toolkit)
 - [Option 3: Using Docker without NVIDIA GPU and NVIDIA Container Toolkit](SETUP.md#option-3-using-docker-without-nvidia-gpu-and-nvidia-container-toolkit)
 
 > [!NOTE]
 > The dataset contains approximately 100.000 packages on PyPI with more than 100 weekly downloads. To speed up local development,
-> you can lower the amount of packages that is processed locally by lowering the value of `FRAC_DATA_TO_INCLUDE` in `pypi_scout/config.py`.
+> you can lower the amount of packages that is processed locally by lowering the value of `FRAC_DATA_TO_INCLUDE` in `pylens/config.py`.
 
 #### 3. **Run the Application**
 

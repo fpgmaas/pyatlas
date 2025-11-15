@@ -3,10 +3,10 @@ import logging
 import polars as pl
 from dotenv import load_dotenv
 
-from pypi_scout.config import Config
-from pypi_scout.data.description_cleaner import CLEANING_FAILED, DescriptionCleaner
-from pypi_scout.data.raw_data_reader import RawDataReader
-from pypi_scout.utils.logging import setup_logging
+from pylens.config import Config
+from pylens.data.description_cleaner import CLEANING_FAILED, DescriptionCleaner
+from pylens.data.raw_data_reader import RawDataReader
+from pylens.utils.logging import setup_logging
 
 
 def read_raw_dataset(path_to_raw_dataset):

@@ -2,9 +2,9 @@ import logging
 
 from dotenv import load_dotenv
 
-from pypi_scout.config import Config, StorageBackend
-from pypi_scout.utils.blob_io import BlobIO
-from pypi_scout.utils.logging import setup_logging
+from pylens.config import Config, StorageBackend
+from pylens.utils.blob_io import BlobIO
+from pylens.utils.logging import setup_logging
 
 
 def upload_processed_datasets():

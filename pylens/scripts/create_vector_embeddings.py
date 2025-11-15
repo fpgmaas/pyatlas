@@ -5,9 +5,9 @@ import polars as pl
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 
-from pypi_scout.config import Config
-from pypi_scout.embeddings.embeddings_creator import VectorEmbeddingCreator
-from pypi_scout.utils.logging import setup_logging
+from pylens.config import Config
+from pylens.embeddings.embeddings_creator import VectorEmbeddingCreator
+from pylens.utils.logging import setup_logging
 
 
 def read_processed_dataset(path_to_processed_dataset: Path):

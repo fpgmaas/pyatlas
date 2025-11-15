@@ -21,7 +21,7 @@ COPY requirements-cpu.txt /code/requirements-cpu.txt
 RUN pip install --no-cache-dir -r requirements-cpu.txt
 
 # Copy the rest of the application code
-COPY pypi_scout /code/pypi_scout/
+COPY pylens /code/pylens/
 
 # Make empty data directory
 RUN mkdir -p /code/data
@@ -29,4 +29,4 @@ RUN mkdir -p /code/data
 ENV PYTHONPATH=/code
 
 # Use the script as the entrypoint
-CMD ["uvicorn", "pypi_scout.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "pylens.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

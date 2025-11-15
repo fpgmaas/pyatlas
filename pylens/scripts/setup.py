@@ -1,10 +1,10 @@
 import logging
 
-from pypi_scout.scripts.create_vector_embeddings import create_vector_embeddings
-from pypi_scout.scripts.download_raw_dataset import download_raw_dataset
-from pypi_scout.scripts.process_raw_dataset import process_raw_dataset
-from pypi_scout.scripts.upload_processed_datasets import upload_processed_datasets
-from pypi_scout.utils.logging import setup_logging
+from pylens.scripts.create_vector_embeddings import create_vector_embeddings
+from pylens.scripts.download_raw_dataset import download_raw_dataset
+from pylens.scripts.process_raw_dataset import process_raw_dataset
+from pylens.scripts.upload_processed_datasets import upload_processed_datasets
+from pylens.utils.logging import setup_logging
 
 
 def main():

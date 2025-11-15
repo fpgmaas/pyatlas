@@ -3,8 +3,8 @@ import logging
 import gdown
 from dotenv import load_dotenv
 
-from pypi_scout.config import Config
-from pypi_scout.utils.logging import setup_logging
+from pylens.config import Config
+from pylens.utils.logging import setup_logging
 
 
 def download_raw_dataset():

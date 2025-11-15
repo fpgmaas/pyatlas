@@ -9,12 +9,12 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.requests import Request
 
-from pypi_scout.api.data_loader import ApiDataLoader
-from pypi_scout.api.models import QueryModel, SearchResponse
-from pypi_scout.config import Config
-from pypi_scout.embeddings.simple_vector_database import SimpleVectorDatabase
-from pypi_scout.utils.logging import setup_logging
-from pypi_scout.utils.score_calculator import calculate_score
+from pylens.api.data_loader import ApiDataLoader
+from pylens.api.models import QueryModel, SearchResponse
+from pylens.config import Config
+from pylens.embeddings.simple_vector_database import SimpleVectorDatabase
+from pylens.utils.logging import setup_logging
+from pylens.utils.score_calculator import calculate_score
 
 setup_logging()
 logging.info("Initializing backend...")
@@ -55,7 +55,7 @@ async def search(query: QueryModel, request: Request):
         raise HTTPException(status_code=400, detail="top_k cannot be larger than 100.")
 
     logging.info(f"Searching for similar projects. Query: '{query.query}'")
-    df_matches = vector_database.find_similar(query.query, top_k=int(query.top_k * 3))
+    df_matches = vector_database.find_similar(query.query, top_k=int(query.top_k * 2))
     df_matches = df_matches.join(df_packages, how="left", on="name")
     logging.info(
         f"Fetched the {len(df_matches)} most similar projects. Calculating the weighted scores and filtering..."

@@ -3,7 +3,7 @@ import React from "react";
 const GitHubButton: React.FC = () => {
   return (
     <a
-      href="https://github.com/fpgmaas/pypi-scout"
+      href="https://github.com/fpgmaas/pylens"
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center p-2 border border-sky-700 rounded bg-sky-900 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700"

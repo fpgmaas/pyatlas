@@ -74,7 +74,7 @@ export default function Home() {
         <div className="flex flex-col items-center text-center mb-4">
           <picture>
             <img
-              alt="pypi-scout logo"
+              alt="pylens logo"
               width="420"
               height="220"
               src="./pypi.svg"
