@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class QueryModel(BaseModel):
     query: str
-    top_k: int
+    top_k: int = 100
 
 
 class Match(BaseModel):

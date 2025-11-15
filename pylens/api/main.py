@@ -1,7 +1,7 @@
 import logging
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sentence_transformers import SentenceTransformer
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -51,11 +51,12 @@ async def search(query: QueryModel, request: Request):
     The top_k packages with the highest score are returned.
     """
 
-    if query.top_k > 100:
-        raise HTTPException(status_code=400, detail="top_k cannot be larger than 100.")
+    # if query.top_k > 100:
+    #     raise HTTPException(status_code=400, detail="top_k cannot be larger than 100.")
 
     logging.info(f"Searching for similar projects. Query: '{query.query}'")
-    df_matches = vector_database.find_similar(query.query, top_k=int(query.top_k * 2))
+    df_matches = vector_database.find_similar(query.query, top_k=int(query.top_k))
+    # df_matches = vector_database.find_similar(query.query, top_k=int(query.top_k * 2))
     df_matches = df_matches.join(df_packages, how="left", on="name")
     logging.info(
         f"Fetched the {len(df_matches)} most similar projects. Calculating the weighted scores and filtering..."
