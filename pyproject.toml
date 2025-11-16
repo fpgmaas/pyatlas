@@ -22,6 +22,7 @@ dependencies = [
     "starlette>=0.37.2,<0.38",
     "numpy>=2.0.0,<3",
     "scikit-learn>=1.5.0,<2",
+    "readme-renderer>=44.0",
 ]
 
 [project.urls]

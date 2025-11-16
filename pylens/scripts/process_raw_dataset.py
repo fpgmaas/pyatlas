@@ -1,10 +1,9 @@
 import logging
 
-import polars as pl
 from dotenv import load_dotenv
 
 from pylens.config import Config
-from pylens.data.description_cleaner import CLEANING_FAILED, DescriptionCleaner
+from pylens.data.description.description_cleaner import DescriptionCleaner
 from pylens.data.raw_data_reader import RawDataReader
 from pylens.utils.logging import setup_logging
 
@@ -34,11 +33,19 @@ def filter_top_packages(df, frac_data_to_include):
     return df
 
 
-def clean_descriptions(df):
-    logging.info("🧹 Cleaning the descriptions...")
-    df = DescriptionCleaner().clean(df, "description", "description_cleaned")
-    df = df.filter(~pl.col("description_cleaned").is_null())
-    df = df.filter(pl.col("description_cleaned") != CLEANING_FAILED)
+def extract_description_text(df):
+    """
+    Extract plain text from package descriptions using content-type-aware rendering.
+
+    This function:
+    1. Detects content type (Markdown, RST, or plain text)
+    2. Renders to HTML using readme_renderer
+    3. Extracts clean plain text using BeautifulSoup
+    4. Filters out failed extractions
+    """
+    logging.info("📝 Extracting plain text from descriptions...")
+    df = DescriptionCleaner().extract_text(df, "description", "description_cleaned")
+    logging.info(f"📊 Number of rows after extraction and filtering: {len(df):,}")
     return df
 
 
@@ -54,7 +61,7 @@ def process_raw_dataset():
     df = read_raw_dataset(config.DATA_DIR / config.RAW_DATASET_CSV_NAME)
     if config.FRAC_DATA_TO_INCLUDE < 1.0:
         df = filter_top_packages(df, config.FRAC_DATA_TO_INCLUDE)
-    df = clean_descriptions(df)
+    df = extract_description_text(df)
 
     write_csv(df, config.DATA_DIR / config.PROCESSED_DATASET_CSV_NAME)
     write_csv(df.select(["name", "summary", "weekly_downloads"]), config.DATA_DIR / config.DATASET_FOR_API_CSV_NAME)
