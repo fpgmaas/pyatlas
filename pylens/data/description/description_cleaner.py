@@ -32,39 +32,39 @@ class DescriptionCleaner:
         Extracts plain text from package descriptions in the specified DataFrame column.
         """
 
-        def process_row(row: dict) -> str:
-            description = row.get(input_col)
-            content_type_str = row.get(self.content_type_column)
-
-            # Handle None/empty descriptions
-            if description is None or not str(description).strip():
-                return ""
-
-            try:
-                # Detect content type
-                detected_type = self.detector.detect(description, content_type=content_type_str)
-
-                # Render and extract text
-                extracted = render_and_extract_text(description, detected_type)
-
-                return extracted or ""  # noqa: TRY300
-
-            except Exception as exc:
-                # Log warning with some context, but don't break the pipeline
-                logger.warning(
-                    "Failed to extract description text (content_type=%r). Returning empty string.",
-                    content_type_str,
-                    exc_info=exc,
-                )
-                return ""
-
         # Process with progress bar
         results = []
         total = len(df)
 
         for row in tqdm(df.iter_rows(named=True), total=total, desc="Extracting text", unit="pkg"):
-            results.append(process_row(row))
+            results.append(self._process_row(row, input_col=input_col))
 
         df = df.with_columns(pl.Series(name=output_col, values=results))
 
         return df
+
+    def _process_row(self, row: dict, input_col: str) -> str:
+        description = row.get(input_col)
+        content_type_str = row.get(self.content_type_column)
+
+        # Handle None/empty descriptions
+        if description is None or not str(description).strip():
+            return ""
+
+        try:
+            # Detect content type
+            detected_type = self.detector.detect(description, content_type=content_type_str)
+
+            # Render and extract text
+            extracted = render_and_extract_text(description, detected_type)
+
+            return extracted or ""  # noqa: TRY300
+
+        except Exception as exc:
+            # Log warning with some context, but don't break the pipeline
+            logger.warning(
+                "Failed to extract description text (content_type=%r). Returning empty string.",
+                content_type_str,
+                exc_info=exc,
+            )
+            return ""

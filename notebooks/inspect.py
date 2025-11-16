@@ -9,12 +9,12 @@ def _():
     import polars as pl
 
     df = pl.read_csv("data/processed_dataset.csv")
-    return (df,)
+    return df, pl
 
 
 @app.cell
-def _(df):
-    df.to_dicts()[1900:1950]
+def _(df, pl):
+    df.filter(pl.col("name") == "plotly").to_dicts()
     return
 
 
