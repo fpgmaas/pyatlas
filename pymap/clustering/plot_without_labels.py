@@ -1,0 +1,77 @@
+import plotly.express as px
+import polars as pl
+
+
+def create_dataset_for_unlabeled_plot(df: pl.DataFrame) -> pl.DataFrame:
+    df = df.with_columns(pl.col("cluster_id").cast(pl.String).alias("cluster_id"))
+
+    projected = df.with_columns(
+        weekly_downloads=pl.col("weekly_downloads").fill_null(0),
+    )
+
+    log_dl = (projected["weekly_downloads"] + 1).log10()
+    log_min = float(log_dl.min())
+    log_max = float(log_dl.max())
+    denom = log_max - log_min if log_max > log_min else 1.0
+
+    # --- size mapping params ---
+    min_size = 16  # smaller low-download dots
+    max_size = 128  # much bigger high-download dots
+    gamma = 1  # >1: emphasise high end, <1: emphasise low end
+
+    # Normalize to 0..1
+    norm = (log_dl - log_min) / denom
+    # Non-linear mapping: push more contrast to the top end
+    norm = norm.clip(0, 1) ** gamma
+
+    size_vals = min_size + (max_size - min_size) * norm
+    size_vals = size_vals.clip(min_size, max_size)
+
+    projected = projected.with_columns(
+        log_dl=log_dl,
+        size=size_vals,
+    ).drop(["log_dl"])
+
+    return projected
+
+
+def create_plot(df):
+    fig = px.scatter(
+        df,
+        x="x",
+        y="y",
+        hover_name="name",
+        color="cluster_id",  # color by cluster
+        size="size",  # marker size from log(downloads)
+        custom_data=["weekly_downloads", "cluster_id", "summary"],
+        title="Embedding projection",
+        opacity=0.5,
+        height=1000,  # taller figure
+    )
+
+    fig.update_traces(
+        marker=dict(
+            line=dict(width=0.4, color="rgba(0,0,0,0.25)"),
+        ),
+        hovertemplate=(
+            "<b>%{hovertext}</b><br>"
+            "<b>%{customdata[2]}</b><br>"
+            "x=%{x:.2f}<br>"
+            "y=%{y:.2f}<br>"
+            "downloads=%{customdata[0]:,.0f}<br>"
+            "cluster=%{customdata[1]}<extra></extra>"
+        ),
+    )
+
+    fig.update_layout(
+        template="plotly_white",
+        margin=dict(l=20, r=20, t=60, b=40),
+        xaxis_title="Component 1",
+        yaxis_title="Component 2",
+        legend_title_text="Cluster",
+        # Keep aspect ratio so distances feel Euclidean
+        yaxis_scaleanchor="x",
+        yaxis_scaleratio=1,
+    )
+
+    return fig

@@ -6,26 +6,27 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
-    import numpy as np
-    import polars as pl
-    import plotly.express as px
-    from sklearn.decomposition import IncrementalPCA, PCA
-    import marimo as mo
-    from dotenv import load_dotenv
     import random
+
+    import numpy as np
+    import plotly.express as px
+    import polars as pl
+    from dotenv import load_dotenv
+
     random.seed(1234)
 
     load_dotenv()
 
     EMBEDDINGS_PATH = "data/embeddings.parquet"
     META_PATH = "data/processed_dataset.csv"
-    SAMPLE_SIZE=10000
+    SAMPLE_SIZE = 10000
     return SAMPLE_SIZE, np, pl, px
 
 
 @app.cell
 def _(SAMPLE_SIZE):
-    from pymap.map.utils import get_dataset, create_dataset_for_plot, cluster_with_umap
+    from pymap.map.utils import cluster_with_umap, create_dataset_for_plot, get_dataset
+
     df = get_dataset()
     n_rows = df.height
     embedding_dim = len(df["embeddings"].item(0)) if n_rows else 0
@@ -36,7 +37,7 @@ def _(SAMPLE_SIZE):
 @app.cell
 def _(cluster_with_umap, create_dataset_for_plot, np, sampled):
     embeddings = np.asarray(sampled["embeddings"].to_list(), dtype=np.float32)
-    coords = cluster_with_umap(embeddings, n_components = 2)
+    coords = cluster_with_umap(embeddings, n_components=2)
     df_projected = create_dataset_for_plot(sampled, coords)
     return df_projected, embeddings
 
@@ -44,19 +45,17 @@ def _(cluster_with_umap, create_dataset_for_plot, np, sampled):
 @app.cell
 def _(cluster_with_umap, embeddings):
     import hdbscan
-    from hdbscan.dist_metrics import ArccosDistance
-
     from sklearn.preprocessing import normalize
 
-    coords_for_hdbscan = cluster_with_umap(embeddings, n_components = 10)
-    norm_data = normalize(coords_for_hdbscan, norm='l2')
+    coords_for_hdbscan = cluster_with_umap(embeddings, n_components=10)
+    norm_data = normalize(coords_for_hdbscan, norm="l2")
 
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=8,
         min_samples=2,
         metric="euclidean",
         cluster_selection_method="leaf",
-        cluster_selection_epsilon=.01,
+        cluster_selection_epsilon=0.01,
     )
     labels = clusterer.fit_predict(norm_data)  # -1 = noise
     return (labels,)
@@ -64,9 +63,9 @@ def _(cluster_with_umap, embeddings):
 
 @app.cell
 def _(df_projected, labels, pl):
-    df_plot = df_projected.with_columns(
-        cluster=pl.Series("cluster", labels)
-    ).with_columns(pl.col("cluster").cast(pl.Utf8).alias("cluster_str"))
+    df_plot = df_projected.with_columns(cluster=pl.Series("cluster", labels)).with_columns(
+        pl.col("cluster").cast(pl.Utf8).alias("cluster_str")
+    )
     return (df_plot,)
 
 
@@ -77,12 +76,12 @@ def _(SAMPLE_SIZE, df_plot, n_rows, px):
         x="x",
         y="y",
         hover_name="name",
-        color="cluster_str",                 # color by cluster
-        size="size",                         # marker size from log(downloads)
+        color="cluster_str",  # color by cluster
+        size="size",  # marker size from log(downloads)
         custom_data=["weekly_downloads", "cluster_str", "summary"],
         title=f"Embedding projection ({SAMPLE_SIZE:,} of {n_rows:,} rows)",
         opacity=0.5,
-        height=1000,                         # taller figure
+        height=1000,  # taller figure
     )
 
     fig.update_traces(
@@ -112,7 +111,6 @@ def _(SAMPLE_SIZE, df_plot, n_rows, px):
 
     fig.write_html("figure.html")
     print("done")
-
     return (fig,)
 
 

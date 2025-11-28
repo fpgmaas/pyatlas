@@ -1,38 +1,49 @@
 import logging
+import random
 from pathlib import Path
 
 import polars as pl
 from dotenv import load_dotenv
 
+from pymap.clustering.clustering import ClusterIdGenerator
+from pymap.clustering.coordinates import ClusterCoordinatesGenerator
 from pymap.config import Config
 from pymap.utils.logging import setup_logging
-import numpy as np
 
-from pymap.clustering.coordinates import ClusterCoordinatesGenerator
-from pymap.clustering.clustering import ClusterIdGenerator
 
 def get_dataset(processed_dataset_csv: Path, embeddings_parquet: Path):
     df_embeddings = pl.read_parquet(embeddings_parquet, columns=["name", "embeddings"])
     df_meta = pl.read_csv(processed_dataset_csv, columns=["name", "weekly_downloads", "summary"])
     df_joined = df_embeddings.join(df_meta, on="name", how="left")
-    df = df_joined.sort("weekly_downloads",descending=True)
+    df = df_joined.sort("weekly_downloads", descending=True)
     return df
 
 
-def create_vector_embeddings():
+def generate_clusters():
     setup_logging()
     load_dotenv()
+    random.seed(1234)
 
     config = Config.from_toml()
 
-    df = get_dataset(config.storage.data_folder / config.storage.processed_dataset_csv, 
-                     config.storage.data_folder / config.storage.embeddings_parquet)
+    df = get_dataset(
+        config.storage.data_folder / config.storage.processed_dataset_csv,
+        config.storage.data_folder / config.storage.embeddings_parquet,
+    )
 
     df = ClusterCoordinatesGenerator().generate_coordinates(df, "embeddings")
     df = ClusterIdGenerator().generate_cluster_ids(df, "embeddings")
 
+    # Write output
+    clustered_dataset_path = config.storage.data_folder / config.storage.clustered_dataset_csv
+
+    df = df.drop("embeddings")
+    df.write_csv(clustered_dataset_path)
+
+    logging.info(f"Generated {df['cluster_id'].n_unique()} clusters")
+    logging.info(f"Wrote clustered dataset to {clustered_dataset_path}")
 
 
 if __name__ == "__main__":
     setup_logging()
-    create_vector_embeddings()
+    generate_clusters()

@@ -18,5 +18,6 @@ def main():
     logging.info("\n\nCREATING VECTOR EMBEDDINGS -------------\n")
     create_vector_embeddings()
 
+
 if __name__ == "__main__":
     main()

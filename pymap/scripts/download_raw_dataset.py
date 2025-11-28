@@ -16,7 +16,7 @@ def download_raw_dataset():
 
     target_path = config.storage.data_folder / config.storage.raw_dataset_csv
     if target_path.exists():
-        if not config.OVERWRITE:
+        if not config.etl.overwrite_download:
             logging.info(f"🔹 Raw dataset {target_path} from Google Drive already exists! Skipping download.")
             return
         else:

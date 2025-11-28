@@ -28,6 +28,7 @@ dependencies = [
     "pandas>=2.3.3",
     "umap-learn>=0.5.9.post2",
     "hdbscan>=0.8.40",
+    "openai>=1.0.0,<2",
 ]
 
 [project.urls]

@@ -18,9 +18,7 @@ def read_raw_dataset(path_to_raw_dataset):
 
 
 def keep_top_packages(df, n_top_packages):
-    logging.info(
-        f"Using only the top {n_top_packages} packages based on weekly downloads."
-    )
+    logging.info(f"Using only the top {n_top_packages} packages based on weekly downloads.")
     df = df.sort("weekly_downloads", descending=True)
     df = df.head(n_top_packages)
     logging.info(f"📊 Number of rows after filtering: {len(df):,}")
@@ -60,6 +58,7 @@ def process_raw_dataset():
     df = extract_description_text(df)
 
     write_csv(df, config.storage.data_folder / config.storage.processed_dataset_csv)
+
 
 if __name__ == "__main__":
     setup_logging()

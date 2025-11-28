@@ -7,7 +7,7 @@ install: ## Install the uv environment and install the pre-commit hooks
 .PHONY: check
 check: ## Run code quality tools.
 	@echo "🚀 Checking uv lock file consistency with 'pyproject.toml': Running uv check --lock"
-	@uv check --lock
+	@uv lock --locked
 	@echo "🚀 Linting code: Running pre-commit"
 	@uv run pre-commit run -a
 	@echo "🚀 Checking for obsolete dependencies: Running deptry"

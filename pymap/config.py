@@ -5,7 +5,6 @@ Loads defaults with optional .env overrides—no TOML files or per-environment m
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -30,6 +29,8 @@ class StorageConfig(BaseSettings):
     processed_dataset_csv: str = "processed_dataset.csv"
     dataset_for_api_csv: str = "dataset_for_api.csv"
     embeddings_parquet: str = "embeddings.parquet"
+    clustered_dataset_csv: str = "clustered_dataset.csv"
+    cluster_metadata_csv: str = "cluster_metadata.csv"
 
     model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP_STORAGE__", extra="ignore")
 
@@ -38,10 +39,19 @@ class ETLConfig(BaseSettings):
     """ETL pipeline configuration."""
 
     google_file_id: str = "1pNdyZ7WP5YImPwzr-AjPX-CDt3ZIzBM2"
-    overwrite_download: bool = True
-    top_packages_to_include: int = 1000
+    overwrite_download: bool = False
+    top_packages_to_include: int = 10000
 
     model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP_ETL__", extra="ignore")
+
+
+class OpenAIConfig(BaseSettings):
+    """OpenAI API configuration."""
+
+    openai_api_key: str
+    model_name: str = "gpt-5-nano"
+
+    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP__", extra="ignore")
 
 
 class Config(BaseSettings):
@@ -50,6 +60,7 @@ class Config(BaseSettings):
     app: AppConfig = Field(default_factory=AppConfig)
     storage: StorageConfig = Field(default_factory=StorageConfig)
     etl: ETLConfig = Field(default_factory=ETLConfig)
+    openai: OpenAIConfig = Field(default_factory=OpenAIConfig)
 
     @classmethod
     @lru_cache(maxsize=1)
@@ -68,9 +79,11 @@ class Config(BaseSettings):
             "app": self.app.model_dump(),
             "storage": self.storage.model_dump(),
             "etl": self.etl.model_dump(),
+            "openai": self.openai.model_dump(),
         }
 
     model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP__", extra="ignore")
+
 
 # Global config instance
 config = Config.load()
