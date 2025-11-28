@@ -23,6 +23,11 @@ dependencies = [
     "numpy>=2.0.0,<3",
     "scikit-learn>=1.5.0,<2",
     "readme-renderer>=44.0",
+    "plotly>=6.5.0",
+    "pyarrow>=21.0.0",
+    "pandas>=2.3.3",
+    "umap-learn>=0.5.9.post2",
+    "hdbscan>=0.8.40",
 ]
 
 [project.urls]
@@ -37,6 +42,7 @@ dev = [
     "deptry>=0.12.0,<0.13",
     "pre-commit>=3.4.0,<4",
     "tox>=4.11.1,<5",
+    "marimo>=0.17.6",
 ]
 
 [tool.hatch.build.targets.sdist]
