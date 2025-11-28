@@ -1,5 +1,5 @@
 [app]
-name = "pylens"
+name = "pymap"
 version = "0.0.1"
 description = "PyLens helps you find PyPI packages through natural language prompts"
 environment = "prod"
@@ -8,7 +8,7 @@ environment = "prod"
 host = "0.0.0.0"
 port = 8080
 debug = false
-cors_origins = ["https://pylens.io"]
+cors_origins = ["https://pymap.io"]
 embeddings_model_name = "all-mpnet-base-v2"
 weight_similarity = 0.0
 weight_weekly_downloads = 1.0

@@ -25,7 +25,7 @@ def _():
 
 @app.cell
 def _(SAMPLE_SIZE):
-    from pylens.map.utils import get_dataset, create_dataset_for_plot, cluster_with_umap
+    from pymap.map.utils import get_dataset, create_dataset_for_plot, cluster_with_umap
     df = get_dataset()
     n_rows = df.height
     embedding_dim = len(df["embeddings"].item(0)) if n_rows else 0

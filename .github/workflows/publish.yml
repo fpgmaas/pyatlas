@@ -27,7 +27,7 @@ jobs:
           file: ./DockerfileCPU
           platforms: linux/amd64
           push: true
-          tags: pypiscoutacr.azurecr.io/pylens-backend:latest
+          tags: pypiscoutacr.azurecr.io/pymap-backend:latest
 
   build-and-push-frontend:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
           file: ./frontend/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: pypiscoutacr.azurecr.io/pylens-frontend:latest
+          tags: pypiscoutacr.azurecr.io/pymap-frontend:latest
           build-args: |
             NEXT_PUBLIC_API_URL=https://pypiscout.com/api
             NEXT_PUBLIC_GA_TRACKING_ID=${{ secrets.NEXT_PUBLIC_GA_TRACKING_ID }}

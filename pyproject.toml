@@ -1,5 +1,5 @@
 [project]
-name = "pylens"
+name = "pymap"
 version = "0.0.1"
 description = "PyLens helps you find PyPI packages through natural language prompts with the help of Large Language Models (LLMs)."
 authors = [{ name = "Florian Maas", email = "ffpgmaas@gmail.com" }]
@@ -22,7 +22,7 @@ dependencies = [
     "starlette>=0.37.2,<0.38",
     "numpy>=2.0.0,<3",
     "scikit-learn>=1.5.0,<2",
-    "readme-renderer>=44.0",
+    "readme-renderer[md]>=44.0",
     "plotly>=6.5.0",
     "pyarrow>=21.0.0",
     "pandas>=2.3.3",
@@ -31,8 +31,8 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/fpgmaas/pylens"
-Documentation = "https://fpgmaas.github.io/pylens/"
+Repository = "https://github.com/fpgmaas/pymap"
+Documentation = "https://fpgmaas.github.io/pymap/"
 
 [dependency-groups]
 dev = [
@@ -46,10 +46,10 @@ dev = [
 ]
 
 [tool.hatch.build.targets.sdist]
-include = ["pylens"]
+include = ["pymap"]
 
 [tool.hatch.build.targets.wheel]
-include = ["pylens"]
+include = ["pymap"]
 
 [build-system]
 requires = ["hatchling"]
@@ -110,7 +110,7 @@ skip_empty = true
 
 [tool.coverage.run]
 branch = true
-source = ["pylens"]
+source = ["pymap"]
 
 [tool.ruff.per-file-ignores]
 "tests/*" = ["S101"]

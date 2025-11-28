@@ -1,5 +1,5 @@
 [app]
-name = "pylens"
+name = "pymap"
 version = "0.0.1"
 description = "PyLens helps you find PyPI packages through natural language prompts"
 environment = "dev"

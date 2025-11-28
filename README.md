@@ -4,7 +4,7 @@
 
 <br/>
 <p align="center">
-  <img src="https://github.com/fpgmaas/pylens/blob/main/static/demo.gif?raw=true" alt="PyLens Demo" width="700">
+  <img src="https://github.com/fpgmaas/pymap/blob/main/static/demo.gif?raw=true" alt="PyLens Demo" width="700">
 </p>
 
 ## What does this do?
@@ -39,10 +39,10 @@ cp .env.template .env
 
 Fill in the required Azure Blob Storage credentials:
 
-- `PYLENS_ENV`: Set to `dev` for development or `prod` for production
-- `PYLENS_STORAGE__BLOB_ACCOUNT_NAME`: Your Azure storage account name
-- `PYLENS_STORAGE__BLOB_CONTAINER_NAME`: Your blob container name
-- `PYLENS_STORAGE__BLOB_ACCOUNT_KEY`: Your storage account key
+- `PYMAP_ENV`: Set to `dev` for development or `prod` for production
+- `PYMAP_STORAGE__BLOB_ACCOUNT_NAME`: Your Azure storage account name
+- `PYMAP_STORAGE__BLOB_CONTAINER_NAME`: Your blob container name
+- `PYMAP_STORAGE__BLOB_ACCOUNT_KEY`: Your storage account key
 
 The application uses TOML config files (`config.dev.toml` and `config.prod.toml`) for environment-specific settings. In development, the API will cache blob files locally and skip re-downloading if they exist. In production, the API always downloads fresh data from blob storage on startup.
 

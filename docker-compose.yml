@@ -10,7 +10,7 @@ services:
     volumes:
       - ./data:/code/data
     environment:
-      - PYLENS_ENV=dev
+      - PYMAP_ENV=dev
     env_file:
       - .env
 

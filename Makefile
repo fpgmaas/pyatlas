@@ -25,7 +25,7 @@ build: ## Build wheel file using uv
 
 .PHONY: serve
 serve: ## Serve API with uvicorn in development mode
-	@uv run uvicorn pylens.api.main:app --reload
+	@uv run uvicorn pymap.api.main:app --reload
 
 .PHONY: frontend
 frontend: ## Serve frontend in development mode
