@@ -10,7 +10,8 @@ import { createPointShaderMaterial } from '../shaders/pointShader';
 export function PackagePoints() {
   const { packages, visibleClusterIds, hoveredIndex, setSelectedPackageId, setHoveredIndex } = useGalaxyStore();
   const pointsRef = useRef<THREE.Points>(null);
-  const { camera, size } = useThree();
+  const canvasRectRef = useRef<DOMRect | null>(null);
+  const { camera, size, gl } = useThree();
 
   // Precompute positions, colors, sizes
   const { sizes, geometry, material } = useMemo(() => {
@@ -71,6 +72,18 @@ export function PackagePoints() {
     hoveredAttr.needsUpdate = true;
   }, [hoveredIndex, packages.length]);
 
+  // Cache canvas bounding rect for performance
+  useEffect(() => {
+    canvasRectRef.current = gl.domElement.getBoundingClientRect();
+
+    const handleResize = () => {
+      canvasRectRef.current = gl.domElement.getBoundingClientRect();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [gl]);
+
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
 
@@ -88,8 +101,15 @@ export function PackagePoints() {
       const screenX = (vector.x + 1) / 2 * size.width;
       const screenY = -(vector.y - 1) / 2 * size.height;
 
-      const dx = screenX - event.clientX;
-      const dy = screenY - event.clientY;
+      // Get cached canvas position (or compute if not cached)
+      const rect = canvasRectRef.current || gl.domElement.getBoundingClientRect();
+
+      // Convert viewport coordinates to canvas-relative coordinates
+      const canvasX = event.clientX - rect.left;
+      const canvasY = event.clientY - rect.top;
+
+      const dx = screenX - canvasX;
+      const dy = screenY - canvasY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       // Check if within point radius (using actual point size)

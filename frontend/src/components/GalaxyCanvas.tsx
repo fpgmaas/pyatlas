@@ -73,7 +73,7 @@ export function GalaxyCanvas() {
         <OrthographicCamera
           makeDefault
           position={[bounds.centerX, bounds.centerY, 10]}
-          zoom={1}
+          zoom={1.6}
         />
 
         <CameraSetup bounds={bounds} />
@@ -85,8 +85,8 @@ export function GalaxyCanvas() {
           enableZoom={true}
           minZoom={0.5}
           maxZoom={20}
-          zoomSpeed={0.5}
-          panSpeed={0.8}
+          zoomSpeed={1.5}
+          panSpeed={1}
         />
 
         <ambientLight intensity={0.8} />
