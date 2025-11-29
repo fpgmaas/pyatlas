@@ -8,12 +8,12 @@ import { precomputeSizes } from '../utils/sizeScaling';
 import { createPointShaderMaterial } from '../shaders/pointShader';
 
 export function PackagePoints() {
-  const { packages, visibleClusterIds, selectedPackageId, hoveredIndex, setSelectedPackageId, setHoveredIndex } = useGalaxyStore();
+  const { packages, visibleClusterIds, hoveredIndex, setSelectedPackageId, setHoveredIndex } = useGalaxyStore();
   const pointsRef = useRef<THREE.Points>(null);
   const { camera, size } = useThree();
 
   // Precompute positions, colors, sizes
-  const { positions, colors, sizes, hovered, geometry, material } = useMemo(() => {
+  const { sizes, geometry, material } = useMemo(() => {
     const positions = new Float32Array(packages.length * 3);
     const colors = new Float32Array(packages.length * 3);
     const sizes = new Float32Array(packages.length);
@@ -74,15 +74,8 @@ export function PackagePoints() {
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
 
-    // Manual raycasting for accurate point detection
-    const mouse = new THREE.Vector2(
-      (event.clientX / size.width) * 2 - 1,
-      -(event.clientY / size.height) * 2 + 1
-    );
-
     let closestIndex = -1;
     let closestDistance = Infinity;
-    const threshold = 50; // pixels
 
     packages.forEach((pkg, i) => {
       // Skip invisible points

@@ -7,6 +7,8 @@ import type { Bounds } from '../utils/dataBounds';
 import { PackagePoints } from './PackagePoints';
 import { HoverLabel } from './HoverLabel';
 import { ClusterLabels } from './ClusterLabels';
+import { useCameraAnimation } from '../hooks/useCameraAnimation';
+import { useGalaxyStore } from '../store/useGalaxyStore';
 
 function CameraSetup({ bounds }: { bounds: Bounds }) {
   const { camera, size } = useThree();
@@ -42,6 +44,22 @@ function CameraSetup({ bounds }: { bounds: Bounds }) {
   return null;
 }
 
+function CameraAnimationController() {
+  const { animateTo } = useCameraAnimation();
+  const { packages, selectedPackageId } = useGalaxyStore();
+
+  useEffect(() => {
+    if (selectedPackageId !== null) {
+      const pkg = packages.find(p => p.id === selectedPackageId);
+      if (pkg) {
+        animateTo(pkg.x, pkg.y, 8);
+      }
+    }
+  }, [selectedPackageId, packages, animateTo]);
+
+  return null;
+}
+
 export function GalaxyCanvas() {
   const bounds = useDataBounds();
 
@@ -73,6 +91,7 @@ export function GalaxyCanvas() {
 
         <ambientLight intensity={0.8} />
 
+        <CameraAnimationController />
         <PackagePoints />
         <HoverLabel />
         <ClusterLabels />
