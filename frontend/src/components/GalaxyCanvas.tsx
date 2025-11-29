@@ -6,6 +6,7 @@ import { useDataBounds } from '../hooks/useDataBounds';
 import type { Bounds } from '../utils/dataBounds';
 import { PackagePoints } from './PackagePoints';
 import { HoverLabel } from './HoverLabel';
+import { ClusterLabels } from './ClusterLabels';
 
 function CameraSetup({ bounds }: { bounds: Bounds }) {
   const { camera, size } = useThree();
@@ -74,6 +75,7 @@ export function GalaxyCanvas() {
 
         <PackagePoints />
         <HoverLabel />
+        <ClusterLabels />
       </Canvas>
     </div>
   );
