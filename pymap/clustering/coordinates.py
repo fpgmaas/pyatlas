@@ -8,15 +8,13 @@ from sklearn.preprocessing import normalize
 
 @dataclass
 class ClusterCoordinatesGenerator:
-    n_neighbours = 10
-    min_dist = 0.1
-    metric = "euclidean"
 
-    def generate_coordinates(self, df: pl.DataFrame, embeddings_column: str):
+    def generate_coordinates(self, df: pl.DataFrame, embeddings_column: str, cluster_id_column: str):
         embeddings = np.asarray(df[embeddings_column].to_list(), dtype=np.float32)
+        cluster_ids = np.asarray(df[cluster_id_column].to_list(), dtype=np.int16)
 
-        coordinates = cluster_with_umap(
-            embeddings, n_components=2, n_neighbours=self.n_neighbours, min_dist=self.min_dist, metric=self.metric
+        coordinates = self._supervised_cluster_with_umap(
+            embeddings, cluster_ids
         )
 
         # To reduce empty space in the plot in two dimensions. Otherwise a single outlier group squashes the
@@ -42,22 +40,22 @@ class ClusterCoordinatesGenerator:
         scaled = centered * factor[:, None]
         return scaled + center
 
+    @staticmethod
+    def _supervised_cluster_with_umap(
+        embeddings: np.array, cluster_ids: np.array
+    ) -> np.array:
+        normalized_embeddings = normalize(embeddings, norm="l2")
 
-def cluster_with_umap(
-    embeddings: np.array,
-    n_components: int = 2,
-    n_neighbours: int = 10,
-    min_dist: float = 0.1,
-    metric: str = "euclidean",
-) -> np.array:
-    normalized_embeddings = normalize(embeddings, norm="l2")
+        umap_reducer = umap.UMAP(
+            n_components=2,
+            n_neighbors= 20,
+            min_dist= 0.4,
+            repulsion_strength=0.5,
+            metric="euclidean",
+            random_state=0,
+            target_weight=0.4,
+            spread=0.8,
+        )
+        coords = umap_reducer.fit_transform(normalized_embeddings, y=cluster_ids)
+        return coords
 
-    umap_reducer = umap.UMAP(
-        n_components=n_components,
-        n_neighbors=n_neighbours,  # smaller -> more, tighter clusters; larger -> smoother
-        min_dist=min_dist,  # smaller -> tighter blobs; larger -> more spread
-        metric=metric,
-        random_state=0,
-    )
-    coords = umap_reducer.fit_transform(normalized_embeddings)
-    return coords

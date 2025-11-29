@@ -1,12 +1,10 @@
 import hdbscan
-from hdbscan.dist_metrics import ArccosDistance
-from pymap.clustering.coordinates import cluster_with_umap
 
 from sklearn.preprocessing import normalize
 import numpy as np
 import polars as pl
 from dataclasses import dataclass
-
+import umap
 
 @dataclass
 class ClusterIdGenerator:
@@ -17,7 +15,7 @@ class ClusterIdGenerator:
 
     def generate_cluster_ids(self, df: pl.DataFrame, embeddings_column: str):
         embeddings = np.asarray(df[embeddings_column].to_list(), dtype=np.float32)
-        coords_for_hdbscan = cluster_with_umap(embeddings, n_components=10)
+        coords_for_hdbscan = self._unsupervised_cluster_with_umap(embeddings)
         norm_data = normalize(coords_for_hdbscan, norm="l2")
 
         clusterer = hdbscan.HDBSCAN(
@@ -33,3 +31,19 @@ class ClusterIdGenerator:
         )
 
         return df
+
+    @staticmethod
+    def _unsupervised_cluster_with_umap(
+        embeddings: np.array,
+    ) -> np.array:
+        normalized_embeddings = normalize(embeddings, norm="l2")
+
+        umap_reducer = umap.UMAP(
+            n_components=10,
+            n_neighbors= 10,
+            min_dist= 0.1,
+            metric="euclidean",
+            random_state=0,
+        )
+        coords = umap_reducer.fit_transform(normalized_embeddings)
+        return coords

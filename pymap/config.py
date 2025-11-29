@@ -31,6 +31,9 @@ class StorageConfig(BaseSettings):
     embeddings_parquet: str = "embeddings.parquet"
     clustered_dataset_csv: str = "clustered_dataset.csv"
     cluster_metadata_csv: str = "cluster_metadata.csv"
+    cluster_labels_csv: str = "cluster_labels.csv"
+    packages_json: str = "packages.json"
+    clusters_json: str = "clusters.json"
 
     model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP_STORAGE__", extra="ignore")
 
@@ -49,7 +52,7 @@ class OpenAIConfig(BaseSettings):
     """OpenAI API configuration."""
 
     openai_api_key: str
-    model_name: str = "gpt-5-nano"
+    model_name: str = "gpt-5-mini"
 
     model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP__", extra="ignore")
 

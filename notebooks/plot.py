@@ -17,7 +17,6 @@ def _():
     random.seed(1234)
 
     load_dotenv()
-
     return (pl,)
 
 
@@ -38,7 +37,9 @@ def _(pl):
     from pymap.clustering.plot_with_labels import create_dataset_for_labeled_plot, create_plot_with_labels
 
     df2 = pl.read_csv("data/clustered_dataset.csv")
-    df_clusters = pl.read_csv("data/cluster_metadata.csv")
+    df_cluster_labels = pl.read_csv("data/cluster_labels.csv")
+    df_cluster_metadata = pl.read_csv("data/cluster_metadata.csv")
+    df_clusters = df_cluster_labels.join(df_cluster_metadata, on="cluster_id",how="outer")
 
     # df2 = df2.filter(pl.col("cluster_id")==22)
     # df_clusters = df_clusters.filter(pl.col("cluster_id")==22)
