@@ -66,7 +66,7 @@ export function GalaxyCanvas() {
   if (!bounds) return null; // or loading skeleton
 
   return (
-    <div className="fixed inset-0 w-full h-full">
+    <div className="w-full h-full">
       <Canvas gl={{ alpha: false, antialias: true }}>
         <color attach="background" args={['#0a0a0a']} />
 
