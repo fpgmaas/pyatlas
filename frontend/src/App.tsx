@@ -61,7 +61,7 @@ function App() {
         <GalaxyCanvas />
 
         {/* Package Detail - Bottom Right */}
-        <div className="absolute bottom-6 right-6 pointer-events-auto">
+        <div className="absolute bottom-6 right-6 pointer-events-auto z-50">
           <PackageDetail />
         </div>
       </div>

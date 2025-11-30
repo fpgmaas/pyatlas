@@ -39,6 +39,7 @@ export function PackageLabels() {
         <Html
           key={pkg.id}
           position={[pkg.x, pkg.y, 0]}
+          zIndexRange={[0, 0]}
           style={{
             color: 'white',
             fontSize: '12px',

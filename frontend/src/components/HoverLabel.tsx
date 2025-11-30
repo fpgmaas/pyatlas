@@ -15,6 +15,7 @@ export function HoverLabel() {
     <Html
       position={[pkg.x, pkg.y, 0]}
       center
+      zIndexRange={[0, 0]}
       style={{
         color: 'white',
         fontSize: '12px',

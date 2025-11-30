@@ -16,6 +16,7 @@ export function ClusterLabels() {
             center
             transform={false}
             sprite={false}
+            zIndexRange={[0, 0]}
             style={{
               fontSize: '12px',
               color: 'black',
