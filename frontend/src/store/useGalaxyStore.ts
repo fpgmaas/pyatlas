@@ -3,6 +3,12 @@ import type { Package, Cluster } from '../types';
 import type { ViewportBounds } from '../hooks/useViewportBounds';
 import { buildSpatialIndex, type SpatialIndex } from '../utils/spatialIndex';
 
+export interface CameraAnimationRequest {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
 interface GalaxyStore {
   packages: Package[];
   clusters: Cluster[];
@@ -17,6 +23,7 @@ interface GalaxyStore {
   visiblePackageIds: Set<number>;
   shouldShowLabels: boolean;
   spatialIndex: SpatialIndex | null;
+  cameraAnimationRequest: CameraAnimationRequest | null;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -29,6 +36,7 @@ interface GalaxyStore {
   setCurrentZoom: (zoom: number) => void;
   setViewportBounds: (bounds: ViewportBounds) => void;
   setVisiblePackageIds: (ids: Set<number>) => void;
+  requestCameraAnimation: (request: CameraAnimationRequest | null) => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
@@ -45,6 +53,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   visiblePackageIds: new Set(),
   shouldShowLabels: false,
   spatialIndex: null,
+  cameraAnimationRequest: null,
 
   setPackages: (packages) => {
     // Build spatial index when packages are loaded
@@ -96,4 +105,5 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   setCurrentZoom: (zoom) => set({ currentZoom: zoom, shouldShowLabels: zoom >= 12 }),
   setViewportBounds: (bounds) => set({ viewportBounds: bounds }),
   setVisiblePackageIds: (ids) => set({ visiblePackageIds: ids }),
+  requestCameraAnimation: (request) => set({ cameraAnimationRequest: request }),
 }));

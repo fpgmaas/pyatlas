@@ -7,8 +7,8 @@ export function calculatePointSize(
   downloads: number,
   minDownloads: number,
   maxDownloads: number,
-  minSize = 8,
-  maxSize = 50,
+  minSize = 12,
+  maxSize = 80,
   gamma = 1
 ): number {
   const logDl = Math.log10(downloads + 1);

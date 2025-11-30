@@ -3,9 +3,16 @@ import Fuse from 'fuse.js';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import type { Package } from '../types';
 import { sortByDownloads } from '../utils/packageUtils';
+import { CAMERA_ZOOM_LEVELS } from '../utils/cameraConstants';
 
 export function SearchBar() {
-  const { packages, setSelectedPackageId, setSearchQuery, setSearchResults } = useGalaxyStore();
+  const {
+    packages,
+    setSelectedPackageId,
+    requestCameraAnimation,
+    setSearchQuery,
+    setSearchResults
+  } = useGalaxyStore();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Package[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -33,10 +40,23 @@ export function SearchBar() {
   }, [query, fuse, setSearchQuery, setSearchResults]);
 
   const handleSelect = (pkg: Package) => {
+    console.log('[SearchBar] Package selected:', pkg.name, 'at position:', { x: pkg.x, y: pkg.y });
+
+    // Request camera animation to package location
+    const animationRequest = {
+      x: pkg.x,
+      y: pkg.y,
+      zoom: CAMERA_ZOOM_LEVELS.PACKAGE
+    };
+    console.log('[SearchBar] Requesting camera animation:', animationRequest);
+    requestCameraAnimation(animationRequest);
+
+    // Update selection state (for detail panel)
     setSelectedPackageId(pkg.id);
+
+    // Clear search UI
     setQuery('');
     setShowDropdown(false);
-    // Camera animation will be added in next step
   };
 
   return (

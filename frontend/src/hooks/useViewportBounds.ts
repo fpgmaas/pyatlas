@@ -21,12 +21,20 @@ const PERF_CONFIG = {
 };
 
 // Helper: Compute viewport bounds from orthographic camera
-function computeBounds(cam: THREE.OrthographicCamera): ViewportBounds {
+function computeBounds(
+  cam: THREE.OrthographicCamera,
+  controls: any  // OrbitControls type
+): ViewportBounds {
+  // Use controls.target if available (when using OrbitControls)
+  // Fall back to camera.position for backward compatibility
+  const centerX = controls?.target?.x ?? cam.position.x;
+  const centerY = controls?.target?.y ?? cam.position.y;
+
   return {
-    minX: cam.position.x + cam.left / cam.zoom,
-    maxX: cam.position.x + cam.right / cam.zoom,
-    minY: cam.position.y + cam.bottom / cam.zoom,
-    maxY: cam.position.y + cam.top / cam.zoom,
+    minX: centerX + cam.left / cam.zoom,
+    maxX: centerX + cam.right / cam.zoom,
+    minY: centerY + cam.bottom / cam.zoom,
+    maxY: centerY + cam.top / cam.zoom,
   };
 }
 
@@ -85,7 +93,7 @@ function setsEqual<T>(a: Set<T>, b: Set<T>): boolean {
 }
 
 export function useViewportBounds() {
-  const { camera } = useThree();
+  const { camera, controls } = useThree();
   const {
     packages,
     clusters,
@@ -108,7 +116,7 @@ export function useViewportBounds() {
     const cam = camera as THREE.OrthographicCamera;
 
     const now = performance.now();
-    const currentBounds = computeBounds(cam);
+    const currentBounds = computeBounds(cam, controls);
     const boundsChanged = didBoundsChange(lastBounds.current, currentBounds, PERF_CONFIG.SPATIAL_THRESHOLD);
 
     // Detect if label visibility just changed (especially false → true)

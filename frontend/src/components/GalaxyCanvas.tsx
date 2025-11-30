@@ -12,6 +12,7 @@ import { useCameraAnimation } from '../hooks/useCameraAnimation';
 import { useZoomTracker } from '../hooks/useZoomTracker';
 import { useViewportBounds } from '../hooks/useViewportBounds';
 import { useGalaxyStore } from '../store/useGalaxyStore';
+import { CAMERA_ZOOM_LEVELS } from '../utils/cameraConstants';
 
 function CameraSetup({ bounds }: { bounds: Bounds }) {
   const { camera, size } = useThree();
@@ -48,19 +49,33 @@ function CameraSetup({ bounds }: { bounds: Bounds }) {
 }
 
 function CameraAnimationController() {
+  const { controls } = useThree();
   const { animateTo } = useCameraAnimation();
-  const { packages, selectedPackageId } = useGalaxyStore();
+  const { cameraAnimationRequest, requestCameraAnimation } = useGalaxyStore();
   useZoomTracker();
   useViewportBounds();
 
   useEffect(() => {
-    if (selectedPackageId !== null) {
-      const pkg = packages.find(p => p.id === selectedPackageId);
-      if (pkg) {
-        animateTo(pkg.x, pkg.y, 8);
-      }
+    console.log('[CameraAnimationController] Animation request changed:', cameraAnimationRequest, 'controls:', !!controls);
+
+    // Only process if we have both a request AND controls are ready
+    if (cameraAnimationRequest && controls) {
+      console.log('[CameraAnimationController] Controls available, executing animation to:',
+        { x: cameraAnimationRequest.x, y: cameraAnimationRequest.y, zoom: cameraAnimationRequest.zoom });
+
+      animateTo(
+        cameraAnimationRequest.x,
+        cameraAnimationRequest.y,
+        { zoom: cameraAnimationRequest.zoom }
+      );
+
+      console.log('[CameraAnimationController] Clearing animation request');
+      requestCameraAnimation(null); // Clear the request
+    } else if (cameraAnimationRequest && !controls) {
+      console.warn('[CameraAnimationController] Animation requested but controls not ready yet - will retry when controls become available');
+      // Don't clear the request - it will be retried when controls becomes truthy
     }
-  }, [selectedPackageId, packages, animateTo]);
+  }, [cameraAnimationRequest, animateTo, requestCameraAnimation, controls]);
 
   return null;
 }
@@ -84,6 +99,7 @@ export function GalaxyCanvas() {
         <CameraSetup bounds={bounds} />
 
         <OrbitControls
+          makeDefault
           target={[bounds.centerX, bounds.centerY, 0]}
           enableRotate={false}
           enablePan={true}
