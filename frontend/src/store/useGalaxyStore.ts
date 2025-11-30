@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Package, Cluster } from '../types';
 import type { ViewportBounds } from '../hooks/useViewportBounds';
+import { buildSpatialIndex, type SpatialIndex } from '../utils/spatialIndex';
 
 interface GalaxyStore {
   packages: Package[];
@@ -15,6 +16,7 @@ interface GalaxyStore {
   viewportBounds: ViewportBounds | null;
   visiblePackageIds: Set<number>;
   shouldShowLabels: boolean;
+  spatialIndex: SpatialIndex | null;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -42,8 +44,37 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   viewportBounds: null,
   visiblePackageIds: new Set(),
   shouldShowLabels: false,
+  spatialIndex: null,
 
-  setPackages: (packages) => set({ packages }),
+  setPackages: (packages) => {
+    // Build spatial index when packages are loaded
+    if (packages.length === 0) {
+      set({ packages, spatialIndex: null });
+      return;
+    }
+
+    // Calculate data bounds
+    const minX = Math.min(...packages.map(p => p.x));
+    const maxX = Math.max(...packages.map(p => p.x));
+    const minY = Math.min(...packages.map(p => p.y));
+    const maxY = Math.max(...packages.map(p => p.y));
+
+    const spatialIndex = buildSpatialIndex(
+      packages,
+      { minX, maxX, minY, maxY },
+      32
+    );
+
+    console.log('Spatial index built:', {
+      totalPackages: packages.length,
+      gridCols: spatialIndex.gridCols,
+      gridRows: spatialIndex.gridRows,
+      totalCells: spatialIndex.cells.size,
+      spatialIndex: spatialIndex
+    });
+
+    set({ packages, spatialIndex });
+  },
   setClusters: (clusters) => {
     const clusterIds = new Set(clusters.map(c => c.clusterId));
     set({ clusters, selectedClusterIds: clusterIds, visibleClusterIds: clusterIds });

@@ -121,7 +121,6 @@ export function PackagePoints() {
     });
 
     if (closestIndex !== -1) {
-      console.log('Hover index:', closestIndex, 'Package:', packages[closestIndex]?.name);
       document.body.style.cursor = 'pointer';
       setHoveredIndex(closestIndex);
     } else {
