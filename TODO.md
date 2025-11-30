@@ -1,1 +1,0 @@
-add pypi package in the side bar with details on hover!
