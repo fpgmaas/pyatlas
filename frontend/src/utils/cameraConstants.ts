@@ -1,5 +1,5 @@
 /**
- * Standard zoom levels for different view types in the PyPI Galaxy visualization
+ * Standard zoom levels for different view types in the PyAtlas visualization
  */
 export const CAMERA_ZOOM_LEVELS = {
   OVERVIEW: 1.6,      // Full galaxy view (default initial view)

@@ -22,7 +22,7 @@ def _():
 
 @app.cell
 def _(pl):
-    from pymap.clustering.plot_without_labels import create_dataset_for_unlabeled_plot, create_plot
+    from pyatlas.clustering.plot_without_labels import create_dataset_for_unlabeled_plot, create_plot
 
     df = pl.read_csv("data/clustered_dataset.csv")
     df_plot = create_dataset_for_unlabeled_plot(df)
@@ -34,7 +34,7 @@ def _(pl):
 
 @app.cell
 def _(pl):
-    from pymap.clustering.plot_with_labels import create_dataset_for_labeled_plot, create_plot_with_labels
+    from pyatlas.clustering.plot_with_labels import create_dataset_for_labeled_plot, create_plot_with_labels
 
     df2 = pl.read_csv("data/clustered_dataset.csv")
     df_cluster_labels = pl.read_csv("data/cluster_labels.csv")

@@ -21,7 +21,7 @@ You can run the setup script using a virtual environment with uv. This method wi
 2. Run the setup script:
 
    ```sh
-   uv run python pymap/scripts/setup.py
+   uv run python pyatlas/scripts/setup.py
    ```
 
 ### Option 2: Using Docker with NVIDIA GPU and NVIDIA Container Toolkit
@@ -31,7 +31,7 @@ If you have an NVIDIA GPU and the [NVIDIA Container Toolkit](https://docs.nvidia
 1. Build the Docker image:
 
    ```sh
-   docker build -t pymap .
+   docker build -t pyatlas .
    ```
 
 2. Run the setup script in a Docker container with GPU support:
@@ -42,8 +42,8 @@ If you have an NVIDIA GPU and the [NVIDIA Container Toolkit](https://docs.nvidia
      --env-file .env \
      -v $(pwd)/data:/code/data \
      --entrypoint "/bin/bash" \
-     pymap \
-     -c "python /code/pymap/scripts/setup.py"
+     pyatlas \
+     -c "python /code/pyatlas/scripts/setup.py"
    ```
 
 ### Option 3: Using Docker without NVIDIA GPU and NVIDIA Container Toolkit
@@ -53,7 +53,7 @@ If you do not have an NVIDIA GPU or the NVIDIA Container Toolkit installed, foll
 1. Build the Docker image:
 
    ```sh
-   docker build -f DockerfileCPU -t pymap .
+   docker build -f DockerfileCPU -t pyatlas .
    ```
 
 2. Run the setup script in a Docker container without GPU support:
@@ -63,8 +63,8 @@ If you do not have an NVIDIA GPU or the NVIDIA Container Toolkit installed, foll
      --env-file .env \
      -v $(pwd)/data:/code/data \
      --entrypoint "/bin/bash" \
-     pymap \
-     -c "python /code/pymap/scripts/setup.py"
+     pyatlas \
+     -c "python /code/pyatlas/scripts/setup.py"
    ```
 
 ### Running the Application

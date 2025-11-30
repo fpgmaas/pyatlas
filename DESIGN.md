@@ -3,7 +3,7 @@
 ## 1. Goal & Feel
 
 **Goal:**
-A full-page, standalone “PyPI Galaxy” that visualizes ~10k Python packages in 2D space:
+A full-page, standalone “PyAtlas” that visualizes ~10k Python packages in 2D space:
 
 * Galaxy-like, slightly animated (“breathing”) and modern.
 * Smooth pan/zoom, hover & click tooltips.

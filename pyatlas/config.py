@@ -1,5 +1,5 @@
 """
-Simplified configuration for the PyLens project.
+Simplified configuration for the PyAtlas project.
 Loads defaults with optional .env overrides—no TOML files or per-environment modes.
 """
 
@@ -13,12 +13,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class AppConfig(BaseSettings):
     """Application metadata."""
 
-    name: str = "pymap"
+    name: str = "pyatlas"
     version: str = "0.0.1"
-    description: str = "PyMap creates a map of python packages."
+    description: str = "PyAtlas creates a map of python packages."
     embeddings_model_name: str = "all-mpnet-base-v2"
 
-    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP_APP__", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYATLAS_APP__", extra="ignore")
 
 
 class StorageConfig(BaseSettings):
@@ -35,7 +35,7 @@ class StorageConfig(BaseSettings):
     packages_json: str = "packages.json"
     clusters_json: str = "clusters.json"
 
-    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP_STORAGE__", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYATLAS_STORAGE__", extra="ignore")
 
 
 class ETLConfig(BaseSettings):
@@ -45,7 +45,7 @@ class ETLConfig(BaseSettings):
     overwrite_download: bool = False
     top_packages_to_include: int = 10000
 
-    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP_ETL__", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYATLAS_ETL__", extra="ignore")
 
 
 class OpenAIConfig(BaseSettings):
@@ -54,7 +54,7 @@ class OpenAIConfig(BaseSettings):
     openai_api_key: str
     model_name: str = "gpt-5-mini"
 
-    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP__", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYATLAS__", extra="ignore")
 
 
 class Config(BaseSettings):
@@ -85,7 +85,7 @@ class Config(BaseSettings):
             "openai": self.openai.model_dump(),
         }
 
-    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYMAP__", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYATLAS__", extra="ignore")
 
 
 # Global config instance

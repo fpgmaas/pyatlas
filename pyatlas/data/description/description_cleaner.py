@@ -6,8 +6,8 @@ from dataclasses import dataclass
 import polars as pl
 from tqdm import tqdm
 
-from pymap.data.description.content_type_detector import ContentTypeDetector
-from pymap.data.description.description_parser import render_and_extract_text
+from pyatlas.data.description.content_type_detector import ContentTypeDetector
+from pyatlas.data.description.description_parser import render_and_extract_text
 
 logger = logging.getLogger(__name__)
 

@@ -1,13 +1,13 @@
 import logging
 
-from pymap.scripts.calculate_cluster_labels import calculate_cluster_labels
-from pymap.scripts.calculate_cluster_metadata import calculate_cluster_metadata
-from pymap.scripts.create_vector_embeddings import create_vector_embeddings
-from pymap.scripts.download_raw_dataset import download_raw_dataset
-from pymap.scripts.generate_clusters import generate_clusters
-from pymap.scripts.generate_json_outputs import generate_json_outputs
-from pymap.scripts.process_raw_dataset import process_raw_dataset
-from pymap.utils.logging import setup_logging
+from pyatlas.scripts.calculate_cluster_labels import calculate_cluster_labels
+from pyatlas.scripts.calculate_cluster_metadata import calculate_cluster_metadata
+from pyatlas.scripts.create_vector_embeddings import create_vector_embeddings
+from pyatlas.scripts.download_raw_dataset import download_raw_dataset
+from pyatlas.scripts.generate_clusters import generate_clusters
+from pyatlas.scripts.generate_json_outputs import generate_json_outputs
+from pyatlas.scripts.process_raw_dataset import process_raw_dataset
+from pyatlas.utils.logging import setup_logging
 
 
 def main():

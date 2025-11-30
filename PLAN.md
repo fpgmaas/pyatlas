@@ -2,7 +2,7 @@
 
 ## Overview
 
-Convert the PyPI Galaxy frontend from 3D visualization to a 2D scatter plot using Three.js in orthographic mode, matching the Python Plotly implementation while maintaining the existing React/Three.js infrastructure.
+Convert the PyAtlas frontend from 3D visualization to a 2D scatter plot using Three.js in orthographic mode, matching the Python Plotly implementation while maintaining the existing React/Three.js infrastructure.
 
 ## Key Requirements
 
@@ -14,8 +14,8 @@ Convert the PyPI Galaxy frontend from 3D visualization to a 2D scatter plot usin
 
 ## Data Analysis
 
-- **Packages**: 10,000 items at `/home/fpgmaas/git/pymap/data/packages.json`
-- **Clusters**: 192 clusters at `/home/fpgmaas/git/pymap/data/clusters.json`
+- **Packages**: 10,000 items at `/home/fpgmaas/git/pyatlas/data/packages.json`
+- **Clusters**: 192 clusters at `/home/fpgmaas/git/pyatlas/data/clusters.json`
 - **Coordinate bounds**: X [-3.07, 1.29], Y [1.44, 5.95]
 - **Downloads range**: [24,951 to 338,140,687]
 - **Size formula**: `log10(downloads+1)` scaled to 16-128px (from `plot_with_labels.py`)
@@ -24,7 +24,7 @@ Convert the PyPI Galaxy frontend from 3D visualization to a 2D scatter plot usin
 
 ### 1. Create Utility Functions
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/utils/colorPalette.ts` (NEW)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/utils/colorPalette.ts` (NEW)**
 
 ```typescript
 const GOLDEN_ANGLE = 137.508;
@@ -44,7 +44,7 @@ function hslToHex(h: number, s: number, l: number): string {
 
 ---
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/utils/sizeScaling.ts` (NEW)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/utils/sizeScaling.ts` (NEW)**
 
 ```typescript
 export function calculatePointSize(
@@ -78,7 +78,7 @@ export function precomputeSizes(packages: Package[]): Map<number, number> {
 
 ### 2. Create Data Bounds Utilities
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/utils/dataBounds.ts` (NEW)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/utils/dataBounds.ts` (NEW)**
 
 ```typescript
 export interface Bounds {
@@ -132,7 +132,7 @@ export function computeBounds(packages: Package[]): Bounds | null {
 
 ---
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/hooks/useDataBounds.ts` (NEW)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/hooks/useDataBounds.ts` (NEW)**
 
 ```typescript
 import { useMemo } from 'react';
@@ -151,7 +151,7 @@ export function useDataBounds() {
 
 ### 3. Update Camera Setup
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/components/GalaxyCanvas.tsx` (MODIFY)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/components/GalaxyCanvas.tsx` (MODIFY)**
 
 Replace perspective camera with orthographic, using dynamic bounds:
 
@@ -239,7 +239,7 @@ function CameraSetup({ bounds }: { bounds: Bounds }) {
 
 ### 4. Create Point Cloud Component
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/components/PackagePoints.tsx` (NEW)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/components/PackagePoints.tsx` (NEW)**
 
 ```tsx
 import { useRef, useMemo, useEffect } from 'react';
@@ -342,7 +342,7 @@ The current implementation shows the approach, but will require the custom shade
 
 ### 5. Add Cluster Labels
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/components/ClusterLabels.tsx` (NEW)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/components/ClusterLabels.tsx` (NEW)**
 
 ```tsx
 import { Html } from '@react-three/drei';
@@ -385,7 +385,7 @@ export function ClusterLabels() {
 
 ### 6. Enhance Search Functionality
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/components/SearchBar.tsx` (MODIFY)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/components/SearchBar.tsx` (MODIFY)**
 
 Add Fuse.js integration:
 
@@ -453,7 +453,7 @@ export function SearchBar() {
 
 ### 7. Add Camera Animation Hook
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/hooks/useCameraAnimation.ts` (NEW)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/hooks/useCameraAnimation.ts` (NEW)**
 
 ```typescript
 import { useThree, useFrame } from '@react-three/fiber';
@@ -530,7 +530,7 @@ const handleSelect = (pkg: Package) => {
 
 ### 8. Update UI Components
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/components/ClusterLegend.tsx` (MODIFY)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/components/ClusterLegend.tsx` (MODIFY)**
 
 ```tsx
 import { useGalaxyStore } from '../store/useGalaxyStore';
@@ -573,7 +573,7 @@ export function ClusterLegend() {
 
 ---
 
-**File: `/home/fpgmaas/git/pymap/frontend/src/components/PackageDetail.tsx` (MODIFY)**
+**File: `/home/fpgmaas/git/pyatlas/frontend/src/components/PackageDetail.tsx` (MODIFY)**
 
 ```tsx
 import { useGalaxyStore } from '../store/useGalaxyStore';
@@ -643,7 +643,7 @@ Ensure data files are available in frontend:
 
 **Option 1: Build script (recommended)**
 
-Update `/home/fpgmaas/git/pymap/frontend/package.json`:
+Update `/home/fpgmaas/git/pyatlas/frontend/package.json`:
 ```json
 {
   "scripts": {
@@ -657,7 +657,7 @@ Update `/home/fpgmaas/git/pymap/frontend/package.json`:
 
 **Option 2: Symlink**
 ```bash
-cd /home/fpgmaas/git/pymap/frontend/public
+cd /home/fpgmaas/git/pyatlas/frontend/public
 ln -s ../../data data
 ```
 
@@ -705,9 +705,9 @@ ln -s ../../data data
 
 ## Critical Files Reference
 
-- `/home/fpgmaas/git/pymap/pymap/clustering/plot_with_labels.py` - Size/color formulas
-- `/home/fpgmaas/git/pymap/frontend/src/components/GalaxyCanvas.tsx` - Main canvas
-- `/home/fpgmaas/git/pymap/frontend/src/store/useGalaxyStore.ts` - State management
-- `/home/fpgmaas/git/pymap/frontend/src/types/index.ts` - Data model
-- `/home/fpgmaas/git/pymap/data/packages.json` - Package data (10k items)
-- `/home/fpgmaas/git/pymap/data/clusters.json` - Cluster data (192 items)
+- `/home/fpgmaas/git/pyatlas/pyatlas/clustering/plot_with_labels.py` - Size/color formulas
+- `/home/fpgmaas/git/pyatlas/frontend/src/components/GalaxyCanvas.tsx` - Main canvas
+- `/home/fpgmaas/git/pyatlas/frontend/src/store/useGalaxyStore.ts` - State management
+- `/home/fpgmaas/git/pyatlas/frontend/src/types/index.ts` - Data model
+- `/home/fpgmaas/git/pyatlas/data/packages.json` - Package data (10k items)
+- `/home/fpgmaas/git/pyatlas/data/clusters.json` - Cluster data (192 items)

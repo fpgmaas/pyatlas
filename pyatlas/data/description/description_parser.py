@@ -5,7 +5,7 @@ import readme_renderer.rst
 import readme_renderer.txt
 from bs4 import BeautifulSoup
 
-from pymap.data.description.content_type_detector import ContentType
+from pyatlas.data.description.content_type_detector import ContentType
 
 
 def render_and_extract_text(description: str, content_type: ContentType) -> str:
@@ -25,7 +25,7 @@ def render_and_extract_text(description: str, content_type: ContentType) -> str:
         if rendering fails or description is None/empty.
 
     Example:
-        >>> from pymap.data.content_type_detector import ContentType
+        >>> from pyatlas.data.content_type_detector import ContentType
         >>> text = "# Hello\\n\\nThis is **bold**."
         >>> result = render_and_extract_text(text, ContentType.MARKDOWN)
         >>> print(result)

@@ -5,6 +5,7 @@ import { ClusterLegend } from './components/ClusterLegend';
 import { PackageDetail } from './components/PackageDetail';
 import { useGalaxyStore } from './store/useGalaxyStore';
 import { loadPackages, loadClusters } from './utils/dataLoader';
+import { MousePointer2, Mouse, ZoomIn } from 'lucide-react';
 
 function App() {
   const { setPackages, setClusters } = useGalaxyStore();
@@ -34,8 +35,29 @@ function App() {
         <div className="flex flex-col h-full">
           {/* Header Section */}
           <div className="px-8 pt-8 pb-6 border-b border-gray-700/50">
-            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">PyPI Galaxy</h1>
-            <p className="text-gray-400">Explore the Python package universe</p>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">PyAtlas</h1>
+            <p className="text-gray-400">Explore the top 10,000 packages on PyPI</p>
+          </div>
+
+          {/* Controls Section */}
+          <div className="px-8 py-4 border-b border-gray-700/30 bg-gray-800/30">
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+              Controls
+            </label>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-3 text-gray-300">
+                <ZoomIn className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <span>Scroll to zoom</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-300">
+                <Mouse className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <span>Right click + drag to pan</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-300">
+                <MousePointer2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <span>Click package for details</span>
+              </div>
+            </div>
           </div>
 
           {/* Search Section */}

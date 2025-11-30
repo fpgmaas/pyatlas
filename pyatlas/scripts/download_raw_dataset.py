@@ -3,8 +3,8 @@ import logging
 import gdown
 from dotenv import load_dotenv
 
-from pymap.config import Config
-from pymap.utils.logging import setup_logging
+from pyatlas.config import Config
+from pyatlas.utils.logging import setup_logging
 
 
 def download_raw_dataset():

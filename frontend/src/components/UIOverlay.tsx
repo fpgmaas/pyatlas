@@ -10,8 +10,8 @@ export function UIOverlay() {
         <div className="flex flex-col h-full">
           {/* Header Section */}
           <div className="px-8 pt-8 pb-6 border-b border-gray-700/50">
-            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">PyPI Galaxy</h1>
-            <p className="text-gray-400">Explore the Python package universe</p>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">PyAtlas</h1>
+            <p className="text-gray-400">Explore the top 10,000 packages on PyPI</p>
           </div>
 
           {/* Search Section */}

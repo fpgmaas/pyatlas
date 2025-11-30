@@ -5,9 +5,9 @@ import polars as pl
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 
-from pymap.config import Config
-from pymap.embeddings.embeddings_creator import VectorEmbeddingCreator
-from pymap.utils.logging import setup_logging
+from pyatlas.config import Config
+from pyatlas.embeddings.embeddings_creator import VectorEmbeddingCreator
+from pyatlas.utils.logging import setup_logging
 
 
 def read_processed_dataset(path_to_processed_dataset: Path):

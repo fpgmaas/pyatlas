@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import polars as pl
 from openai import OpenAI
 
-from pymap.config import Config
+from pyatlas.config import Config
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ services:
     volumes:
       - ./data:/code/data
     environment:
-      - PYMAP_ENV=dev
+      - PYATLAS_ENV=dev
     env_file:
       - .env
 

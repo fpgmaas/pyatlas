@@ -20,7 +20,7 @@ RUN uv install --no-interaction --no-ansi --no-root --no-dev && \
     rm -rf /root/.cache/pip
 
 # Copy Python code to the Docker image
-COPY pymap /code/pymap/
+COPY pyatlas /code/pyatlas/
 
 # Copy TOML config files
 COPY config.dev.toml config.prod.toml /code/
@@ -31,4 +31,4 @@ RUN mkdir -p /code/data
 ENV PYTHONPATH=/code
 
 # Use the script as the entrypoint
-CMD ["uvicorn", "pymap.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "pyatlas.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

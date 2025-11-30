@@ -25,7 +25,7 @@ def _():
 
 @app.cell
 def _(SAMPLE_SIZE):
-    from pymap.map.utils import cluster_with_umap, create_dataset_for_plot, get_dataset
+    from pyatlas.map.utils import cluster_with_umap, create_dataset_for_plot, get_dataset
 
     df = get_dataset()
     n_rows = df.height

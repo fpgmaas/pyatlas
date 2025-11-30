@@ -3,9 +3,9 @@ import logging
 import polars as pl
 from dotenv import load_dotenv
 
-from pymap.clustering.labeling import ClusterLabeler
-from pymap.config import Config
-from pymap.utils.logging import setup_logging
+from pyatlas.clustering.labeling import ClusterLabeler
+from pyatlas.config import Config
+from pyatlas.utils.logging import setup_logging
 
 
 def label_clusters():

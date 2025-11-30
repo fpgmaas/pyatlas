@@ -5,10 +5,10 @@ from pathlib import Path
 import polars as pl
 from dotenv import load_dotenv
 
-from pymap.clustering.clustering import ClusterIdGenerator
-from pymap.clustering.coordinates import ClusterCoordinatesGenerator
-from pymap.config import Config
-from pymap.utils.logging import setup_logging
+from pyatlas.clustering.clustering import ClusterIdGenerator
+from pyatlas.clustering.coordinates import ClusterCoordinatesGenerator
+from pyatlas.config import Config
+from pyatlas.utils.logging import setup_logging
 
 
 def get_dataset(processed_dataset_csv: Path, embeddings_parquet: Path):

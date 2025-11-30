@@ -1,14 +1,14 @@
 [app]
-name = "pymap"
+name = "pyatlas"
 version = "0.0.1"
-description = "PyLens helps you find PyPI packages through natural language prompts"
+description = "PyAtlas helps you find PyPI packages through natural language prompts"
 environment = "prod"
 
 [api]
 host = "0.0.0.0"
 port = 8080
 debug = false
-cors_origins = ["https://pymap.io"]
+cors_origins = ["https://pyatlas.io"]
 embeddings_model_name = "all-mpnet-base-v2"
 weight_similarity = 0.0
 weight_weekly_downloads = 1.0

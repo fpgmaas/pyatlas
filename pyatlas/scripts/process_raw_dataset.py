@@ -2,10 +2,10 @@ import logging
 
 from dotenv import load_dotenv
 
-from pymap.config import Config
-from pymap.data.description.description_cleaner import DescriptionCleaner
-from pymap.data.raw_data_reader import RawDataReader
-from pymap.utils.logging import setup_logging
+from pyatlas.config import Config
+from pyatlas.data.description.description_cleaner import DescriptionCleaner
+from pyatlas.data.raw_data_reader import RawDataReader
+from pyatlas.utils.logging import setup_logging
 
 
 def read_raw_dataset(path_to_raw_dataset):
