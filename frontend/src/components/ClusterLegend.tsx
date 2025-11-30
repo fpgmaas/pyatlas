@@ -58,7 +58,7 @@ export function ClusterLegend() {
       </button>
 
       {/* Cluster List */}
-      <div className="space-y-1 max-h-96 overflow-y-auto">
+      <div className="space-y-1">
         {sortedClusters.map((cluster) => {
           const isSelected = selectedClusterIds.has(cluster.clusterId);
 

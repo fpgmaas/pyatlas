@@ -5,7 +5,7 @@ import { ClusterLegend } from './components/ClusterLegend';
 import { PackageDetail } from './components/PackageDetail';
 import { useGalaxyStore } from './store/useGalaxyStore';
 import { loadPackages, loadClusters } from './utils/dataLoader';
-import { MousePointer2, Mouse, ZoomIn, Menu, X } from 'lucide-react';
+import { MousePointer2, Mouse, ZoomIn, Menu, X, Github } from 'lucide-react';
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
@@ -61,11 +61,26 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       {/* Clusters Section */}
-      <div className="flex-1 overflow-y-auto px-8 py-6">
-        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
+      <div className="flex-1 min-h-0 max-h-96 flex flex-col px-8 py-6">
+        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4 flex-shrink-0">
           Package Clusters
         </label>
-        <ClusterLegend />
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <ClusterLegend />
+        </div>
+      </div>
+
+      {/* Footer with GitHub link */}
+      <div className="mt-auto flex-shrink-0 px-8 py-4 border-t border-gray-700/50">
+        <a
+          href="https://github.com/fpgmaas/pyatlas"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
+        >
+          <Github className="w-5 h-5" />
+          <span>View on GitHub</span>
+        </a>
       </div>
     </div>
   );
