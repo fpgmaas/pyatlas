@@ -7,7 +7,7 @@ export interface SpatialIndex {
   minY: number;
   gridCols: number;
   gridRows: number;
-  cells: Map<string, number[]>; // CellKey -> Package IDs
+  cells: Map<string, number[]>; // CellKey -> Package indices (not IDs)
 }
 
 /**
@@ -36,17 +36,18 @@ export function buildSpatialIndex(
 
   const cells = new Map<string, number[]>();
 
-  // Assign each package to its grid cell
-  for (const pkg of packages) {
+  // Assign each package to its grid cell (storing indices, not IDs)
+  for (let i = 0; i < packages.length; i++) {
+    const pkg = packages[i];
     const cellX = Math.floor((pkg.x - minX) / cellSize);
     const cellY = Math.floor((pkg.y - minY) / cellSize);
     const key = `${cellX},${cellY}`;
 
     const existing = cells.get(key);
     if (existing) {
-      existing.push(pkg.id);
+      existing.push(i);
     } else {
-      cells.set(key, [pkg.id]);
+      cells.set(key, [i]);
     }
   }
 
@@ -65,7 +66,7 @@ export function buildSpatialIndex(
  * Query which packages are visible in the given viewport using the spatial index.
  *
  * @param spatialIndex - The spatial index
- * @param packages - All packages (for lookup by ID and coordinate checks)
+ * @param packages - All packages (accessed by index directly)
  * @param visibleClusterIds - Only consider packages from these clusters
  * @param viewport - The viewport bounds
  * @param padding - Extra padding around viewport
@@ -93,20 +94,16 @@ export function queryVisiblePackagesFromGrid(
   const startCellY = Math.max(0, Math.floor((viewMinY - minY) / cellSizeY));
   const endCellY = Math.floor((viewMaxY - minY) / cellSizeY);
 
-  // Create a package ID -> Package lookup map for efficient access
-  const packageMap = new Map(packages.map(p => [p.id, p]));
-
   // Iterate over candidate cells
   for (let cellX = startCellX; cellX <= endCellX; cellX++) {
     for (let cellY = startCellY; cellY <= endCellY; cellY++) {
       const key = `${cellX},${cellY}`;
-      const packageIds = cells.get(key);
-      if (!packageIds) continue;
+      const indices = cells.get(key);
+      if (!indices) continue;
 
-      // Check each package in this cell
-      for (const pkgId of packageIds) {
-        const pkg = packageMap.get(pkgId);
-        if (!pkg) continue;
+      // Check each package in this cell (direct index access, no map lookup)
+      for (const idx of indices) {
+        const pkg = packages[idx];
 
         // Skip packages from hidden clusters
         if (!visibleClusterIds.has(pkg.clusterId)) continue;

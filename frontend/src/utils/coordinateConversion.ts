@@ -5,19 +5,22 @@ export interface ScreenCoordinates {
   canvasY: number;
 }
 
+// Reusable scratch vector to avoid allocations in hot paths
+const scratchVec = new THREE.Vector3();
+
 /**
  * Convert 3D world coordinates to canvas-relative screen coordinates
+ * Uses a reusable scratch vector to avoid allocations
  */
 export function worldToCanvasCoords(
   worldPos: THREE.Vector3,
   camera: THREE.Camera,
   canvasSize: { width: number; height: number }
 ): ScreenCoordinates {
-  const vector = worldPos.clone();
-  vector.project(camera);
+  scratchVec.copy(worldPos).project(camera);
 
-  const screenX = (vector.x + 1) / 2 * canvasSize.width;
-  const screenY = -(vector.y - 1) / 2 * canvasSize.height;
+  const screenX = (scratchVec.x + 1) / 2 * canvasSize.width;
+  const screenY = -(scratchVec.y - 1) / 2 * canvasSize.height;
 
   return { canvasX: screenX, canvasY: screenY };
 }
