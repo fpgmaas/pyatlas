@@ -21,7 +21,7 @@ class ClusterMetadataGenerator:
     def generate_cluster_metadata(self, df: pl.DataFrame) -> pl.DataFrame:
         """Generate metadata dataframe with cluster_id, centroid coordinates, and statistics.
 
-        Returns a dataframe with columns: cluster_id, centroid_x, centroid_y, total_weekly_downloads
+        Returns a dataframe with columns: cluster_id, centroid_x, centroid_y, total_weekly_downloads, min_x, max_x, min_y, max_y
         """
         cluster_ids = self._get_unique_cluster_ids(df)
         metadata_rows = []
@@ -29,12 +29,17 @@ class ClusterMetadataGenerator:
         for cluster_id in cluster_ids:
             centroid = self._calculate_centroid(df, cluster_id)
             total_downloads = self._calculate_total_weekly_downloads(df, cluster_id)
+            bounds = self._calculate_bounds(df, cluster_id)
 
             metadata_rows.append({
                 self.cluster_id_column: cluster_id,
                 "centroid_x": centroid[0],
                 "centroid_y": centroid[1],
                 "total_weekly_downloads": total_downloads,
+                "min_x": bounds["min_x"],
+                "max_x": bounds["max_x"],
+                "min_y": bounds["min_y"],
+                "max_y": bounds["max_y"],
             })
             logger.info(f"Calculated metadata for cluster {cluster_id}")
 
@@ -61,6 +66,16 @@ class ClusterMetadataGenerator:
         cluster_data = self._get_cluster_data(df, cluster_id)
         total = cluster_data[self.weekly_downloads_column].sum()
         return int(total) if total is not None else 0
+
+    def _calculate_bounds(self, df: pl.DataFrame, cluster_id: str) -> dict[str, float]:
+        """Calculate the min and max x, y coordinates for a cluster."""
+        cluster_data = self._get_cluster_data(df, cluster_id)
+        return {
+            "min_x": cluster_data[self.x_column].min(),
+            "max_x": cluster_data[self.x_column].max(),
+            "min_y": cluster_data[self.y_column].min(),
+            "max_y": cluster_data[self.y_column].max(),
+        }
 
 
 @dataclass

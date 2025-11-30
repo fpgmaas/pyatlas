@@ -6,9 +6,14 @@ import { useGalaxyStore } from '../store/useGalaxyStore';
 import { getClusterColor } from '../utils/colorPalette';
 import { precomputeSizes } from '../utils/sizeScaling';
 import { createPointShaderMaterial } from '../shaders/pointShader';
+import { getCanvasPointDistance } from '../utils/coordinateConversion';
 
 export function PackagePoints() {
-  const { packages, visibleClusterIds, hoveredIndex, setSelectedPackageId, setHoveredIndex } = useGalaxyStore();
+  const packages = useGalaxyStore((s) => s.packages);
+  const selectedClusterIds = useGalaxyStore((s) => s.selectedClusterIds);
+  const hoveredIndex = useGalaxyStore((s) => s.hoveredIndex);
+  const setSelectedPackageId = useGalaxyStore((s) => s.setSelectedPackageId);
+  const setHoveredIndex = useGalaxyStore((s) => s.setHoveredIndex);
   const pointsRef = useRef<THREE.Points>(null);
   const canvasRectRef = useRef<DOMRect | null>(null);
   const { camera, size, gl } = useThree();
@@ -54,11 +59,11 @@ export function PackagePoints() {
 
     packages.forEach((pkg, i) => {
       const baseSize = sizes[i];
-      const visible = visibleClusterIds.has(pkg.clusterId);
+      const visible = selectedClusterIds.has(pkg.clusterId);
       sizeAttr.setX(i, visible ? baseSize : 0);
     });
     sizeAttr.needsUpdate = true;
-  }, [visibleClusterIds, packages, sizes]);
+  }, [selectedClusterIds, packages, sizes]);
 
   // Handle hover state
   useEffect(() => {
@@ -92,25 +97,20 @@ export function PackagePoints() {
 
     packages.forEach((pkg, i) => {
       // Skip invisible points
-      if (!visibleClusterIds.has(pkg.clusterId)) return;
-
-      // Project 3D point to screen space
-      const vector = new THREE.Vector3(pkg.x, pkg.y, 0);
-      vector.project(camera);
-
-      const screenX = (vector.x + 1) / 2 * size.width;
-      const screenY = -(vector.y - 1) / 2 * size.height;
+      if (!selectedClusterIds.has(pkg.clusterId)) return;
 
       // Get cached canvas position (or compute if not cached)
       const rect = canvasRectRef.current || gl.domElement.getBoundingClientRect();
 
-      // Convert viewport coordinates to canvas-relative coordinates
-      const canvasX = event.clientX - rect.left;
-      const canvasY = event.clientY - rect.top;
-
-      const dx = screenX - canvasX;
-      const dy = screenY - canvasY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+      // Calculate distance using coordinate conversion utility
+      const distance = getCanvasPointDistance(
+        new THREE.Vector3(pkg.x, pkg.y, 0),
+        event.clientX,
+        event.clientY,
+        camera,
+        rect,
+        size
+      );
 
       // Check if within point radius (using actual point size)
       const pointRadius = sizes[i] / 2;
@@ -121,7 +121,6 @@ export function PackagePoints() {
     });
 
     if (closestIndex !== -1) {
-      console.log('Hover index:', closestIndex, 'Package:', packages[closestIndex]?.name);
       document.body.style.cursor = 'pointer';
       setHoveredIndex(closestIndex);
     } else {

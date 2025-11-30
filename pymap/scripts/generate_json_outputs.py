@@ -47,6 +47,10 @@ def generate_json_outputs():
             "centroidX": row["centroid_x"],
             "centroidY": row["centroid_y"],
             "downloads": row["total_weekly_downloads"],
+            "minX": row["min_x"],
+            "maxX": row["max_x"],
+            "minY": row["min_y"],
+            "maxY": row["max_y"],
         })
 
     # Write output files
