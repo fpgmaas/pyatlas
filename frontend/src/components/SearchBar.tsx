@@ -4,6 +4,8 @@ import { useGalaxyStore } from '../store/useGalaxyStore';
 import type { Package } from '../types';
 import { sortByDownloads } from '../utils/packageUtils';
 import { CAMERA_ZOOM_LEVELS } from '../utils/cameraConstants';
+import { TrendingUp } from 'lucide-react';
+import { formatDownloads } from '../utils/formatDownloads';
 
 export function SearchBar() {
   const {
@@ -11,7 +13,9 @@ export function SearchBar() {
     setSelectedPackageId,
     requestCameraAnimation,
     setSearchQuery,
-    setSearchResults
+    setSearchResults,
+    selectedClusterIds,
+    toggleCluster
   } = useGalaxyStore();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Package[]>([]);
@@ -41,6 +45,11 @@ export function SearchBar() {
 
   const handleSelect = (pkg: Package) => {
     console.log('[SearchBar] Package selected:', pkg.name, 'at position:', { x: pkg.x, y: pkg.y });
+
+    // If the package's cluster is not selected, make it visible
+    if (!selectedClusterIds.has(pkg.clusterId)) {
+      toggleCluster(pkg.clusterId);
+    }
 
     // Request camera animation to package location
     const animationRequest = {
@@ -76,10 +85,18 @@ export function SearchBar() {
               onClick={() => handleSelect(pkg)}
               className="w-full text-left px-4 py-3 hover:bg-gray-700/70 text-white border-b border-gray-700/30 last:border-b-0 transition-colors"
             >
-              <div className="font-semibold text-sm">{pkg.name}</div>
-              {pkg.summary && (
-                <div className="text-xs text-gray-400 truncate mt-1">{pkg.summary}</div>
-              )}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm">{pkg.name}</div>
+                  {pkg.summary && (
+                    <div className="text-xs text-gray-400 truncate mt-1">{pkg.summary}</div>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-400 text-xs flex-shrink-0">
+                  <TrendingUp size={14} />
+                  <span className="font-medium">{formatDownloads(pkg.downloads)}/week</span>
+                </div>
+              </div>
             </button>
           ))}
         </div>
