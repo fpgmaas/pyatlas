@@ -28,6 +28,7 @@ interface GalaxyStore {
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
   setVisibleClusterIds: (ids: Set<number>) => void;
+  setSelectedClusterIds: (ids: Set<number>) => void;
   toggleCluster: (clusterId: number) => void;
   setSelectedPackageId: (id: number | null) => void;
   setHoveredIndex: (index: number | null) => void;
@@ -89,6 +90,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
     set({ clusters, selectedClusterIds: clusterIds, visibleClusterIds: clusterIds });
   },
   setVisibleClusterIds: (ids) => set({ visibleClusterIds: ids }),
+  setSelectedClusterIds: (ids) => set({ selectedClusterIds: ids }),
   toggleCluster: (clusterId) => set((state) => {
     const newSet = new Set(state.selectedClusterIds);
     if (newSet.has(clusterId)) {

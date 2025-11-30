@@ -20,7 +20,7 @@ export function PackagePoints() {
   const { camera, size, gl } = useThree();
 
   // Precompute positions, colors, sizes
-  const { sizes, geometry, material } = useMemo(() => {
+  const { geometry, material, baseSizes } = useMemo(() => {
     const positions = new Float32Array(packages.length * 3);
     const colors = new Float32Array(packages.length * 3);
     const sizes = new Float32Array(packages.length);
@@ -52,7 +52,13 @@ export function PackagePoints() {
 
     const material = createPointShaderMaterial();
 
-    return { positions, colors, sizes, hovered, selected, geometry, material };
+    // Store base sizes in a Map for easy lookup
+    const baseSizes = new Map<number, number>();
+    packages.forEach((pkg) => {
+      baseSizes.set(pkg.id, sizeMap.get(pkg.id) || 16);
+    });
+
+    return { geometry, material, baseSizes };
   }, [packages]);
 
   // Handle visibility filtering
@@ -62,12 +68,12 @@ export function PackagePoints() {
     const sizeAttr = geom.attributes.size as THREE.BufferAttribute;
 
     packages.forEach((pkg, i) => {
-      const baseSize = sizes[i];
+      const baseSize = baseSizes.get(pkg.id) || 16;
       const visible = selectedClusterIds.has(pkg.clusterId);
       sizeAttr.setX(i, visible ? baseSize : 0);
     });
     sizeAttr.needsUpdate = true;
-  }, [selectedClusterIds, packages, sizes]);
+  }, [selectedClusterIds, packages, baseSizes]);
 
   // Handle hover state
   useEffect(() => {
@@ -136,7 +142,7 @@ export function PackagePoints() {
       );
 
       // Check if within point radius (using actual point size)
-      const pointRadius = sizes[i] / 2;
+      const pointRadius = (baseSizes.get(pkg.id) || 16) / 2;
       if (distance < pointRadius && distance < closestDistance) {
         closestDistance = distance;
         closestIndex = i;

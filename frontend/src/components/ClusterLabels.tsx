@@ -3,13 +3,10 @@ import { useGalaxyStore } from '../store/useGalaxyStore';
 
 export function ClusterLabels() {
   const clusters = useGalaxyStore((s) => s.clusters);
-  const selectedClusterIds = useGalaxyStore((s) => s.selectedClusterIds);
 
   return (
     <>
-      {clusters
-        .filter(c => selectedClusterIds.has(c.clusterId))
-        .map(cluster => (
+      {clusters.map(cluster => (
           <Html
             key={cluster.clusterId}
             position={[cluster.centroidX, cluster.centroidY, 0]}

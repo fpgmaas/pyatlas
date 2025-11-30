@@ -108,6 +108,9 @@ export function queryVisiblePackagesFromGrid(
         const pkg = packageMap.get(pkgId);
         if (!pkg) continue;
 
+        // Skip packages from hidden clusters
+        if (!visibleClusterIds.has(pkg.clusterId)) continue;
+
         // Final point-in-viewport check (with padding)
         if (
           pkg.x >= viewMinX &&

@@ -97,6 +97,7 @@ export function useViewportBounds() {
   const {
     packages,
     clusters,
+    selectedClusterIds,
     shouldShowLabels,
     spatialIndex,
     setViewportBounds,
@@ -110,6 +111,7 @@ export function useViewportBounds() {
   const lastVisibleClusterIds = useRef<Set<number>>(new Set());
   const lastVisiblePackageIds = useRef<Set<number>>(new Set());
   const prevShouldShowLabels = useRef<boolean>(false);
+  const prevSelectedClusterIds = useRef<Set<number>>(selectedClusterIds);
 
   useFrame(() => {
     if (camera.type !== 'OrthographicCamera') return;
@@ -123,8 +125,14 @@ export function useViewportBounds() {
     const labelsJustEnabled = !prevShouldShowLabels.current && shouldShowLabels;
     prevShouldShowLabels.current = shouldShowLabels;
 
-    // Bypass throttles if labels just turned on
-    const bypassThrottle = labelsJustEnabled;
+    // Detect if cluster selection changed
+    const clusterSelectionChanged = !setsEqual(prevSelectedClusterIds.current, selectedClusterIds);
+    if (clusterSelectionChanged) {
+      prevSelectedClusterIds.current = selectedClusterIds;
+    }
+
+    // Bypass throttles if labels just turned on or cluster selection changed
+    const bypassThrottle = labelsJustEnabled || clusterSelectionChanged;
 
     // Step 1: Always update clusters (cheap operation) with 100ms throttle
     const shouldUpdateClusters = bypassThrottle ||
@@ -185,7 +193,7 @@ export function useViewportBounds() {
         const visiblePackageIdsSet = queryVisiblePackagesFromGrid(
           spatialIndex,
           packages,
-          lastVisibleClusterIds.current,
+          selectedClusterIds,
           currentBounds,
           padding
         );

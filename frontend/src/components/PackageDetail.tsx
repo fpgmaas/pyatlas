@@ -3,9 +3,10 @@ import { X, ExternalLink } from 'lucide-react';
 import { formatDownloads } from '../utils/formatDownloads';
 
 export function PackageDetail() {
-  const { selectedPackageId, packages, setSelectedPackageId } = useGalaxyStore();
+  const { selectedPackageId, packages, clusters, setSelectedPackageId } = useGalaxyStore();
 
   const selectedPackage = packages.find(p => p.id === selectedPackageId);
+  const cluster = selectedPackage ? clusters.find(c => c.clusterId === selectedPackage.clusterId) : null;
 
   if (!selectedPackage) {
     return (
@@ -40,6 +41,18 @@ export function PackageDetail() {
       >
         View on PyPI <ExternalLink size={14} />
       </a>
+
+      {/* Cluster section */}
+      {cluster && (
+        <div className="mb-4">
+          <label className="text-gray-400 text-xs uppercase tracking-wide mb-1 block">
+            Cluster
+          </label>
+          <p className="text-white text-sm">
+            {cluster.label}
+          </p>
+        </div>
+      )}
 
       {/* Downloads section */}
       <div className="mb-4">
