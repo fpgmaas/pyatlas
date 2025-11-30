@@ -15,7 +15,8 @@ export function SearchBar() {
     setSearchQuery,
     setSearchResults,
     selectedClusterIds,
-    toggleCluster
+    toggleCluster,
+    setSidebarOpen
   } = useGalaxyStore();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Package[]>([]);
@@ -63,6 +64,9 @@ export function SearchBar() {
     // Update selection state (for detail panel)
     setSelectedPackageId(pkg.id);
 
+    // Close sidebar on mobile after selection
+    setSidebarOpen(false);
+
     // Clear search UI
     setQuery('');
     setShowDropdown(false);
@@ -78,7 +82,7 @@ export function SearchBar() {
         className="bg-gray-800/70 text-white px-4 py-3 rounded-lg outline-none w-full focus:ring-2 focus:ring-blue-500/50 focus:bg-gray-800 border border-gray-700/30 transition-all placeholder:text-gray-500"
       />
       {showDropdown && results.length > 0 && (
-        <div className="absolute top-full mt-3 w-full bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-2xl max-h-96 overflow-y-auto z-10 border border-gray-700/50">
+        <div className="absolute top-full mt-3 w-full bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-2xl max-h-[60vh] sm:max-h-96 overflow-y-auto z-10 border border-gray-700/50">
           {results.map(pkg => (
             <button
               key={pkg.id}

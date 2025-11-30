@@ -108,6 +108,16 @@ export function GalaxyCanvas() {
           maxZoom={40}
           zoomSpeed={2.5}
           panSpeed={1}
+          touches={{
+            ONE: THREE.TOUCH.PAN,
+            TWO: THREE.TOUCH.DOLLY_PAN
+          }}
+          zoomToCursor={true}
+          mouseButtons={{
+            LEFT: THREE.MOUSE.PAN,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.PAN
+          }}
         />
 
         <ambientLight intensity={0.8} />

@@ -24,6 +24,7 @@ interface GalaxyStore {
   shouldShowLabels: boolean;
   spatialIndex: SpatialIndex | null;
   cameraAnimationRequest: CameraAnimationRequest | null;
+  isSidebarOpen: boolean;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -38,6 +39,8 @@ interface GalaxyStore {
   setViewportBounds: (bounds: ViewportBounds) => void;
   setVisiblePackageIds: (ids: Set<number>) => void;
   requestCameraAnimation: (request: CameraAnimationRequest | null) => void;
+  setSidebarOpen: (isOpen: boolean) => void;
+  toggleSidebar: () => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
@@ -55,6 +58,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   shouldShowLabels: false,
   spatialIndex: null,
   cameraAnimationRequest: null,
+  isSidebarOpen: false,
 
   setPackages: (packages) => {
     // Build spatial index when packages are loaded
@@ -108,4 +112,6 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   setViewportBounds: (bounds) => set({ viewportBounds: bounds }),
   setVisiblePackageIds: (ids) => set({ visiblePackageIds: ids }),
   requestCameraAnimation: (request) => set({ cameraAnimationRequest: request }),
+  setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 }));
