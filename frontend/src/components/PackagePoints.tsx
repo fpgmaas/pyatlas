@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import type { ThreeEvent } from '@react-three/fiber';
-import { useThree } from '@react-three/fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import { getClusterColor } from '../utils/colorPalette';
 import { precomputeSizes } from '../utils/sizeScaling';
@@ -12,6 +12,7 @@ export function PackagePoints() {
   const packages = useGalaxyStore((s) => s.packages);
   const selectedClusterIds = useGalaxyStore((s) => s.selectedClusterIds);
   const hoveredIndex = useGalaxyStore((s) => s.hoveredIndex);
+  const selectedPackageId = useGalaxyStore((s) => s.selectedPackageId);
   const setSelectedPackageId = useGalaxyStore((s) => s.setSelectedPackageId);
   const setHoveredIndex = useGalaxyStore((s) => s.setHoveredIndex);
   const pointsRef = useRef<THREE.Points>(null);
@@ -24,6 +25,7 @@ export function PackagePoints() {
     const colors = new Float32Array(packages.length * 3);
     const sizes = new Float32Array(packages.length);
     const hovered = new Float32Array(packages.length);
+    const selected = new Float32Array(packages.length);
     const sizeMap = precomputeSizes(packages);
 
     packages.forEach((pkg, i) => {
@@ -38,6 +40,7 @@ export function PackagePoints() {
 
       sizes[i] = sizeMap.get(pkg.id) || 16;
       hovered[i] = 0;
+      selected[i] = 0;
     });
 
     const geometry = new THREE.BufferGeometry();
@@ -45,10 +48,11 @@ export function PackagePoints() {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     geometry.setAttribute('hovered', new THREE.BufferAttribute(hovered, 1));
+    geometry.setAttribute('selected', new THREE.BufferAttribute(selected, 1));
 
     const material = createPointShaderMaterial();
 
-    return { positions, colors, sizes, hovered, geometry, material };
+    return { positions, colors, sizes, hovered, selected, geometry, material };
   }, [packages]);
 
   // Handle visibility filtering
@@ -76,6 +80,25 @@ export function PackagePoints() {
     }
     hoveredAttr.needsUpdate = true;
   }, [hoveredIndex, packages.length]);
+
+  // Handle selection state
+  useEffect(() => {
+    if (!pointsRef.current) return;
+    const geom = pointsRef.current.geometry;
+    const selectedAttr = geom.attributes.selected as THREE.BufferAttribute;
+
+    // Find index of selected package
+    const selectedIndex = selectedPackageId
+      ? packages.findIndex(pkg => pkg.id === selectedPackageId)
+      : -1;
+
+    // Update buffer: 1 for selected, 0 for others
+    for (let i = 0; i < packages.length; i++) {
+      selectedAttr.setX(i, i === selectedIndex ? 1 : 0);
+    }
+
+    selectedAttr.needsUpdate = true;
+  }, [selectedPackageId, packages]);
 
   // Cache canvas bounding rect for performance
   useEffect(() => {
@@ -140,6 +163,16 @@ export function PackagePoints() {
       setSelectedPackageId(packages[hoveredIndex].id);
     }
   };
+
+  // Update time uniform for animation
+  useFrame((state) => {
+    if (!pointsRef.current) return;
+
+    const mat = pointsRef.current.material as THREE.ShaderMaterial;
+    if (mat.uniforms?.time) {
+      mat.uniforms.time.value = state.clock.elapsedTime;
+    }
+  });
 
   return (
     <points
