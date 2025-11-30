@@ -14,4 +14,8 @@ export interface Cluster {
   centroidX: number;
   centroidY: number;
   downloads: number;
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
 }
