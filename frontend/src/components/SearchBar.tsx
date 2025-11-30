@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import type { Package } from '../types';
+import { sortByDownloads } from '../utils/packageUtils';
 
 export function SearchBar() {
   const { packages, setSelectedPackageId, setSearchQuery, setSearchResults } = useGalaxyStore();
@@ -11,13 +12,14 @@ export function SearchBar() {
 
   const fuse = useMemo(() => new Fuse(packages, {
     keys: ['name', 'summary'],
-    threshold: 0.3,
+    threshold: 0.2,
     includeScore: true,
   }), [packages]);
 
   useEffect(() => {
     if (query.length > 1) {
-      const searchResults = fuse.search(query).slice(0, 10).map(r => r.item);
+      const fuseResults = fuse.search(query).map(r => r.item);
+      const searchResults = sortByDownloads(fuseResults, 25);
       setResults(searchResults);
       setShowDropdown(true);
       setSearchQuery(query);

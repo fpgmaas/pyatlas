@@ -2,25 +2,9 @@ import { Html } from '@react-three/drei';
 import { useMemo } from 'react';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import type { Package } from '../types';
+import { sortByDownloads } from '../utils/packageUtils';
 
 const MAX_RENDERED_LABELS = 200;
-
-/**
- * Get the top N most downloaded packages from a set of package IDs
- */
-function getTopDownloaded(
-  packageIds: Set<number>,
-  packages: Package[],
-  limit: number
-): Package[] {
-  const packageMap = new Map(packages.map(p => [p.id, p]));
-
-  return Array.from(packageIds)
-    .map(id => packageMap.get(id))
-    .filter((p): p is Package => p !== undefined)
-    .sort((a, b) => b.downloads - a.downloads)
-    .slice(0, limit);
-}
 
 export function PackageLabels() {
   const packages = useGalaxyStore((s) => s.packages);
@@ -31,7 +15,12 @@ export function PackageLabels() {
   const renderedPackages = useMemo(() => {
     if (visiblePackageIds.size === 0) return [];
 
-    const topPackages = getTopDownloaded(visiblePackageIds, packages, MAX_RENDERED_LABELS);
+    const packageMap = new Map(packages.map(p => [p.id, p]));
+    const visiblePackages = Array.from(visiblePackageIds)
+      .map(id => packageMap.get(id))
+      .filter((p): p is Package => p !== undefined);
+
+    const topPackages = sortByDownloads(visiblePackages, MAX_RENDERED_LABELS);
 
     if (visiblePackageIds.size > MAX_RENDERED_LABELS) {
       console.log(`Rendering cap applied: ${visiblePackageIds.size} visible → ${topPackages.length} rendered (top by downloads)`);

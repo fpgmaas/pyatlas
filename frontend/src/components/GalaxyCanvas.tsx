@@ -90,7 +90,7 @@ export function GalaxyCanvas() {
           enableZoom={true}
           minZoom={0.5}
           maxZoom={40}
-          zoomSpeed={1.5}
+          zoomSpeed={2.5}
           panSpeed={1}
         />
 
