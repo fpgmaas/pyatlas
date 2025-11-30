@@ -57,7 +57,7 @@ function App() {
       </div>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 h-full relative">
+      <div className="flex-1 w-full h-full relative">
         <GalaxyCanvas />
 
         {/* Package Detail - Bottom Right */}
