@@ -4,14 +4,19 @@ import { useGalaxyStore } from '../store/useGalaxyStore';
 import type { Package } from '../types';
 import { sortByDownloads } from '../utils/packageUtils';
 
-const MAX_RENDERED_LABELS = 200;
-
 export function PackageLabels() {
   const packages = useGalaxyStore((s) => s.packages);
   const visiblePackageIds = useGalaxyStore((s) => s.visiblePackageIds);
   const shouldShowLabels = useGalaxyStore((s) => s.shouldShowLabels);
+  const currentZoom = useGalaxyStore((s) => s.currentZoom);
 
-  // Get top 200 most downloaded packages from all visible packages
+  // Dynamic label count based on zoom level - fewer labels at lower zoom for performance
+  const maxLabels =
+    currentZoom < 14 ? 80 :
+    currentZoom < 20 ? 140 :
+    200;
+
+  // Get top N most downloaded packages from all visible packages
   const renderedPackages = useMemo(() => {
     if (visiblePackageIds.size === 0) return [];
 
@@ -20,14 +25,14 @@ export function PackageLabels() {
       .map(id => packageMap.get(id))
       .filter((p): p is Package => p !== undefined);
 
-    const topPackages = sortByDownloads(visiblePackages, MAX_RENDERED_LABELS);
+    const topPackages = sortByDownloads(visiblePackages, maxLabels);
 
-    if (visiblePackageIds.size > MAX_RENDERED_LABELS) {
+    if (visiblePackageIds.size > maxLabels) {
       console.log(`Rendering cap applied: ${visiblePackageIds.size} visible → ${topPackages.length} rendered (top by downloads)`);
     }
 
     return topPackages;
-  }, [visiblePackageIds, packages]);
+  }, [visiblePackageIds, packages, maxLabels]);
 
   if (!shouldShowLabels) return null;
 

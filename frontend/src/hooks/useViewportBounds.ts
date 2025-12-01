@@ -14,9 +14,9 @@ export interface ViewportBounds {
 
 // Performance configuration
 const PERF_CONFIG = {
-  CLUSTER_UPDATE_INTERVAL: 100, // ms
-  LABEL_UPDATE_INTERVAL: 150,   // ms
-  SPATIAL_THRESHOLD: 0.1,       // Minimum viewport change to trigger update
+  CLUSTER_UPDATE_INTERVAL: 200, // ms
+  LABEL_UPDATE_INTERVAL: 200,   // ms
+  SPATIAL_THRESHOLD: 0.05,       // Minimum viewport change to trigger update
   PADDING_FACTOR: 0.1,          // 10% of viewport for padding
 };
 

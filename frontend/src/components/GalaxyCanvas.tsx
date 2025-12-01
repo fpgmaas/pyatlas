@@ -87,7 +87,7 @@ export function GalaxyCanvas() {
 
   return (
     <div className="w-full h-full">
-      <Canvas gl={{ alpha: false, antialias: true }}>
+      <Canvas gl={{ alpha: false, antialias: false }} dpr={[1, 1.5]} >
         <color attach="background" args={['#0a0a0a']} />
 
         <OrthographicCamera
