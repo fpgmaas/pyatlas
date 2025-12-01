@@ -5,7 +5,7 @@ import { ClusterLegend } from './components/ClusterLegend';
 import { PackageDetail } from './components/PackageDetail';
 import { useGalaxyStore } from './store/useGalaxyStore';
 import { loadPackages, loadClusters } from './utils/dataLoader';
-import { MousePointer2, Mouse, ZoomIn, Menu, X, Github } from 'lucide-react';
+import { MousePointer2, Mouse, ZoomIn, Menu, X, Github, Tag } from 'lucide-react';
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   return (
@@ -48,6 +48,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             <MousePointer2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
             <span className="lg:hidden">Tap package for details</span>
             <span className="hidden lg:inline">Click package for details</span>
+          </div>
+          <div className="flex items-center gap-3 text-gray-300">
+            <Tag className="w-4 h-4 text-blue-400 flex-shrink-0" />
+            <span>Click cluster label to toggle</span>
           </div>
         </div>
       </div>
