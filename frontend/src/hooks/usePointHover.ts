@@ -3,10 +3,6 @@ import * as THREE from 'three';
 import { useThree } from '@react-three/fiber';
 import type { Package } from '../types';
 import type { SpatialIndex } from '../utils/spatialIndex';
-import { getCanvasPointDistance } from '../utils/coordinateConversion';
-
-// Reusable vector for hover detection to avoid allocations
-const hoverScratchVec = new THREE.Vector3();
 
 interface UsePointHoverOptions {
   packages: Package[];
@@ -32,7 +28,7 @@ export function usePointHover({
   setHoveredIndex,
   onClickIndex,
 }: UsePointHoverOptions): void {
-  const { camera, size, gl } = useThree();
+  const { camera, size, gl, controls } = useThree();
   const canvasRectRef = useRef<DOMRect | null>(null);
   const lastHoverCheckRef = useRef<number>(0);
   const hoveredIndexRef = useRef<number | null>(null);
@@ -65,18 +61,30 @@ export function usePointHover({
 
       const rect = canvasRectRef.current || gl.domElement.getBoundingClientRect();
 
-      // Convert mouse position to NDC then to world coordinates
-      const ndc = hoverScratchVec.set(
-        ((event.clientX - rect.left) / rect.width) * 2 - 1,
-        -((event.clientY - rect.top) / rect.height) * 2 + 1,
-        0
-      );
-      ndc.unproject(camera); // Now in world coordinates
+      // Manual orthographic unproject (more reliable than Three.js unproject with native events)
+      // Three.js unproject() relies on camera matrices which may be stale outside R3F's render loop
+      const ortho = camera as THREE.OrthographicCamera;
+      const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const ndcY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      // For orthographic camera: visible width/height = frustum size / zoom
+      const visibleWidth = (ortho.right - ortho.left) / ortho.zoom;
+      const visibleHeight = (ortho.top - ortho.bottom) / ortho.zoom;
+
+      // Get the view center from OrbitControls target (not camera position)
+      // OrbitControls moves the target when panning, which determines the view center
+      const target = (controls as any)?.target;
+      const centerX = target?.x ?? ortho.position.x;
+      const centerY = target?.y ?? ortho.position.y;
+
+      // World position = view center + NDC * half visible size
+      const worldX = centerX + ndcX * (visibleWidth / 2);
+      const worldY = centerY + ndcY * (visibleHeight / 2);
 
       // Determine which grid cell the mouse is in
       const { cellSizeX, cellSizeY, minX, minY, cells } = spatialIndex;
-      const cellX = Math.floor((ndc.x - minX) / cellSizeX);
-      const cellY = Math.floor((ndc.y - minY) / cellSizeY);
+      const cellX = Math.floor((worldX - minX) / cellSizeX);
+      const cellY = Math.floor((worldY - minY) / cellSizeY);
 
       // Collect candidate indices from this cell and neighbors
       const candidateIndices: number[] = [];
@@ -98,20 +106,18 @@ export function usePointHover({
         // Skip invisible points
         if (!selectedClusterIds.has(pkg.clusterId)) continue;
 
-        // Calculate distance using coordinate conversion utility
-        const distance = getCanvasPointDistance(
-          hoverScratchVec.set(pkg.x, pkg.y, 0),
-          event.clientX,
-          event.clientY,
-          camera,
-          rect,
-          size
-        );
+        // Calculate world-space distance (avoids camera matrix issues)
+        const dx = pkg.x - worldX;
+        const dy = pkg.y - worldY;
+        const worldDistance = Math.sqrt(dx * dx + dy * dy);
 
-        // Check if within point radius (using actual point size)
-        const pointRadius = (baseSizes.get(pkg.id) || 16) / 2;
-        if (distance < pointRadius && distance < closestDistance) {
-          closestDistance = distance;
+        // Convert point radius from screen pixels to world units
+        // For orthographic: screen pixels * (world units per pixel)
+        const screenRadius = (baseSizes.get(pkg.id) || 16) / 2;
+        const worldRadius = screenRadius * visibleWidth / size.width;
+
+        if (worldDistance < worldRadius && worldDistance < closestDistance) {
+          closestDistance = worldDistance;
           closestIndex = idx;
         }
       }
@@ -124,7 +130,7 @@ export function usePointHover({
         setHoveredIndexAndRef(null);
       }
     },
-    [spatialIndex, packages, selectedClusterIds, baseSizes, setHoveredIndexAndRef, camera, size, gl]
+    [spatialIndex, packages, selectedClusterIds, baseSizes, setHoveredIndexAndRef, camera, size, gl, controls]
   );
 
   const handlePointerLeave = useCallback(() => {
