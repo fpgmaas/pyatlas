@@ -1,6 +1,5 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
-import type { ThreeEvent } from '@react-three/fiber';
 import { useFrame } from '@react-three/fiber';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import { getClusterColor } from '../utils/colorPalette';
@@ -119,21 +118,24 @@ export function PackagePoints() {
     prevSelectedIndex.current = selectedIndex !== -1 ? selectedIndex : null;
   }, [selectedPackageId, packages]);
 
-  // Hover detection logic (spatial index lookup, cursor management)
-  const { handlePointerMove, handlePointerOut } = usePointHover({
+  // Handle click on a point
+  const handleClickIndex = useCallback(
+    (index: number) => {
+      setSelectedPackageId(packages[index].id);
+    },
+    [packages, setSelectedPackageId]
+  );
+
+  // Hover detection logic (spatial index lookup, cursor management, click handling)
+  // Uses native canvas events to bypass R3F's expensive raycasting
+  usePointHover({
     packages,
     spatialIndex,
     selectedClusterIds,
     baseSizes,
     setHoveredIndex,
+    onClickIndex: handleClickIndex,
   });
-
-  const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    event.stopPropagation();
-    if (hoveredIndex !== null) {
-      setSelectedPackageId(packages[hoveredIndex].id);
-    }
-  };
 
   // Update time uniform for animation
   useFrame((state) => {
@@ -150,9 +152,6 @@ export function PackagePoints() {
       ref={pointsRef}
       geometry={geometry}
       material={material}
-      onPointerMove={handlePointerMove}
-      onPointerOut={handlePointerOut}
-      onClick={handleClick}
     />
   );
 }

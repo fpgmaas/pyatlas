@@ -28,7 +28,6 @@ export function PackageLabels() {
     const topPackages = sortByDownloads(visiblePackages, maxLabels);
 
     if (visiblePackageIds.size > maxLabels) {
-      console.log(`Rendering cap applied: ${visiblePackageIds.size} visible → ${topPackages.length} rendered (top by downloads)`);
     }
 
     return topPackages;
@@ -36,7 +35,6 @@ export function PackageLabels() {
 
   if (!shouldShowLabels) return null;
 
-  console.log('PackageLabels - Rendering', renderedPackages.length, 'of', visiblePackageIds.size, 'visible packages');
 
   return (
     <>

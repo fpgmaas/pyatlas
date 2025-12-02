@@ -45,7 +45,6 @@ export function SearchBar() {
   }, [query, fuse, setSearchQuery, setSearchResults]);
 
   const handleSelect = (pkg: Package) => {
-    console.log('[SearchBar] Package selected:', pkg.name, 'at position:', { x: pkg.x, y: pkg.y });
 
     // If the package's cluster is not selected, make it visible
     if (!selectedClusterIds.has(pkg.clusterId)) {
@@ -58,7 +57,6 @@ export function SearchBar() {
       y: pkg.y,
       zoom: CAMERA_ZOOM_LEVELS.PACKAGE
     };
-    console.log('[SearchBar] Requesting camera animation:', animationRequest);
     requestCameraAnimation(animationRequest);
 
     // Update selection state (for detail panel)

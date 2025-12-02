@@ -56,12 +56,9 @@ function CameraAnimationController() {
   useViewportBounds();
 
   useEffect(() => {
-    console.log('[CameraAnimationController] Animation request changed:', cameraAnimationRequest, 'controls:', !!controls);
 
     // Only process if we have both a request AND controls are ready
     if (cameraAnimationRequest && controls) {
-      console.log('[CameraAnimationController] Controls available, executing animation to:',
-        { x: cameraAnimationRequest.x, y: cameraAnimationRequest.y, zoom: cameraAnimationRequest.zoom });
 
       animateTo(
         cameraAnimationRequest.x,
@@ -69,7 +66,6 @@ function CameraAnimationController() {
         { zoom: cameraAnimationRequest.zoom }
       );
 
-      console.log('[CameraAnimationController] Clearing animation request');
       requestCameraAnimation(null); // Clear the request
     } else if (cameraAnimationRequest && !controls) {
       console.warn('[CameraAnimationController] Animation requested but controls not ready yet - will retry when controls become available');

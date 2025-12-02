@@ -14,8 +14,8 @@ export interface ViewportBounds {
 
 // Performance configuration
 const PERF_CONFIG = {
-  CLUSTER_UPDATE_INTERVAL: 200, // ms
-  LABEL_UPDATE_INTERVAL: 200,   // ms
+  CLUSTER_UPDATE_INTERVAL:500, // ms
+  LABEL_UPDATE_INTERVAL: 50,   // ms
   SPATIAL_THRESHOLD: 0.05,       // Minimum viewport change to trigger update
   PADDING_FACTOR: 0.1,          // 10% of viewport for padding
 };
@@ -158,18 +158,6 @@ export function useViewportBounds() {
 
       // Only update store if contents changed
       if (!setsEqual(visibleClusterIdsSet, lastVisibleClusterIds.current)) {
-        console.log('Viewport culling:', {
-          bounds: {
-            minX: currentBounds.minX.toFixed(2),
-            maxX: currentBounds.maxX.toFixed(2),
-            minY: currentBounds.minY.toFixed(2),
-            maxY: currentBounds.maxY.toFixed(2),
-          },
-          zoom: cam.zoom.toFixed(2),
-          padding: padding.toFixed(2),
-          totalClusters: clusters.length,
-          viewportClusters: visibleClusterIdsSet.size,
-        });
 
         lastVisibleClusterIds.current = visibleClusterIdsSet;
         setVisibleClusterIds(visibleClusterIdsSet);

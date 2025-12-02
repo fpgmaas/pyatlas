@@ -42,6 +42,7 @@ def generate_clusters():
     df.write_csv(clustered_dataset_path)
 
     logging.info(f"Generated {df['cluster_id'].n_unique()} clusters")
+    logging.info(f"Number of points not belonging to a cluster; {len(df.filter(pl.col('cluster_id') == "-1"))}")
     logging.info(f"Wrote clustered dataset to {clustered_dataset_path}")
 
 

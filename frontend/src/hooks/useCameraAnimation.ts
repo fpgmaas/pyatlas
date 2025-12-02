@@ -53,7 +53,6 @@ export function useCameraAnimation() {
     }
 
     if (t >= 1) {
-      console.log('[useCameraAnimation] Animation completed');
       targetPosition.current = null;
       targetZoom.current = null;
       progress.current = 0;
@@ -65,8 +64,6 @@ export function useCameraAnimation() {
     y: number,
     optionsOrZoom?: CameraAnimationOptions | number
   ) => {
-    console.log('[useCameraAnimation] animateTo called with:', { x, y, optionsOrZoom });
-    console.log('[useCameraAnimation] Controls available?', !!three.controls);
 
     // Support both old signature (number) and new signature (options object)
     const options = typeof optionsOrZoom === 'number'
@@ -75,7 +72,6 @@ export function useCameraAnimation() {
 
     const finalOptions = { ...DEFAULT_OPTIONS, ...options };
 
-    console.log('[useCameraAnimation] Final animation options:', finalOptions);
 
     if (!three.controls) {
       console.warn('[useCameraAnimation] No controls available, animation skipped');
@@ -92,11 +88,6 @@ export function useCameraAnimation() {
     easingFunction.current = finalOptions.easing;
     progress.current = 0;
 
-    console.log('[useCameraAnimation] Animation started:', {
-      from: { x: currentTarget.x, y: currentTarget.y, zoom: startZoom.current },
-      to: { x, y, zoom: finalOptions.zoom },
-      duration: finalOptions.duration
-    });
   }, [three]);
 
   return { animateTo };
