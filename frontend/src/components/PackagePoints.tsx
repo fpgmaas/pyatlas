@@ -1,11 +1,13 @@
 import { useRef, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import { getClusterColor } from '../utils/colorPalette';
 import { precomputeSizes } from '../utils/sizeScaling';
 import { createPointShaderMaterial } from '../shaders/pointShader';
-import { usePointHover } from '../hooks/usePointHover';
+
+const HOVER_THROTTLE_MS = 32;
+const CAMERA_MOVE_THRESHOLD = 0.001;
 
 export function PackagePoints() {
   const packages = useGalaxyStore((s) => s.packages);
@@ -14,10 +16,16 @@ export function PackagePoints() {
   const selectedPackageId = useGalaxyStore((s) => s.selectedPackageId);
   const setSelectedPackageId = useGalaxyStore((s) => s.setSelectedPackageId);
   const setHoveredIndex = useGalaxyStore((s) => s.setHoveredIndex);
-  const spatialIndex = useGalaxyStore((s) => s.spatialIndex);
+  const { camera, raycaster, size, controls } = useThree();
   const pointsRef = useRef<THREE.Points>(null);
   const prevHoveredIndex = useRef<number | null>(null);
   const prevSelectedIndex = useRef<number | null>(null);
+  const lastHoverTimeRef = useRef(0);
+
+  // Camera movement detection refs
+  const prevCameraTarget = useRef(new THREE.Vector3());
+  const prevCameraZoom = useRef(0);
+  const isCameraMovingRef = useRef(false);
 
   // Precompute positions, colors, sizes
   const { geometry, material, baseSizes } = useMemo(() => {
@@ -118,26 +126,63 @@ export function PackagePoints() {
     prevSelectedIndex.current = selectedIndex !== -1 ? selectedIndex : null;
   }, [selectedPackageId, packages]);
 
-  // Handle click on a point
-  const handleClickIndex = useCallback(
-    (index: number) => {
-      setSelectedPackageId(packages[index].id);
+  // R3F pointer event handlers - use event.index from raycaster
+  const handlePointerMove = useCallback(
+    (event: { index?: number }) => {
+      // Skip hover processing while camera is moving
+      if (isCameraMovingRef.current) return;
+
+      const now = performance.now();
+      if (now - lastHoverTimeRef.current < HOVER_THROTTLE_MS) return;
+      lastHoverTimeRef.current = now;
+
+      // R3F + Raycaster give you the vertex index on event.index
+      const idx = event.index;
+      if (idx == null || idx < 0 || idx >= packages.length) {
+        if (hoveredIndex !== null) setHoveredIndex(null);
+        return;
+      }
+
+      const pkg = packages[idx];
+
+      // Respect cluster visibility
+      if (!selectedClusterIds.has(pkg.clusterId)) {
+        if (hoveredIndex !== null) setHoveredIndex(null);
+        return;
+      }
+
+      if (hoveredIndex !== idx) {
+        setHoveredIndex(idx);
+      }
+
+      document.body.style.cursor = 'pointer';
     },
-    [packages, setSelectedPackageId]
+    [packages, selectedClusterIds, hoveredIndex, setHoveredIndex]
   );
 
-  // Hover detection logic (spatial index lookup, cursor management, click handling)
-  // Uses native canvas events to bypass R3F's expensive raycasting
-  usePointHover({
-    packages,
-    spatialIndex,
-    selectedClusterIds,
-    baseSizes,
-    setHoveredIndex,
-    onClickIndex: handleClickIndex,
-  });
+  const handlePointerOut = useCallback(() => {
+    if (hoveredIndex !== null) {
+      setHoveredIndex(null);
+      document.body.style.cursor = 'default';
+    }
+  }, [hoveredIndex, setHoveredIndex]);
 
-  // Update time uniform for animation
+  const handleClick = useCallback(
+    (event: { index?: number }) => {
+      const idx = event.index;
+      if (idx == null || idx < 0 || idx >= packages.length) return;
+
+      const pkg = packages[idx];
+
+      // Respect cluster visibility
+      if (!selectedClusterIds.has(pkg.clusterId)) return;
+
+      setSelectedPackageId(pkg.id);
+    },
+    [packages, selectedClusterIds, setSelectedPackageId]
+  );
+
+  // Update time uniform, raycaster threshold, and detect camera movement
   useFrame((state) => {
     if (!pointsRef.current) return;
 
@@ -145,6 +190,35 @@ export function PackagePoints() {
     if (mat.uniforms?.time) {
       mat.uniforms.time.value = state.clock.elapsedTime;
     }
+
+    // Update raycaster threshold based on camera zoom
+    // For orthographic camera, convert screen pixels to world units
+    const cam = camera as THREE.OrthographicCamera;
+    const visibleWidth = (cam.right - cam.left) / cam.zoom;
+    const worldUnitsPerPixel = visibleWidth / size.width;
+    // Use a reasonable point radius in pixels (e.g., 20px) converted to world units
+    raycaster.params.Points.threshold = 20 * worldUnitsPerPixel;
+
+    // Detect camera movement
+    const target = (controls as any)?.target;
+    const currentTarget = target ? new THREE.Vector3(target.x, target.y, target.z) : cam.position.clone();
+    const currentZoom = cam.zoom;
+
+    const dx = Math.abs(currentTarget.x - prevCameraTarget.current.x);
+    const dy = Math.abs(currentTarget.y - prevCameraTarget.current.y);
+    const dz = Math.abs(currentZoom - prevCameraZoom.current);
+
+    const isMoving = dx > CAMERA_MOVE_THRESHOLD || dy > CAMERA_MOVE_THRESHOLD || dz > CAMERA_MOVE_THRESHOLD;
+    isCameraMovingRef.current = isMoving;
+
+    // Clear hover when camera is moving
+    if (isMoving && hoveredIndex !== null) {
+      setHoveredIndex(null);
+      document.body.style.cursor = 'default';
+    }
+
+    prevCameraTarget.current.copy(currentTarget);
+    prevCameraZoom.current = currentZoom;
   });
 
   return (
@@ -152,6 +226,9 @@ export function PackagePoints() {
       ref={pointsRef}
       geometry={geometry}
       material={material}
+      onPointerMove={handlePointerMove}
+      onPointerOut={handlePointerOut}
+      onClick={handleClick}
     />
   );
 }

@@ -3,7 +3,6 @@ import { useRef } from 'react';
 import * as THREE from 'three';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import type { Package, Cluster } from '../types';
-import { queryVisiblePackagesFromGrid } from '../utils/spatialIndex';
 
 export interface ViewportBounds {
   minX: number;
@@ -92,6 +91,37 @@ function setsEqual<T>(a: Set<T>, b: Set<T>): boolean {
   return true;
 }
 
+// Helper: Compute visible packages within viewport bounds
+function computeVisiblePackages(
+  packages: Package[],
+  selectedClusterIds: Set<number>,
+  viewport: ViewportBounds,
+  padding: number
+): Set<number> {
+  const result = new Set<number>();
+  const viewMinX = viewport.minX - padding;
+  const viewMaxX = viewport.maxX + padding;
+  const viewMinY = viewport.minY - padding;
+  const viewMaxY = viewport.maxY + padding;
+
+  for (const pkg of packages) {
+    // Skip packages from hidden clusters
+    if (!selectedClusterIds.has(pkg.clusterId)) continue;
+
+    // Check if within viewport bounds
+    if (
+      pkg.x >= viewMinX &&
+      pkg.x <= viewMaxX &&
+      pkg.y >= viewMinY &&
+      pkg.y <= viewMaxY
+    ) {
+      result.add(pkg.id);
+    }
+  }
+
+  return result;
+}
+
 export function useViewportBounds() {
   const { camera, controls } = useThree();
   const {
@@ -99,7 +129,6 @@ export function useViewportBounds() {
     clusters,
     selectedClusterIds,
     shouldShowLabels,
-    spatialIndex,
     setViewportBounds,
     setVisiblePackageIds,
     setVisibleClusterIds,
@@ -164,8 +193,8 @@ export function useViewportBounds() {
       }
     }
 
-    // Step 2: Update labels less frequently (expensive operation) with 150ms throttle
-    if (shouldShowLabels && spatialIndex) {
+    // Step 2: Update labels less frequently (expensive operation) with throttle
+    if (shouldShowLabels) {
       const shouldUpdateLabels = bypassThrottle ||
         (now - lastLabelUpdateTime.current >= PERF_CONFIG.LABEL_UPDATE_INTERVAL && boundsChanged);
 
@@ -177,9 +206,8 @@ export function useViewportBounds() {
         const viewportHeight = currentBounds.maxY - currentBounds.minY;
         const padding = Math.max(0.1, Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.PADDING_FACTOR);
 
-        // Use spatial index for fast lookup
-        const visiblePackageIdsSet = queryVisiblePackagesFromGrid(
-          spatialIndex,
+        // Compute visible packages with simple bounds check
+        const visiblePackageIdsSet = computeVisiblePackages(
           packages,
           selectedClusterIds,
           currentBounds,
@@ -188,12 +216,6 @@ export function useViewportBounds() {
 
         // Only update store if contents changed
         if (!setsEqual(visiblePackageIdsSet, lastVisiblePackageIds.current)) {
-          console.log('Package culling (grid-based):', {
-            totalPackages: packages.length,
-            visiblePackages: visiblePackageIdsSet.size,
-            gridCells: spatialIndex.cells.size,
-          });
-
           lastVisiblePackageIds.current = visiblePackageIdsSet;
           setVisiblePackageIds(visiblePackageIdsSet);
         }
