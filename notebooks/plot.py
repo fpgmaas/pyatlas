@@ -52,6 +52,24 @@ def _(pl):
 
 
 @app.cell
+def _(pl):
+    pl.read_csv("data/clustered_dataset.csv").filter(pl.col('name')=='plotly')
+    return
+
+
+@app.cell
+def _(pl):
+    pl.read_csv("data/cluster_metadata.csv").filter(pl.col('cluster_id')==162)
+    return
+
+
+@app.cell
+def _(pl):
+    pl.read_csv("data/cluster_labels.csv").filter(pl.col('cluster_id')==162)
+    return
+
+
+@app.cell
 def _():
     return
 

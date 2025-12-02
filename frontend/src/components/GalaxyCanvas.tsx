@@ -101,7 +101,7 @@ export function GalaxyCanvas() {
           enablePan={true}
           enableZoom={true}
           minZoom={0.5}
-          maxZoom={40}
+          maxZoom={160}
           zoomSpeed={2.5}
           panSpeed={1}
           touches={{

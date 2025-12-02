@@ -19,16 +19,16 @@ def label_clusters():
     df = pl.read_csv(clustered_dataset_path)
 
     # Generate cluster metadata/labels
-    cluster_metadata = ClusterLabeler().generate_cluster_metadata(df)
+    cluster_labels = ClusterLabeler().generate_cluster_labels(df)
 
-    logging.info(f"Generated metadata for {len(cluster_metadata)} clusters")
-    logging.info(f"\n{cluster_metadata}")
+    logging.info(f"Generated metadata for {len(cluster_labels)} clusters")
+    logging.info(f"\n{cluster_labels}")
 
     # Write output
-    cluster_metadata_path = config.storage.data_folder / config.storage.cluster_metadata_csv
-    cluster_metadata.write_csv(cluster_metadata_path)
+    cluster_labels_path = config.storage.data_folder / config.storage.cluster_labels_csv
+    cluster_labels.write_csv(cluster_labels_path)
 
-    logging.info(f"Wrote cluster metadata to {cluster_metadata_path}")
+    logging.info(f"Wrote cluster labels to {cluster_labels_path}")
 
 
 if __name__ == "__main__":

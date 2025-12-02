@@ -48,13 +48,13 @@ class ClusterCoordinatesGenerator:
 
         umap_reducer = umap.UMAP(
             n_components=2,
-            n_neighbors= 20,
-            min_dist= 0.4,
-            repulsion_strength=0.5,
+            n_neighbors= 12,
+            min_dist= 0.6,
+            repulsion_strength=0.3,
             metric="euclidean",
             random_state=0,
-            target_weight=0.4,
-            spread=0.8,
+            target_weight=0.5,
+            spread=0.7,
         )
         coords = umap_reducer.fit_transform(normalized_embeddings, y=cluster_ids)
         return coords
