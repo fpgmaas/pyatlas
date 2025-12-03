@@ -10,10 +10,10 @@ import umap
 class ClusterIdGenerator:
     min_cluster_size: int = 8
     min_samples: int = 2
-    cluster_selection_method: str = "eom"
+    cluster_selection_method: str = "leaf"
 
     # values around 0.01 provided best results. Higher -> poor results; less clusters.
-    cluster_selection_epsilon: float = 0.0075
+    cluster_selection_epsilon: float = 0.0085
 
     def generate_cluster_ids(self, df: pl.DataFrame, embeddings_column: str):
         embeddings = np.asarray(df[embeddings_column].to_list(), dtype=np.float32)
@@ -26,6 +26,7 @@ class ClusterIdGenerator:
             metric="euclidean",
             cluster_selection_method=self.cluster_selection_method,
             cluster_selection_epsilon=self.cluster_selection_epsilon,
+            cluster_selection_persistence=0.1
         )
         labels = clusterer.fit_predict(norm_data)
         df = df.with_columns(cluster_id=pl.Series("cluster_id", labels)).with_columns(
