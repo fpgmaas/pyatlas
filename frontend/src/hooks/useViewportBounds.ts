@@ -200,6 +200,7 @@ export function useViewportBounds() {
 
       if (shouldUpdateLabels) {
         lastLabelUpdateTime.current = now;
+        lastBounds.current = currentBounds;
 
         // Calculate padding
         const viewportWidth = currentBounds.maxX - currentBounds.minX;

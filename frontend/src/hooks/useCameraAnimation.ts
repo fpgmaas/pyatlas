@@ -41,6 +41,8 @@ export function useCameraAnimation() {
     if (three.controls) {
       // @ts-expect-error - controls.target exists on OrbitControls
       three.controls.target.lerpVectors(startPosition.current, targetPosition.current, eased);
+      // @ts-expect-error - controls.update exists on OrbitControls
+      three.controls.update();
     }
 
     if (three.camera.type === 'OrthographicCamera') {
