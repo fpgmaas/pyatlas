@@ -14,6 +14,16 @@ import { useViewportBounds } from '../hooks/useViewportBounds';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import { CAMERA_ZOOM_LEVELS } from '../utils/cameraConstants';
 
+function ZoomDebug() {
+  const zoom = useGalaxyStore((s) => s.currentZoom);
+  if (!import.meta.env.DEV) return null;
+  return (
+    <div className="absolute top-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded z-50">
+      Zoom: {zoom.toFixed(2)}
+    </div>
+  );
+}
+
 function CameraSetup({ bounds }: { bounds: Bounds }) {
   const { camera, size } = useThree();
 
@@ -82,7 +92,8 @@ export function GalaxyCanvas() {
   if (!bounds) return null; // or loading skeleton
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
+      <ZoomDebug />
       <Canvas gl={{ alpha: false, antialias: false }} dpr={[1, 1.5]} >
         <color attach="background" args={['#0a0a0a']} />
 

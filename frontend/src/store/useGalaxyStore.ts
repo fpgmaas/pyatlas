@@ -21,6 +21,7 @@ interface GalaxyStore {
   viewportBounds: ViewportBounds | null;
   visiblePackageIds: Set<number>;
   shouldShowLabels: boolean;
+  labeledPackageIds: Set<number>;
   cameraAnimationRequest: CameraAnimationRequest | null;
   isSidebarOpen: boolean;
 
@@ -36,6 +37,7 @@ interface GalaxyStore {
   setCurrentZoom: (zoom: number) => void;
   setViewportBounds: (bounds: ViewportBounds) => void;
   setVisiblePackageIds: (ids: Set<number>) => void;
+  setLabeledPackageIds: (ids: Set<number>) => void;
   requestCameraAnimation: (request: CameraAnimationRequest | null) => void;
   setSidebarOpen: (isOpen: boolean) => void;
   toggleSidebar: () => void;
@@ -54,6 +56,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   viewportBounds: null,
   visiblePackageIds: new Set(),
   shouldShowLabels: false,
+  labeledPackageIds: new Set(),
   cameraAnimationRequest: null,
   isSidebarOpen: false,
 
@@ -77,9 +80,10 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   setHoveredIndex: (index) => set({ hoveredIndex: index }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSearchResults: (results) => set({ searchResults: results }),
-  setCurrentZoom: (zoom) => set({ currentZoom: zoom, shouldShowLabels: zoom >= 12 }),
+  setCurrentZoom: (zoom) => set({ currentZoom: zoom, shouldShowLabels: zoom >= 4 }),
   setViewportBounds: (bounds) => set({ viewportBounds: bounds }),
   setVisiblePackageIds: (ids) => set({ visiblePackageIds: ids }),
+  setLabeledPackageIds: (ids) => set({ labeledPackageIds: ids }),
   requestCameraAnimation: (request) => set({ cameraAnimationRequest: request }),
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
