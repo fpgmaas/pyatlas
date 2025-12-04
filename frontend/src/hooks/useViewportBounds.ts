@@ -13,9 +13,9 @@ export interface ViewportBounds {
 
 // Performance configuration
 const PERF_CONFIG = {
-  CLUSTER_UPDATE_INTERVAL:500, // ms
-  LABEL_UPDATE_INTERVAL: 50,   // ms
-  SPATIAL_THRESHOLD: 0.05,       // Minimum viewport change to trigger update
+  CLUSTER_UPDATE_INTERVAL: 500, // ms
+  LABEL_UPDATE_INTERVAL: 50,    // ms
+  SPATIAL_THRESHOLD: 0.05,      // 5% of viewport size as minimum change to trigger update
   PADDING_FACTOR: 0.1,          // 10% of viewport for padding
 };
 
@@ -148,7 +148,14 @@ export function useViewportBounds() {
 
     const now = performance.now();
     const currentBounds = computeBounds(cam, controls);
-    const boundsChanged = didBoundsChange(lastBounds.current, currentBounds, PERF_CONFIG.SPATIAL_THRESHOLD);
+
+    // Calculate dynamic threshold based on viewport size (5% of smallest dimension)
+    // This ensures updates trigger appropriately at all zoom levels
+    const viewportWidth = currentBounds.maxX - currentBounds.minX;
+    const viewportHeight = currentBounds.maxY - currentBounds.minY;
+    const dynamicThreshold = Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.SPATIAL_THRESHOLD;
+
+    const boundsChanged = didBoundsChange(lastBounds.current, currentBounds, dynamicThreshold);
 
     // Detect if label visibility just changed (especially false → true)
     const labelsJustEnabled = !prevShouldShowLabels.current && shouldShowLabels;
@@ -202,10 +209,11 @@ export function useViewportBounds() {
         lastLabelUpdateTime.current = now;
         lastBounds.current = currentBounds;
 
-        // Calculate padding
+        // Calculate padding - use relative padding only, no minimum floor
+        // (minimum floor of 0.1 was causing huge padding at high zoom levels)
         const viewportWidth = currentBounds.maxX - currentBounds.minX;
         const viewportHeight = currentBounds.maxY - currentBounds.minY;
-        const padding = Math.max(0.1, Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.PADDING_FACTOR);
+        const padding = Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.PADDING_FACTOR;
 
         // Compute visible packages with simple bounds check
         const visiblePackageIdsSet = computeVisiblePackages(

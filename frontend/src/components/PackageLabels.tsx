@@ -29,9 +29,6 @@ export function PackageLabels() {
 
     const topPackages = sortByDownloads(visiblePackages, maxLabels);
 
-    if (visiblePackageIds.size > maxLabels) {
-    }
-
     return topPackages;
   }, [visiblePackageIds, packages, maxLabels]);
 
