@@ -28,8 +28,12 @@ serve: ## Serve API with uvicorn in development mode
 	@uv run uvicorn pyatlas.api.main:app --reload
 
 .PHONY: frontend
-frontend: ## Serve frontend in development mode
+frontend: ## Serve frontend with local data
 	@cd frontend; npm run dev
+
+.PHONY: frontend-remote
+frontend-remote: ## Serve frontend with remote data
+	@cd frontend; npm run dev:remote
 
 .PHONY: help
 help:

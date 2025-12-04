@@ -1,11 +1,10 @@
 name: Main
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
 
 jobs:
   quality:
@@ -20,43 +19,56 @@ jobs:
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Set up the environment
-        uses: ./.github/actions/setup-uv-env
+        uses: ./.github/actions/setup-python-env
 
-      - name: Run checks
-        run: make check
+      - name: Run pre-commit
+        run: uv run pre-commit run -a --show-diff-on-failure
 
-  tox:
+      - name: Inspect dependencies
+        run: uv run deptry .
+
+      - name: Check lock file consistency
+        run: uv sync --locked
+
+  tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
       fail-fast: false
     steps:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Set up python
-        uses: actions/setup-python@v5
+      - name: Set up the environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install uv
-        uses: snok/install-uv@v1
+      - name: Run tests
+        run: uv run python -m pytest tests --cov --cov-config=pyproject.toml --cov-report=xml
 
-      - name: Load cached venv
-        uses: actions/cache@v4
-        with:
-          path: .tox
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
-
-      - name: Install tox
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install tox tox-gh-actions
-
-      - name: Test with tox
-        run: tox
-
-      - name: Upload coverage reports to Codecov with GitHub Action on Python 3.11
+      - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         if: ${{ matrix.python-version == '3.11' }}
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build:gh-pages
+        working-directory: frontend
