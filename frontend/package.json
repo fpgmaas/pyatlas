@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:remote": "VITE_DATA_BASE_URL=https://fpgmaas.github.io/pyatlas-data vite",
     "build": "tsc -b && vite build",
+    "build:gh-pages": "VITE_DATA_BASE_URL=https://fpgmaas.github.io/pyatlas-data tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

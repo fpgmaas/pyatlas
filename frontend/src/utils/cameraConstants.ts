@@ -6,7 +6,7 @@ export const CAMERA_ZOOM_LEVELS = {
   CLUSTER: 8,         // Viewing a cluster of related packages
   PACKAGE: 24,         // Focusing on a single package
   DETAIL: 12,         // Very close inspection (labels become visible)
-  MAX: 40,            // Maximum zoom (from OrbitControls config)
+  MAX: 160,           // Maximum zoom (from OrbitControls config)
   MIN: 0.5,           // Minimum zoom (from OrbitControls config)
 } as const;
 
