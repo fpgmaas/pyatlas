@@ -15,7 +15,7 @@ export function PackageLabels() {
 
   // Dynamic label count based on zoom level - fewer labels on mobile for performance
   const maxLabels = isMobile
-    ? (currentZoom < 7 ? 30 : currentZoom < 12 ? 50 : 70)
+    ? (currentZoom < 7 ? 25 : currentZoom < 12 ? 35 : currentZoom < 25 ? 40 : 60)
     : (currentZoom < 7 ? 50 : currentZoom < 12 ? 80 : 200);
 
   // Get top N most downloaded packages from all visible packages
