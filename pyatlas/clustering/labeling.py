@@ -43,6 +43,23 @@ class ClusterMetadataGenerator:
             })
             logger.info(f"Calculated metadata for cluster {cluster_id}")
 
+        # Handle noise cluster (-1) separately
+        if "-1" in df[self.cluster_id_column].unique().to_list():
+            centroid = self._calculate_centroid(df, "-1")
+            total_downloads = self._calculate_total_weekly_downloads(df, "-1")
+            bounds = self._calculate_bounds(df, "-1")
+            metadata_rows.append({
+                self.cluster_id_column: "-1",
+                "centroid_x": centroid[0],
+                "centroid_y": centroid[1],
+                "total_weekly_downloads": total_downloads,
+                "min_x": bounds["min_x"],
+                "max_x": bounds["max_x"],
+                "min_y": bounds["min_y"],
+                "max_y": bounds["max_y"],
+            })
+            logger.info("Calculated metadata for noise cluster (-1)")
+
         return pl.DataFrame(metadata_rows)
 
     def _get_unique_cluster_ids(self, df: pl.DataFrame) -> list[str]:
@@ -110,12 +127,15 @@ class ClusterLabeler:
         return pl.DataFrame(label_rows)
 
     def _get_unique_cluster_ids(self, df: pl.DataFrame) -> list[str]:
-        """Get sorted list of unique cluster IDs, excluding noise (-1)."""
+        """Get sorted list of unique cluster IDs."""
         cluster_ids = df[self.cluster_id_column].unique().to_list()
-        return sorted([cid for cid in cluster_ids if cid != "-1"])
+        return sorted(cluster_ids)
 
     def _generate_label_for_cluster(self, df: pl.DataFrame, cluster_id: str, client: OpenAI, model_name: str) -> str:
         """Generate a label for a single cluster."""
+        if cluster_id == "-1":
+            return "Not clustered"
+
         cluster_data = self._get_cluster_data(df, cluster_id)
         prompt = self._create_prompt(cluster_data)
 
