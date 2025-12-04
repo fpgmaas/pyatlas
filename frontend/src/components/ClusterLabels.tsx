@@ -1,10 +1,27 @@
 import { Html } from '@react-three/drei';
+import { useMemo } from 'react';
 import { useGalaxyStore } from '../store/useGalaxyStore';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export function ClusterLabels() {
   const clusters = useGalaxyStore((s) => s.clusters);
   const selectedClusterIds = useGalaxyStore((s) => s.selectedClusterIds);
   const toggleCluster = useGalaxyStore((s) => s.toggleCluster);
+  const currentZoom = useGalaxyStore((s) => s.currentZoom);
+  const isMobile = useIsMobile();
+
+  // On mobile, limit the number of visible labels based on zoom level
+  const maxLabels = isMobile
+    ? (currentZoom < 2 ? 30 : currentZoom < 3 ? 80 : Infinity)
+    : Infinity;
+
+  // Sort clusters by downloads and limit to maxLabels on mobile
+  const visibleClusters = useMemo(() => {
+    if (maxLabels === Infinity) return clusters;
+    return [...clusters]
+      .sort((a, b) => b.downloads - a.downloads)
+      .slice(0, maxLabels);
+  }, [clusters, maxLabels]);
 
   const handleClick = (clusterId: number) => (event: React.MouseEvent) => {
     event.preventDefault();
@@ -14,7 +31,7 @@ export function ClusterLabels() {
 
   return (
     <>
-      {clusters.map(cluster => {
+      {visibleClusters.map(cluster => {
         const isVisible = selectedClusterIds.has(cluster.clusterId);
         const opacity = isVisible ? 1.0 : 0.4;
 
