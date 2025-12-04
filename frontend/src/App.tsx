@@ -179,8 +179,11 @@ function App() {
       <main className="flex-1 h-full relative min-w-0" style={{ touchAction: 'none' }}>
         <GalaxyCanvas />
 
-        {/* Package Detail - Responsive positioning */}
-        <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 pointer-events-auto z-50">
+        {/* Package Detail - Responsive positioning with safe area support */}
+        <div
+          className="absolute left-4 right-4 sm:left-auto sm:right-6 pointer-events-auto z-50"
+          style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom) + 1rem))' }}
+        >
           <PackageDetail />
         </div>
       </main>
