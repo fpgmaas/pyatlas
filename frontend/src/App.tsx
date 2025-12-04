@@ -124,7 +124,7 @@ function App() {
   }, [setPackages, setClusters]);
 
   return (
-    <div className="h-screen w-full bg-black overflow-hidden flex">
+    <div className="w-full bg-black overflow-hidden flex" style={{ height: '100svh' }}>
       {/* Backdrop overlay - mobile only */}
       {isSidebarOpen && (
         <div
@@ -180,9 +180,11 @@ function App() {
         <GalaxyCanvas />
 
         {/* Package Detail - Responsive positioning with safe area support */}
+        {/* Hidden on mobile when sidebar is open to avoid overlap */}
         <div
-          className="absolute left-4 right-4 sm:left-auto sm:right-6 pointer-events-auto z-50"
-          style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom) + 1rem))' }}
+          className={`absolute left-4 right-4 sm:left-auto sm:right-6 bottom-4 pointer-events-auto z-50 ${
+            isSidebarOpen ? 'hidden lg:block' : ''
+          }`}
         >
           <PackageDetail />
         </div>
