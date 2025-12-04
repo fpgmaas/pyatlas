@@ -59,7 +59,7 @@ function CameraSetup({ bounds }: { bounds: Bounds }) {
 }
 
 function CameraAnimationController() {
-  const { controls } = useThree();
+  const { controls, camera } = useThree();
   const { animateTo } = useCameraAnimation();
   const { cameraAnimationRequest, requestCameraAnimation } = useGalaxyStore();
   useZoomTracker();
@@ -69,10 +69,20 @@ function CameraAnimationController() {
 
     // Only process if we have both a request AND controls are ready
     if (cameraAnimationRequest && controls) {
+      let targetY = cameraAnimationRequest.y;
+
+      // Apply Y offset to position package at specific screen percentage
+      if (cameraAnimationRequest.screenYPercent !== undefined) {
+        const cam = camera as THREE.OrthographicCamera;
+        const frustumHeight = cam.top - cam.bottom;
+        const visibleHeight = frustumHeight / cameraAnimationRequest.zoom;
+        const offsetPercent = cameraAnimationRequest.screenYPercent - 0.5;
+        targetY = cameraAnimationRequest.y - offsetPercent * visibleHeight;
+      }
 
       animateTo(
         cameraAnimationRequest.x,
-        cameraAnimationRequest.y,
+        targetY,
         { zoom: cameraAnimationRequest.zoom }
       );
 
@@ -81,7 +91,7 @@ function CameraAnimationController() {
       console.warn('[CameraAnimationController] Animation requested but controls not ready yet - will retry when controls become available');
       // Don't clear the request - it will be retried when controls becomes truthy
     }
-  }, [cameraAnimationRequest, animateTo, requestCameraAnimation, controls]);
+  }, [cameraAnimationRequest, animateTo, requestCameraAnimation, controls, camera]);
 
   return null;
 }

@@ -6,6 +6,7 @@ export interface CameraAnimationRequest {
   x: number;
   y: number;
   zoom: number;
+  screenYPercent?: number; // 0.5 = center, 0.75 = 75% from bottom
 }
 
 interface GalaxyStore {
