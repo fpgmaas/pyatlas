@@ -5,90 +5,90 @@ import { ClusterLegend } from './components/ClusterLegend';
 import { PackageDetail } from './components/PackageDetail';
 import { useGalaxyStore } from './store/useGalaxyStore';
 import { loadPackages, loadClusters } from './utils/dataLoader';
-import { MousePointer2, Mouse, ZoomIn, Menu, X, Tag } from 'lucide-react';
+import { useIsMobile } from './hooks/useIsMobile';
+import { MousePointer2, Move, ZoomIn, Menu, X, Tag } from 'lucide-react';
 
-function SidebarContent({ onClose }: { onClose?: () => void }) {
+function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile: boolean }) {
   return (
     <div className="flex flex-col h-full">
       {/* Header Section */}
-      <div className="px-8 pt-8 pb-6 border-b border-gray-700/50 relative">
+      <div className="px-4 pt-4 pb-3 lg:px-8 lg:pt-8 lg:pb-6 border-b border-gray-700/50 relative flex-shrink-0">
         {/* Close button - mobile only */}
         {onClose && (
           <button
-            className="absolute top-4 right-4 lg:hidden
+            className="absolute top-3 right-3 lg:hidden
                        text-gray-400 hover:text-white transition-colors
                        p-2 rounded-lg hover:bg-gray-800/50"
             onClick={onClose}
             aria-label="Close menu"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">PyAtlas</h1>
-        <p className="text-gray-400">Explore the top 10,000 packages on PyPI</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1 lg:mb-2 tracking-tight">PyAtlas</h1>
+        <p className="text-gray-400 text-sm lg:text-base">Explore the top 10,000 packages on PyPI</p>
       </div>
 
-      {/* Controls Section */}
-      <div className="px-8 py-4 border-b border-gray-700/30 bg-gray-800/30">
-        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-          Controls
-        </label>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-3 text-gray-300">
-            <ZoomIn className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span className="lg:hidden">Pinch to zoom</span>
-            <span className="hidden lg:inline">Scroll to zoom</span>
-          </div>
-          <div className="flex items-center gap-3 text-gray-300">
-            <Mouse className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span className="lg:hidden">Drag to pan</span>
-            <span className="hidden lg:inline">Right click + drag to pan</span>
-          </div>
-          <div className="flex items-center gap-3 text-gray-300">
-            <MousePointer2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span className="lg:hidden">Tap package for details</span>
-            <span className="hidden lg:inline">Click package for details</span>
-          </div>
-          <div className="flex items-center gap-3 text-gray-300">
-            <Tag className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span>Click cluster label to toggle</span>
+      {/* Controls Section - Hidden on mobile to save space */}
+      {!isMobile && (
+        <div className="px-8 py-4 border-b border-gray-700/30 bg-gray-800/30">
+          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+            Controls
+          </label>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-3 text-gray-300">
+              <ZoomIn className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <span>Scroll to zoom</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-300">
+              <Move className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <span>(Right) click + drag to pan</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-300">
+              <MousePointer2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <span>Click package for details</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-300">
+              <Tag className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <span>Click cluster label to toggle</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Search Section */}
-      <div className="px-8 py-6 border-b border-gray-700/30">
+      <div className="px-4 py-4 lg:px-8 lg:py-6 border-b border-gray-700/30">
         <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
           Search Packages
         </label>
         <SearchBar />
       </div>
 
-      {/* Clusters Section */}
-      <div className="flex-1 min-h-0 max-h-96 flex flex-col px-8 py-6">
-        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4 flex-shrink-0">
+      {/* Clusters Section - flex-1 takes remaining space, max-h only on desktop */}
+      <div className="flex-1 min-h-32 lg:max-h-96 flex flex-col px-4 py-4 lg:px-8 lg:py-6">
+        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3 lg:mb-4 flex-shrink-0">
           Package Clusters
         </label>
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
           <ClusterLegend />
         </div>
       </div>
 
       {/* Footer with GitHub link */}
-      <div className="mt-auto flex-shrink-0 px-8 py-4 border-t border-gray-700/50">
+      <div className="mt-auto flex-shrink-0 px-4 py-3 lg:px-8 lg:py-4 border-t border-gray-700/50">
         <a
           href="https://github.com/fpgmaas/pyatlas"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center px-3 py-2
+          className="inline-flex items-center px-3 py-1.5 lg:py-2
                      border border-gray-600 rounded-md
                      bg-gray-800 text-white text-sm
                      hover:bg-gray-700 hover:border-gray-500
                      transition-colors"
         >
           <svg
-            height="20"
-            width="20"
+            height="18"
+            width="18"
             viewBox="0 0 16 16"
             fill="currentColor"
             className="mr-2"
@@ -104,6 +104,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
 function App() {
   const { setPackages, setClusters, isSidebarOpen, setSidebarOpen, toggleSidebar } = useGalaxyStore();
+  const isMobile = useIsMobile(1024); // lg breakpoint
 
   useEffect(() => {
     // Load data on mount
@@ -160,7 +161,7 @@ function App() {
           lg:hidden
         `}
       >
-        <SidebarContent onClose={() => setSidebarOpen(false)} />
+        <SidebarContent onClose={() => setSidebarOpen(false)} isMobile={isMobile} />
       </aside>
 
       {/* Desktop sidebar - normal flex child */}
@@ -172,7 +173,7 @@ function App() {
           border-r border-gray-700/50 shadow-2xl
         "
       >
-        <SidebarContent />
+        <SidebarContent isMobile={isMobile} />
       </aside>
 
       {/* Main Canvas Area */}

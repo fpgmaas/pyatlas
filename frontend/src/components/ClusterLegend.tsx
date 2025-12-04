@@ -37,13 +37,13 @@ export function ClusterLegend() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 lg:space-y-3">
       {/* Show All / Hide All Toggle */}
       <button
         onClick={handleToggleAll}
         aria-label={allSelected ? 'Hide all clusters' : 'Show all clusters'}
         aria-pressed={allSelected}
-        className="w-full bg-gray-800/50 hover:bg-gray-800/70 rounded-lg px-4 py-3
+        className="w-full bg-gray-800/50 hover:bg-gray-800/70 rounded-lg px-3 py-2 lg:px-4 lg:py-3
           border border-gray-700/30 text-sm text-gray-300 font-medium
           transition-colors flex items-center gap-2
           focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -58,14 +58,14 @@ export function ClusterLegend() {
       </button>
 
       {/* Cluster List */}
-      <div className="space-y-1">
+      <div className="space-y-0.5 lg:space-y-1">
         {sortedClusters.map((cluster) => {
           const isSelected = selectedClusterIds.has(cluster.clusterId);
 
           return (
             <label
               key={cluster.clusterId}
-              className="flex items-center gap-3 py-2.5 px-3 rounded-md
+              className="flex items-center gap-2 lg:gap-3 py-1.5 lg:py-2.5 px-2 lg:px-3 rounded-md
                 hover:bg-gray-800/30 transition-colors cursor-pointer
                 focus-within:ring-2 focus-within:ring-blue-500/50"
             >
@@ -75,20 +75,20 @@ export function ClusterLegend() {
                 checked={isSelected}
                 onChange={() => toggleCluster(cluster.clusterId)}
                 aria-label={`Toggle ${cluster.label} cluster visibility`}
-                className="w-4 h-4 rounded border-gray-600 text-blue-500
+                className="w-3.5 h-3.5 lg:w-4 lg:h-4 rounded border-gray-600 text-blue-500
                   focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0
                   bg-gray-800/70 cursor-pointer"
               />
 
               {/* Color Indicator */}
               <div
-                className="w-3 h-3 rounded-full flex-shrink-0"
+                className="w-2.5 h-2.5 lg:w-3 lg:h-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: getClusterColor(cluster.clusterId) }}
                 aria-hidden="true"
               />
 
               {/* Cluster Label */}
-              <span className="text-sm text-gray-300 flex-1 truncate select-none">
+              <span className="text-xs lg:text-sm text-gray-300 flex-1 truncate select-none">
                 {cluster.label}
               </span>
             </label>
