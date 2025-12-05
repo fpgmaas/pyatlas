@@ -1,8 +1,6 @@
 # PyAtlas
 
-<p align="center">
-  <span style="font-size: 1.2em;">🗺️ Explore the map at <a href="https://pyatlas.io"><strong>pyatlas.io</strong></a></span>
-</p>
+<span style="font-size: 1.2em;">🗺️ Explore the map at <a href="https://pyatlas.io"><strong>pyatlas.io</strong></a></span>
 
 ## What does this do?
 
