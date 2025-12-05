@@ -3,28 +3,35 @@ import { GalaxyCanvas } from "./components/GalaxyCanvas";
 import { Sidebar } from "./components/Sidebar";
 import { PackageDetail } from "./components/PackageDetail";
 import { useGalaxyStore } from "./store/useGalaxyStore";
-import { loadPackages, loadClusters } from "./utils/dataLoader";
+import {
+  loadPackages,
+  loadClusters,
+  loadConstellations,
+} from "./utils/dataLoader";
 
 function App() {
-  const { setPackages, setClusters, isSidebarOpen } = useGalaxyStore();
+  const { setPackages, setClusters, setConstellations, isSidebarOpen } =
+    useGalaxyStore();
 
   useEffect(() => {
     // Load data on mount
     async function loadData() {
       try {
-        const [packages, clusters] = await Promise.all([
+        const [packages, clusters, constellations] = await Promise.all([
           loadPackages(),
           loadClusters(),
+          loadConstellations(),
         ]);
         setPackages(packages);
         setClusters(clusters);
+        setConstellations(constellations);
       } catch (error) {
         console.error("Failed to load data:", error);
       }
     }
 
     loadData();
-  }, [setPackages, setClusters]);
+  }, [setPackages, setClusters, setConstellations]);
 
   return (
     <div

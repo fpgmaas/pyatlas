@@ -19,3 +19,13 @@ export interface Cluster {
   minY: number;
   maxY: number;
 }
+
+export interface Constellation {
+  clusterId: string;
+  fromId: number;
+  toId: number;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+}

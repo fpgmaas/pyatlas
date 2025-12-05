@@ -32,8 +32,10 @@ class StorageConfig(BaseSettings):
     clustered_dataset_csv: str = "clustered_dataset.csv"
     cluster_metadata_csv: str = "cluster_metadata.csv"
     cluster_labels_csv: str = "cluster_labels.csv"
+    constellations_csv: str = "constellations.csv"
     packages_json: str = "packages.json"
     clusters_json: str = "clusters.json"
+    constellations_json: str = "constellations.json"
 
     model_config = SettingsConfigDict(env_file=(".env",), env_prefix="PYATLAS_STORAGE__", extra="ignore")
 

@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { useDataBounds } from "../hooks/useDataBounds";
 import type { Bounds } from "../utils/dataBounds";
 import { PackagePoints } from "./PackagePoints";
+import { Constellations } from "./Constellations";
 import { HoverLabel } from "./HoverLabel";
 import { PackageLabels } from "./PackageLabels";
 import { ClusterLabels } from "./ClusterLabels";
@@ -153,6 +154,7 @@ export function GalaxyCanvas() {
         <ambientLight intensity={0.8} />
 
         <CameraAnimationController />
+        <Constellations />
         <PackagePoints />
         <HoverLabel />
         <PackageLabels />

@@ -1,4 +1,4 @@
-import type { Package, Cluster } from "../types";
+import type { Package, Cluster, Constellation } from "../types";
 
 // Local: '/data' -> fetches '/data/packages.json'
 // Remote: 'https://fpgmaas.github.io/pyatlas-data' -> fetches from GitHub Pages
@@ -16,6 +16,14 @@ export async function loadClusters(): Promise<Cluster[]> {
   const response = await fetch(`${DATA_BASE_URL}/clusters.json`);
   if (!response.ok) {
     throw new Error("Failed to load clusters data");
+  }
+  return response.json();
+}
+
+export async function loadConstellations(): Promise<Constellation[]> {
+  const response = await fetch(`${DATA_BASE_URL}/constellations.json`);
+  if (!response.ok) {
+    throw new Error("Failed to load star signs data");
   }
   return response.json();
 }

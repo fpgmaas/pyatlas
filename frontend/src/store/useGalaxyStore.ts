@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Package, Cluster } from "../types";
+import type { Package, Cluster, Constellation } from "../types";
 import type { ViewportBounds } from "../hooks/useViewportBounds";
 
 export interface CameraAnimationRequest {
@@ -12,6 +12,7 @@ export interface CameraAnimationRequest {
 interface GalaxyStore {
   packages: Package[];
   clusters: Cluster[];
+  constellations: Constellation[];
   selectedClusterIds: Set<number>; // User-controlled: which clusters user wants to see
   visibleClusterIds: Set<number>; // Viewport-based: which clusters are in viewport
   selectedPackageId: number | null;
@@ -28,6 +29,7 @@ interface GalaxyStore {
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
+  setConstellations: (constellations: Constellation[]) => void;
   setVisibleClusterIds: (ids: Set<number>) => void;
   setSelectedClusterIds: (ids: Set<number>) => void;
   toggleCluster: (clusterId: number) => void;
@@ -47,6 +49,7 @@ interface GalaxyStore {
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
   packages: [],
   clusters: [],
+  constellations: [],
   selectedClusterIds: new Set(), // User-controlled cluster visibility
   visibleClusterIds: new Set(), // Viewport-based cluster culling
   selectedPackageId: null,
@@ -70,6 +73,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
       visibleClusterIds: clusterIds,
     });
   },
+  setConstellations: (constellations) => set({ constellations }),
   setVisibleClusterIds: (ids) => set({ visibleClusterIds: ids }),
   setSelectedClusterIds: (ids) => set({ selectedClusterIds: ids }),
   toggleCluster: (clusterId) =>
