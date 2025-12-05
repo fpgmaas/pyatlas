@@ -15,7 +15,7 @@ body {
 
 /* Custom scrollbar for dark theme */
 .custom-scrollbar {
-  scrollbar-width: thin;
+  scrollbar-width: auto;
   scrollbar-color: rgba(107, 114, 128, 0.5) transparent;
 }
 

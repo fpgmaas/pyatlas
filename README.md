@@ -1,6 +1,14 @@
 # PyAtlas
 
-👉 Explore the map at **[pyatlas.io](https://pyatlas.io)**
+<p align="center">
+  <a href="https://pyatlas.io">
+    <img src="public/screenshot.png" alt="Screenshot of PyAtlas" width="700">
+  </a>
+</p>
+
+<p align="center">
+  <strong>👉 <a href="https://pyatlas.io">Explore the map at pyatlas.io</a></strong>
+</p>
 
 ## What does this do?
 
