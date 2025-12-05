@@ -6,7 +6,7 @@
 
 ## What does this do?
 
-[PyAtlas](https://pyatlas.io) is an interactive map of the top 10,000 Python packages on [PyPI](https://pypi.org/). Packages with similar functionality are positioned close together, making it easy to discover alternatives or related tools. For example, if you want to find packages similar to `matplotlib`, you can locate it on the map and explore the packages clustered around it.
+[PyAtlas](https://pyatlas.io) is an interactive map of the top 10,000 Python packages on [PyPI](https://pypi.org/). Packages with similar functionality are positioned close together, making it easy to discover alternatives or related tools. It’s mainly just a fun tech demo and hobby project, but it can also be a handy way to discover useful packages. For example, if you want to find packages similar to `matplotlib`, you can locate it on the map and explore the packages clustered around it.
 
 ## How does this work?
 
