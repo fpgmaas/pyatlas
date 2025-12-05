@@ -19,15 +19,21 @@ const PERF_CONFIG = {
   PADDING_FACTOR: 0.1,          // 10% of viewport for padding
 };
 
+// Reusable vector for computing camera intersection (avoids allocation in render loop)
+const _direction = new THREE.Vector3();
+
 // Helper: Compute viewport bounds from orthographic camera
-function computeBounds(
-  cam: THREE.OrthographicCamera,
-  controls: any  // OrbitControls type
-): ViewportBounds {
-  // Use controls.target if available (when using OrbitControls)
-  // Fall back to camera.position for backward compatibility
-  const centerX = controls?.target?.x ?? cam.position.x;
-  const centerY = controls?.target?.y ?? cam.position.y;
+// Uses camera's actual view matrix to find where it intersects z=0 plane
+// This is more reliable than controls.target which may have timing issues
+function computeBounds(cam: THREE.OrthographicCamera): ViewportBounds {
+  // Get the direction the camera is looking
+  cam.getWorldDirection(_direction);
+
+  // For orthographic camera looking at z=0 plane, compute intersection point
+  // This gives us the actual center of what the camera is viewing
+  const t = -cam.position.z / _direction.z;
+  const centerX = cam.position.x + _direction.x * t;
+  const centerY = cam.position.y + _direction.y * t;
 
   return {
     minX: centerX + cam.left / cam.zoom,
@@ -123,7 +129,7 @@ function computeVisiblePackages(
 }
 
 export function useViewportBounds() {
-  const { camera, controls } = useThree();
+  const { camera } = useThree();
   const {
     packages,
     clusters,
@@ -147,7 +153,7 @@ export function useViewportBounds() {
     const cam = camera as THREE.OrthographicCamera;
 
     const now = performance.now();
-    const currentBounds = computeBounds(cam, controls);
+    const currentBounds = computeBounds(cam);
 
     // Calculate dynamic threshold based on viewport size (5% of smallest dimension)
     // This ensures updates trigger appropriately at all zoom levels
