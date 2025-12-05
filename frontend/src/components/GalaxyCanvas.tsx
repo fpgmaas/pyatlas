@@ -129,7 +129,7 @@ export function GalaxyCanvas() {
           enableZoom={true}
           minZoom={CAMERA_ZOOM_LEVELS.MIN}
           maxZoom={CAMERA_ZOOM_LEVELS.MAX}
-          zoomSpeed={2}
+          zoomSpeed={2.5}
           panSpeed={1}
           touches={{
             ONE: THREE.TOUCH.PAN,
