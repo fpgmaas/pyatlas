@@ -1,77 +1,36 @@
-# 🌎PyAtlas
+# PyAtlas
 
-<br/>
 <p align="center">
-  <img src="public/architecture.png" width="500">
+  <span style="font-size: 1.2em;">🗺️ Explore the map at <a href="https://pyatlas.io"><strong>pyatlas.io</strong></a></span>
 </p>
 
 ## What does this do?
 
-Finding the right Python package on [PyPI](https://pypi.org/) can be a bit difficult, since PyPI isn't really designed for discovering packages easily. For example, you can search for the word "plot" and get a list of hundreds of packages that contain the word "plot" in seemingly random order.
-
-Data is stored in https://github.com/fpgmaas/pyatlas-data
+[PyAtlas](https://pyatlas.io) is an interactive map of the top 10,000 Python packages on [PyPI](https://pypi.org/). Packages with similar functionality are positioned close together, making it easy to discover alternatives or related tools. For example, if you want to find packages similar to `matplotlib`, you can locate it on the map and explore the packages clustered around it.
 
 ## How does this work?
 
-The project works by collecting project summaries and descriptions for all packages on PyPI with more than 100 weekly downloads. These are then converted into vector representations using [Sentence Transformers](https://www.sbert.net/). When the user enters a query, it is converted into a vector representation, and the most similar package descriptions are fetched from the vector database. Additional weight is given to the amount of weekly downloads before presenting the results to the user in a dashboard.
+The project collects descriptions for the most popular packages on PyPI. These descriptions are converted into vector embeddings using [Sentence Transformers](https://www.sbert.net/). The high-dimensional embeddings are then reduced to 10 dimensions using [UMAP](https://umap-learn.readthedocs.io/), and packages are grouped into clusters using [HDBSCAN](https://hdbscan.readthedocs.io/). A second UMAP reduction creates the final 2D coordinates for visualization, using the cluster labels to keep similar packages together. Finally, cluster labels are generated using [OpenAI's](https://openai.com/) `gpt-5-mini` to describe each group.
+
+</br>
+<p align="center">
+  <img src="public/architecture.png" width="500">
+</p>
 
 ## Stack
 
 The project uses the following technologies:
 
-1. **[FastAPI](https://fastapi.tiangolo.com/)** for the API backend
-2. **[NextJS](https://nextjs.org/) and [TailwindCSS](https://tailwindcss.com/)** for the frontend
-3. **[Sentence Transformers](https://www.sbert.net/)** for vector embeddings
+1. **[React](https://react.dev/)** with **[Three.js](https://threejs.org/)** for the interactive visualization
+2. **[Sentence Transformers](https://www.sbert.net/)** for vector embeddings
+3. **[UMAP](https://umap-learn.readthedocs.io/)** for dimensionality reduction
+4. **[HDBSCAN](https://hdbscan.readthedocs.io/)** for clustering
+5. **[OpenAI](https://openai.com/)** for generating cluster labels
 
-## Getting Started
+## Development
 
-### Build and Setup
-
-#### 1. **Configure Environment**
-
-The project uses Azure Blob Storage for data storage. Create a `.env` file with your credentials:
-
-```sh
-cp .env.template .env
-```
-
-Fill in the required Azure Blob Storage credentials:
-
-- `PYATLAS_ENV`: Set to `dev` for development or `prod` for production
-- `PYATLAS_STORAGE__BLOB_ACCOUNT_NAME`: Your Azure storage account name
-- `PYATLAS_STORAGE__BLOB_CONTAINER_NAME`: Your blob container name
-- `PYATLAS_STORAGE__BLOB_ACCOUNT_KEY`: Your storage account key
-
-The application uses TOML config files (`config.dev.toml` and `config.prod.toml`) for environment-specific settings. In development, the API will cache blob files locally and skip re-downloading if they exist. In production, the API always downloads fresh data from blob storage on startup.
-
-#### 2. **Run the Setup Script**
-
-The setup script will:
-
-- Download and process the PyPI dataset and store the results in the `data` directory.
-- Create vector embeddings for the PyPI dataset.
-- Upload the processed datasets to Azure Blob Storage.
-
-There are three methods to run the setup script, dependent on if you have a NVIDIA GPU and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) installed. Please run the setup script using the method that is applicable for you:
-
-- [Option 1: Using uv](SETUP.md#option-1-using-uv)
-- [Option 2: Using Docker with NVIDIA GPU and NVIDIA Container Toolkit](SETUP.md#option-2-using-docker-with-nvidia-gpu-and-nvidia-container-toolkit)
-- [Option 3: Using Docker without NVIDIA GPU and NVIDIA Container Toolkit](SETUP.md#option-3-using-docker-without-nvidia-gpu-and-nvidia-container-toolkit)
-
-> [!NOTE]
-> The dataset contains approximately 100.000 packages on PyPI with more than 100 weekly downloads. To speed up local development,
-> you can lower the amount of packages that is processed locally by lowering the value of `frac_data_to_include` in `config.dev.toml`.
-
-#### 3. **Run the Application**
-
-Start the application using Docker Compose:
-
-```sh
-docker-compose up
-```
-
-After a short while, your application will be live at [http://localhost:3000](http://localhost:3000).
+See [development.md](./DEVELOPMENT.md)
 
 ## Data
 
-The dataset for this project is created using the [PyPI dataset on Google BigQuery](https://console.cloud.google.com/marketplace/product/gcp-public-data-pypi/pypi?project=regal-net-412415). The SQL query used can be found in [pypi_bigquery.sql](./pypi_bigquery.sql). The resulting dataset is available as a CSV file on [Google Drive](https://drive.google.com/file/d/1huR7-VD3AieBRCcQyRX9MWbPLMb_czjq/view?usp=sharing).
+The dataset for this project is created using the [PyPI dataset on Google BigQuery](https://console.cloud.google.com/marketplace/product/gcp-public-data-pypi/pypi). The SQL query used can be found in [pypi_bigquery.sql](./pypi_bigquery.sql).

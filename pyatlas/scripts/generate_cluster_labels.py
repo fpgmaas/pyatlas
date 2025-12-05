@@ -8,7 +8,7 @@ from pyatlas.config import Config
 from pyatlas.utils.logging import setup_logging
 
 
-def calculate_cluster_labels():
+def generate_cluster_labels():
     setup_logging()
     load_dotenv()
 
@@ -33,4 +33,4 @@ def calculate_cluster_labels():
 
 if __name__ == "__main__":
     setup_logging()
-    calculate_cluster_labels()
+    generate_cluster_labels()
