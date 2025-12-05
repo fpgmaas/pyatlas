@@ -234,6 +234,11 @@ export function PackagePoints() {
       : cam.position.clone();
     const currentZoom = cam.zoom;
 
+    // Update zoom uniform for point scaling
+    if (mat.uniforms?.zoom) {
+      mat.uniforms.zoom.value = currentZoom;
+    }
+
     const dx = Math.abs(currentTarget.x - prevCameraTarget.current.x);
     const dy = Math.abs(currentTarget.y - prevCameraTarget.current.y);
     const dz = Math.abs(currentZoom - prevCameraZoom.current);

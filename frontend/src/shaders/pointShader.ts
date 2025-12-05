@@ -7,6 +7,7 @@ attribute float hovered;
 attribute float selected;
 uniform float time;
 uniform float density;
+uniform float zoom;
 varying vec3 vColor;
 varying float vHovered;
 varying float vSelected;
@@ -23,13 +24,19 @@ void main() {
   vDensity = density;
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
 
+  // Scale point size with zoom - use sqrt for subtle scaling
+  // At zoom 1: scale = 1.0, at zoom 25: scale ~= 1.8
+  float zoomScale = 0.8 + 0.2 * sqrt(zoom);
+  // Less aggressive scaling for hover/selected effects
+  float effectZoomScale = 0.9 + 0.1 * sqrt(zoom);
+
   // Point size with space for soft glow
-  float pointSize = size * 1.8;
+  float pointSize = size * 1.8 * zoomScale;
 
   if (selected > 0.5) {
-    pointSize = size * 2.5; // Extra space for selection glow
+    pointSize = size * 2.0 * effectZoomScale; // Extra space for selection glow
   } else if (hovered > 0.5) {
-    pointSize = size * 2.2; // Extra space for hover glow
+    pointSize = size * 1.8 * effectZoomScale; // Extra space for hover glow
   }
 
   gl_PointSize = pointSize;
@@ -156,6 +163,7 @@ export function createPointShaderMaterial(): THREE.ShaderMaterial {
     uniforms: {
       time: { value: 0.0 },
       density: { value: 0.0 }, // Normalized visible packages / canvas area
+      zoom: { value: 1.0 }, // Camera zoom level for point scaling
     },
   });
 }

@@ -14,19 +14,18 @@ export function PackageLabels() {
   const isMobile = useIsMobile();
 
   // Dynamic label count based on zoom level - fewer labels on mobile for performance
-  const maxLabels = isMobile
-    ? currentZoom < 7
-      ? 25
-      : currentZoom < 12
-      ? 35
-      : currentZoom < 25
-      ? 40
-      : 60
-    : currentZoom < 7
-    ? 50
-    : currentZoom < 20
-    ? 80
-    : 200;
+  function getMaxLabels(isMobile: boolean, currentZoom: number): number {
+    if (isMobile) {
+      return 25;
+    }
+
+    // desktop
+    if (currentZoom < 7) return 20;
+    if (currentZoom < 20) return 30;
+    return 50;
+  }
+
+  const maxLabels = getMaxLabels(isMobile, currentZoom);
 
   // Get top N most downloaded packages from all visible packages
   const renderedPackages = useMemo(() => {
