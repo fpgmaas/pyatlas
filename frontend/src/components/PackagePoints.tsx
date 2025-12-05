@@ -5,6 +5,7 @@ import { useGalaxyStore } from "../store/useGalaxyStore";
 import { getClusterColor } from "../utils/colorPalette";
 import { precomputeSizes } from "../utils/sizeScaling";
 import { createPointShaderMaterial } from "../shaders/pointShader";
+import { computeBounds } from "../utils/dataBounds";
 
 const HOVER_THROTTLE_MS = 32;
 const CAMERA_MOVE_THRESHOLD = 0.001;
@@ -26,6 +27,9 @@ export function PackagePoints() {
   const prevCameraTarget = useRef(new THREE.Vector3());
   const prevCameraZoom = useRef(0);
   const isCameraMovingRef = useRef(false);
+
+  // Compute total data bounds for density calculation
+  const dataBounds = useMemo(() => computeBounds(packages), [packages]);
 
   // Precompute positions, colors, sizes
   const { geometry, material, baseSizes } = useMemo(() => {
@@ -187,7 +191,7 @@ export function PackagePoints() {
     [packages, selectedClusterIds, setSelectedPackageId],
   );
 
-  // Update time uniform, raycaster threshold, and detect camera movement
+  // Update time uniform, raycaster threshold, density, and detect camera movement
   useFrame((state) => {
     if (!pointsRef.current) return;
 
@@ -200,9 +204,28 @@ export function PackagePoints() {
     // For orthographic camera, convert screen pixels to world units
     const cam = camera as THREE.OrthographicCamera;
     const visibleWidth = (cam.right - cam.left) / cam.zoom;
+    const visibleHeight = (cam.top - cam.bottom) / cam.zoom;
     const worldUnitsPerPixel = visibleWidth / size.width;
     // Use a reasonable point radius in pixels (e.g., 20px) converted to world units
     raycaster.params.Points.threshold = 20 * worldUnitsPerPixel;
+
+    // Calculate density based on viewport coverage of total data
+    // When zoomed out (seeing whole map): high density -> dim halos
+    // When zoomed in (seeing small portion): low density -> bright halos
+    const viewportArea = visibleWidth * visibleHeight;
+    const totalDataArea = dataBounds
+      ? dataBounds.width * dataBounds.height
+      : viewportArea;
+
+    // Coverage ratio: 1.0 = seeing entire map, 0.0 = zoomed in on tiny area
+    const coverageRatio = Math.min(1.0, viewportArea / totalDataArea);
+
+    // Use sqrt for smoother transition - brightness increases faster as you zoom in
+    const normalizedDensity = Math.sqrt(coverageRatio);
+
+    if (mat.uniforms?.density) {
+      mat.uniforms.density.value = normalizedDensity;
+    }
 
     // Detect camera movement
     const target = (controls as any)?.target;

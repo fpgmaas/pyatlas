@@ -24,7 +24,7 @@ export function PackageLabels() {
       : 60
     : currentZoom < 7
     ? 50
-    : currentZoom < 12
+    : currentZoom < 20
     ? 80
     : 200;
 

@@ -6,24 +6,30 @@ attribute vec3 color;
 attribute float hovered;
 attribute float selected;
 uniform float time;
+uniform float density;
 varying vec3 vColor;
 varying float vHovered;
 varying float vSelected;
 varying float vTime;
+varying float vSize;
+varying float vDensity;
 
 void main() {
   vColor = color;
   vHovered = hovered;
   vSelected = selected;
   vTime = time;
+  vSize = size;
+  vDensity = density;
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
 
-  // Increase point size for selected or hovered points to accommodate glow
-  float pointSize = size;
+  // Point size with space for soft glow
+  float pointSize = size * 1.8;
+
   if (selected > 0.5) {
-    pointSize = size * 2.0; // Double the size for selection glow
+    pointSize = size * 2.5; // Extra space for selection glow
   } else if (hovered > 0.5) {
-    pointSize = size * 1.3; // Slightly larger for hover glow
+    pointSize = size * 2.2; // Extra space for hover glow
   }
 
   gl_PointSize = pointSize;
@@ -36,89 +42,107 @@ varying vec3 vColor;
 varying float vHovered;
 varying float vSelected;
 varying float vTime;
+varying float vSize;
+varying float vDensity;
 
 void main() {
   vec2 center = gl_PointCoord - vec2(0.5, 0.5);
   float dist = length(center);
 
-  // For selected points, we've doubled the point size
-  // So the main point circle is at radius 0.25, and we have space up to 0.5 for glow
-  if (vSelected > 0.5) {
-    // Discard beyond radius 0.5
-    if (dist > 0.5) {
-      discard;
-    }
-
-    // Animation parameters
-    float pulseSpeed = 2.0;
-    float pulseAmount = 0.1;
-    float pulse = 1.0 + pulseAmount * sin(vTime * pulseSpeed);
-
-    // Start with transparent
-    vec4 finalColor = vec4(0.0, 0.0, 0.0, 0.0);
-
-    // Render selection glow between radius 0.25 and 0.35 (smaller, more subtle glow)
-    if (dist > 0.25 && dist <= 0.35) {
-      float glowDist = dist - 0.25;
-      float maxGlowRadius = 0.1 * pulse;
-
-      // Keep glow brighter - less aggressive falloff
-      float glowAlpha = 1.0 - smoothstep(0.0, maxGlowRadius, glowDist);
-      glowAlpha *= 0.8 + 0.2 * sin(vTime * pulseSpeed); // Higher base opacity (0.8)
-      // Don't square - keeps it brighter
-      glowAlpha = glowAlpha * 0.9; // Scale to 90% max
-
-      finalColor = vec4(1.0, 1.0, 1.0, glowAlpha);
-    }
-
-    // Hover glow on top of selection glow (if both are active)
-    if (vHovered > 0.5 && dist > 0.25 && dist <= 0.32) {
-      float glowDist = dist - 0.25;
-      float maxGlowRadius = 0.07;
-
-      float hoverAlpha = 1.0 - smoothstep(0.0, maxGlowRadius, glowDist);
-      hoverAlpha = hoverAlpha * 0.7; // Static at 70% max
-
-      // Blend with existing color
-      finalColor.rgb = mix(finalColor.rgb, vec3(1.0, 1.0, 1.0), hoverAlpha);
-      finalColor.a = max(finalColor.a, hoverAlpha);
-    }
-
-    // Main point at radius 0.25 (renders on top)
-    if (dist <= 0.25) {
-      finalColor = vec4(vColor, 0.5);
-    }
-
-    gl_FragColor = finalColor;
-  } else {
-    // Normal (non-selected) points
-    // For hovered points, we've scaled to 1.3x, so point is at radius ~0.385
-    float pointRadius = vHovered > 0.5 ? 0.385 : 0.5;
-
-    if (dist > 0.5) {
-      discard;
-    }
-
-    vec4 finalColor = vec4(vColor, 0.5);
-
-    // Hover glow for normal points - static glowing ring
-    if (vHovered > 0.5 && dist > pointRadius && dist <= 0.5) {
-      float glowDist = dist - pointRadius;
-      float maxGlowRadius = 0.115; // 0.5 - 0.385
-
-      float hoverAlpha = 1.0 - smoothstep(0.0, maxGlowRadius, glowDist);
-      hoverAlpha = hoverAlpha * 0.7; // Static at 70% max
-
-      finalColor = vec4(1.0, 1.0, 1.0, hoverAlpha);
-    }
-
-    // Main point
-    if (dist <= pointRadius) {
-      finalColor = vec4(vColor, 0.5);
-    }
-
-    gl_FragColor = finalColor;
+  // Discard beyond radius 0.5
+  if (dist > 0.5) {
+    discard;
   }
+
+  // === Adaptive brightness based on density ===
+  // Very aggressive dimming when zoomed out (high density)
+  // density 0.0 = zoomed in (few visible) -> full brightness
+  // density 1.0 = zoomed out (many visible) -> very dim
+  float densityFactor = smoothstep(0.0, 0.8, vDensity); // Start brightening earlier
+  float haloBrightness = mix(1.0, 0.05, densityFactor); // Dramatically reduce when dense
+  float coreBrightness = mix(1.0, 0.3, densityFactor);  // Core stays more visible
+
+  // === Star geometry ===
+  // Natural star: bright core with exponential falloff
+  float coreRadius = 0.15;
+
+  // === Halo intensity scales with package popularity ===
+  float sizeNormalized = clamp((vSize - 12.0) / 68.0, 0.0, 1.0);
+  float haloStrength = 0.2 + sizeNormalized * 0.6;
+
+  // === Natural star glow using exponential falloff ===
+  // This creates the soft, natural star appearance
+  float normalizedDist = dist / 0.5;
+  float starGlow = exp(-normalizedDist * 5.0) * haloStrength * haloBrightness;
+
+  // Brighter core with smooth falloff
+  float coreGlow = 0.0;
+  if (dist < coreRadius) {
+    coreGlow = 1.0 - (dist / coreRadius);
+    coreGlow = pow(coreGlow, 0.5); // Sqrt for softer center gradient
+  }
+
+  // Combine core and halo
+  vec3 starColor = vColor;
+  float alpha = starGlow + coreGlow * coreBrightness * 0.8;
+
+  // Mix towards white in the bright center
+  float whiteMix = coreGlow * 0.4;
+  starColor = mix(starColor, vec3(1.0), whiteMix);
+
+  vec4 finalColor = vec4(starColor, alpha);
+
+  // === Selection effect (pulsating star with expanding rings) ===
+  if (vSelected > 0.5) {
+    // Core pulsation
+    float pulse = 0.85 + 0.15 * sin(vTime * 2.5);
+
+    // Pulsating bright core
+    float core = exp(-dist * 18.0) * pulse;
+
+    // Soft glow that pulses
+    float glow = exp(-dist * 8.0) * 0.3 * pulse;
+
+    // Expanding rings - create 2 rings that travel outward
+    float ringSpeed = 0.2;
+    float ringWidth = 0.03;
+
+    // Ring 1 - primary ring
+    float ring1Phase = fract(vTime * ringSpeed);
+    float ring1Radius = ring1Phase * 0.5; // Expand from center to edge
+    float ring1Dist = abs(dist - ring1Radius);
+    float ring1 = smoothstep(ringWidth, 0.0, ring1Dist);
+    ring1 *= (1.0 - ring1Phase); // Fade out as it expands
+    ring1 *= smoothstep(0.0, 0.1, ring1Phase); // Fade in at start
+
+    // Ring 2 - offset by half cycle
+    float ring2Phase = fract(vTime * ringSpeed + 0.5);
+    float ring2Radius = ring2Phase * 0.5;
+    float ring2Dist = abs(dist - ring2Radius);
+    float ring2 = smoothstep(ringWidth, 0.0, ring2Dist);
+    ring2 *= (1.0 - ring2Phase);
+    ring2 *= smoothstep(0.0, 0.1, ring2Phase);
+
+    float rings = (ring1 + ring2) * 0.4;
+
+    // Combine all elements
+    float starEffect = core * 0.6 + glow + rings;
+
+    // Apply with slight color tint (warm white)
+    vec3 starColor = vec3(1.0, 0.98, 0.95);
+    finalColor.rgb = mix(finalColor.rgb, starColor, starEffect);
+    finalColor.a = max(finalColor.a, starEffect * 0.8);
+  }
+
+  // === Hover effect (subtle brightening, no ring) ===
+  if (vHovered > 0.5) {
+    // Just brighten the whole star slightly
+    float hoverBoost = exp(-normalizedDist * 2.5) * 0.4;
+    finalColor.rgb = mix(finalColor.rgb, vec3(1.0), hoverBoost);
+    finalColor.a = max(finalColor.a, finalColor.a + hoverBoost * 0.3);
+  }
+
+  gl_FragColor = finalColor;
 }
 `;
 
@@ -128,9 +152,10 @@ export function createPointShaderMaterial(): THREE.ShaderMaterial {
     fragmentShader,
     transparent: true,
     depthWrite: false,
-    blending: THREE.NormalBlending,
+    blending: THREE.NormalBlending, // Normal blending to prevent brightness accumulation
     uniforms: {
       time: { value: 0.0 },
+      density: { value: 0.0 }, // Normalized visible packages / canvas area
     },
   });
 }
