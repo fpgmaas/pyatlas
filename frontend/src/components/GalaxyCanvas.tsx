@@ -10,6 +10,7 @@ import { PackageLabels } from './PackageLabels';
 import { ClusterLabels } from './ClusterLabels';
 import { useCameraAnimation } from '../hooks/useCameraAnimation';
 import { useZoomTracker } from '../hooks/useZoomTracker';
+import { useNormalizedZoom } from '../hooks/useNormalizedZoom';
 import { useViewportBounds } from '../hooks/useViewportBounds';
 import { useGalaxyStore } from '../store/useGalaxyStore';
 import { CAMERA_ZOOM_LEVELS } from '../utils/cameraConstants';
@@ -55,6 +56,11 @@ function CameraSetup({ bounds }: { bounds: Bounds }) {
     updateCamera();
   }, [camera, size, bounds]);
 
+  return null;
+}
+
+function NormalizedZoomController() {
+  useNormalizedZoom();
   return null;
 }
 
@@ -123,7 +129,7 @@ export function GalaxyCanvas() {
           enableZoom={true}
           minZoom={CAMERA_ZOOM_LEVELS.MIN}
           maxZoom={CAMERA_ZOOM_LEVELS.MAX}
-          zoomSpeed={2.5}
+          zoomSpeed={2}
           panSpeed={1}
           touches={{
             ONE: THREE.TOUCH.PAN,
@@ -136,6 +142,8 @@ export function GalaxyCanvas() {
             RIGHT: THREE.MOUSE.PAN
           }}
         />
+
+        <NormalizedZoomController />
 
         <ambientLight intensity={0.8} />
 
