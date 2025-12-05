@@ -23,35 +23,39 @@ def generate_json_outputs():
     df_clusters = pl.read_csv(cluster_metadata_path)
     df_cluster_labels = pl.read_csv(cluster_labels_path)
 
-    df_clusters = df_cluster_labels.join(df_clusters, on="cluster_id",how="outer")
+    df_clusters = df_cluster_labels.join(df_clusters, on="cluster_id", how="outer")
 
     # Generate packages.json
     packages = []
     for idx, row in enumerate(df_packages.iter_rows(named=True)):
-        packages.append({
-            "id": idx,
-            "name": row["name"],
-            "summary": row["summary"],
-            "downloads": row["weekly_downloads"],
-            "x": row["x"],
-            "y": row["y"],
-            "clusterId": row["cluster_id"],
-        })
+        packages.append(
+            {
+                "id": idx,
+                "name": row["name"],
+                "summary": row["summary"],
+                "downloads": row["weekly_downloads"],
+                "x": row["x"],
+                "y": row["y"],
+                "clusterId": row["cluster_id"],
+            }
+        )
 
     # Generate clusters.json
     clusters = []
     for row in df_clusters.iter_rows(named=True):
-        clusters.append({
-            "clusterId": row["cluster_id"],
-            "label": row["cluster_label"],
-            "centroidX": row["centroid_x"],
-            "centroidY": row["centroid_y"],
-            "downloads": row["total_weekly_downloads"],
-            "minX": row["min_x"],
-            "maxX": row["max_x"],
-            "minY": row["min_y"],
-            "maxY": row["max_y"],
-        })
+        clusters.append(
+            {
+                "clusterId": row["cluster_id"],
+                "label": row["cluster_label"],
+                "centroidX": row["centroid_x"],
+                "centroidY": row["centroid_y"],
+                "downloads": row["total_weekly_downloads"],
+                "minX": row["min_x"],
+                "maxX": row["max_x"],
+                "minY": row["min_y"],
+                "maxY": row["max_y"],
+            }
+        )
 
     # Write output files
     packages_json_path = config.storage.data_folder / config.storage.packages_json

@@ -6,13 +6,10 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
-    import numpy as np
-    import polars as pl
-    import plotly.express as px
-    from sklearn.decomposition import IncrementalPCA, PCA
-    import marimo as mo
-    from dotenv import load_dotenv
     import random
+
+    import polars as pl
+    from dotenv import load_dotenv
 
     random.seed(1234)
 
@@ -39,7 +36,7 @@ def _(pl):
     df2 = pl.read_csv("data/clustered_dataset.csv")
     df_cluster_labels = pl.read_csv("data/cluster_labels.csv")
     df_cluster_metadata = pl.read_csv("data/cluster_metadata.csv")
-    df_clusters = df_cluster_labels.join(df_cluster_metadata, on="cluster_id",how="outer")
+    df_clusters = df_cluster_labels.join(df_cluster_metadata, on="cluster_id", how="outer")
 
     # df2 = df2.filter(pl.col("cluster_id")==22)
     # df_clusters = df_clusters.filter(pl.col("cluster_id")==22)
@@ -53,19 +50,19 @@ def _(pl):
 
 @app.cell
 def _(pl):
-    pl.read_csv("data/clustered_dataset.csv").filter(pl.col('name')=='plotly')
+    pl.read_csv("data/clustered_dataset.csv").filter(pl.col("name") == "plotly")
     return
 
 
 @app.cell
 def _(pl):
-    pl.read_csv("data/cluster_metadata.csv").filter(pl.col('cluster_id')==162)
+    pl.read_csv("data/cluster_metadata.csv").filter(pl.col("cluster_id") == 162)
     return
 
 
 @app.cell
 def _(pl):
-    pl.read_csv("data/cluster_labels.csv").filter(pl.col('cluster_id')==162)
+    pl.read_csv("data/cluster_labels.csv").filter(pl.col("cluster_id") == 162)
     return
 
 

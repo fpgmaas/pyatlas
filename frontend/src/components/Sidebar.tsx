@@ -1,10 +1,16 @@
-import { SearchBar } from './SearchBar';
-import { ClusterLegend } from './ClusterLegend';
-import { useGalaxyStore } from '../store/useGalaxyStore';
-import { useIsMobile } from '../hooks/useIsMobile';
-import { MousePointer2, Move, ZoomIn, Menu, X, Tag } from 'lucide-react';
+import { SearchBar } from "./SearchBar";
+import { ClusterLegend } from "./ClusterLegend";
+import { useGalaxyStore } from "../store/useGalaxyStore";
+import { useIsMobile } from "../hooks/useIsMobile";
+import { MousePointer2, Move, ZoomIn, Menu, X, Tag } from "lucide-react";
 
-function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile: boolean }) {
+function SidebarContent({
+  onClose,
+  isMobile,
+}: {
+  onClose?: () => void;
+  isMobile: boolean;
+}) {
   return (
     <div className="flex flex-col h-full">
       {/* Header Section */}
@@ -21,8 +27,12 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
             <X className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1 lg:mb-2 tracking-tight">PyAtlas</h1>
-        <p className="text-gray-400 text-sm lg:text-base">Explore the top 10,000 packages on PyPI</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1 lg:mb-2 tracking-tight">
+          PyAtlas
+        </h1>
+        <p className="text-gray-400 text-sm lg:text-base">
+          Explore the top 10,000 packages on PyPI
+        </p>
       </div>
 
       {/* Controls Section - Hidden on mobile to save space */}
@@ -135,11 +145,14 @@ export function Sidebar() {
           bg-gray-900/98 backdrop-blur-md
           border-r border-gray-700/50 shadow-2xl
           transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:hidden
         `}
       >
-        <SidebarContent onClose={() => setSidebarOpen(false)} isMobile={isMobile} />
+        <SidebarContent
+          onClose={() => setSidebarOpen(false)}
+          isMobile={isMobile}
+        />
       </aside>
 
       {/* Desktop sidebar - normal flex child */}

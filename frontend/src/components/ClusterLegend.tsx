@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { useGalaxyStore } from '../store/useGalaxyStore';
-import { getClusterColor } from '../utils/colorPalette';
+import { useMemo } from "react";
+import { useGalaxyStore } from "../store/useGalaxyStore";
+import { getClusterColor } from "../utils/colorPalette";
 
 export function ClusterLegend() {
   const clusters = useGalaxyStore((s) => s.clusters);
@@ -14,15 +14,16 @@ export function ClusterLegend() {
   }, [clusters]);
 
   // Check if all clusters are selected
-  const allSelected = sortedClusters.length > 0 &&
-    sortedClusters.every(c => selectedClusterIds.has(c.clusterId));
+  const allSelected =
+    sortedClusters.length > 0 &&
+    sortedClusters.every((c) => selectedClusterIds.has(c.clusterId));
 
   // Toggle all clusters
   const handleToggleAll = () => {
     if (allSelected) {
       setSelectedClusterIds(new Set());
     } else {
-      const allIds = new Set(clusters.map(c => c.clusterId));
+      const allIds = new Set(clusters.map((c) => c.clusterId));
       setSelectedClusterIds(allIds);
     }
   };
@@ -41,7 +42,7 @@ export function ClusterLegend() {
       {/* Show All / Hide All Toggle */}
       <button
         onClick={handleToggleAll}
-        aria-label={allSelected ? 'Hide all clusters' : 'Show all clusters'}
+        aria-label={allSelected ? "Hide all clusters" : "Show all clusters"}
         aria-pressed={allSelected}
         className="w-full bg-gray-800/50 hover:bg-gray-800/70 rounded-lg px-3 py-2 lg:px-4 lg:py-3
           border border-gray-700/30 text-sm text-gray-300 font-medium
@@ -54,7 +55,7 @@ export function ClusterLegend() {
           readOnly
           className="w-4 h-4 rounded border-gray-600 text-blue-500 pointer-events-none"
         />
-        <span>{allSelected ? 'Hide All' : 'Show All'}</span>
+        <span>{allSelected ? "Hide All" : "Show All"}</span>
       </button>
 
       {/* Cluster List */}

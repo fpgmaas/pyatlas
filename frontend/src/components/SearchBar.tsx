@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import Fuse from 'fuse.js';
-import { useGalaxyStore } from '../store/useGalaxyStore';
-import type { Package } from '../types';
-import { sortByDownloads } from '../utils/packageUtils';
-import { CAMERA_ZOOM_LEVELS } from '../utils/cameraConstants';
-import { TrendingUp } from 'lucide-react';
-import { formatDownloads } from '../utils/formatDownloads';
-import { useIsMobile } from '../hooks/useIsMobile';
+import { useState, useEffect, useMemo } from "react";
+import Fuse from "fuse.js";
+import { useGalaxyStore } from "../store/useGalaxyStore";
+import type { Package } from "../types";
+import { sortByDownloads } from "../utils/packageUtils";
+import { CAMERA_ZOOM_LEVELS } from "../utils/cameraConstants";
+import { TrendingUp } from "lucide-react";
+import { formatDownloads } from "../utils/formatDownloads";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 export function SearchBar() {
   const {
@@ -17,22 +17,26 @@ export function SearchBar() {
     setSearchResults,
     selectedClusterIds,
     toggleCluster,
-    setSidebarOpen
+    setSidebarOpen,
   } = useGalaxyStore();
   const isMobile = useIsMobile(768);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<Package[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const fuse = useMemo(() => new Fuse(packages, {
-    keys: ['name', 'summary'],
-    threshold: 0.2,
-    includeScore: true,
-  }), [packages]);
+  const fuse = useMemo(
+    () =>
+      new Fuse(packages, {
+        keys: ["name", "summary"],
+        threshold: 0.2,
+        includeScore: true,
+      }),
+    [packages],
+  );
 
   useEffect(() => {
     if (query.length > 1) {
-      const fuseResults = fuse.search(query).map(r => r.item);
+      const fuseResults = fuse.search(query).map((r) => r.item);
       const searchResults = sortByDownloads(fuseResults, 25);
       setResults(searchResults);
       setShowDropdown(true);
@@ -41,13 +45,12 @@ export function SearchBar() {
     } else {
       setResults([]);
       setShowDropdown(false);
-      setSearchQuery('');
+      setSearchQuery("");
       setSearchResults([]);
     }
   }, [query, fuse, setSearchQuery, setSearchResults]);
 
   const handleSelect = (pkg: Package) => {
-
     // If the package's cluster is not selected, make it visible
     if (!selectedClusterIds.has(pkg.clusterId)) {
       toggleCluster(pkg.clusterId);
@@ -69,7 +72,7 @@ export function SearchBar() {
     setSidebarOpen(false);
 
     // Clear search UI
-    setQuery('');
+    setQuery("");
     setShowDropdown(false);
   };
 
@@ -84,7 +87,7 @@ export function SearchBar() {
       />
       {showDropdown && results.length > 0 && (
         <div className="absolute top-full mt-3 w-full bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-2xl max-h-[60vh] sm:max-h-96 overflow-y-auto custom-scrollbar z-10 border border-gray-700/50">
-          {results.map(pkg => (
+          {results.map((pkg) => (
             <button
               key={pkg.id}
               onClick={() => handleSelect(pkg)}
@@ -94,12 +97,16 @@ export function SearchBar() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm">{pkg.name}</div>
                   {pkg.summary && (
-                    <div className="text-xs text-gray-400 truncate mt-1">{pkg.summary}</div>
+                    <div className="text-xs text-gray-400 truncate mt-1">
+                      {pkg.summary}
+                    </div>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 text-gray-400 text-xs flex-shrink-0">
                   <TrendingUp size={14} />
-                  <span className="font-medium">{formatDownloads(pkg.downloads)}/week</span>
+                  <span className="font-medium">
+                    {formatDownloads(pkg.downloads)}/week
+                  </span>
                 </div>
               </div>
             </button>

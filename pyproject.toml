@@ -12,20 +12,15 @@ dependencies = [
     "lxml>=5.2.2,<6",
     "python-dotenv>=1.0.1,<2",
     "tqdm>=4.66.4,<5",
-    "fastapi>=0.111.0,<0.112",
     "pydantic>=2.7.4,<3",
     "pydantic-settings>=2.0.0,<3",
     "uvicorn>=0.30.1,<0.31",
     "gdown>=5.2.0,<6",
-    "azure-storage-blob>=12.20.0,<13",
-    "slowapi>=0.1.9,<0.2",
-    "starlette>=0.37.2,<0.38",
     "numpy>=2.0.0,<3",
     "scikit-learn>=1.5.0,<2",
     "readme-renderer[md]>=44.0",
     "plotly>=6.5.0",
     "pyarrow>=21.0.0",
-    "pandas>=2.3.3",
     "umap-learn>=0.5.9.post2",
     "hdbscan>=0.8.40",
     "openai>=1.0.0,<2",
@@ -60,6 +55,7 @@ build-backend = "hatchling.build"
 testpaths = ["tests"]
 
 [tool.ruff]
+extend-exclude = ["notebooks"]
 target-version = "py37"
 line-length = 120
 fix = true
@@ -122,4 +118,5 @@ extend_exclude = [
 ]
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["lxml", "uvicorn"]
+DEP002 = ["lxml", "uvicorn", "pyarrow"]
+DEP003 = ["marimo"]

@@ -1,11 +1,11 @@
-import { useThree, useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
-import * as THREE from 'three';
-import { useGalaxyStore } from '../store/useGalaxyStore';
+import { useThree, useFrame } from "@react-three/fiber";
+import { useRef } from "react";
+import * as THREE from "three";
+import { useGalaxyStore } from "../store/useGalaxyStore";
 
 export function useZoomTracker() {
   const { camera } = useThree();
-  const setCurrentZoom = useGalaxyStore(state => state.setCurrentZoom);
+  const setCurrentZoom = useGalaxyStore((state) => state.setCurrentZoom);
   const lastZoom = useRef(1.6);
 
   useFrame(() => {

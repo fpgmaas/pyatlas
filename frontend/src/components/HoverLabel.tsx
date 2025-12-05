@@ -1,5 +1,5 @@
-import { Html } from '@react-three/drei';
-import { useGalaxyStore } from '../store/useGalaxyStore';
+import { Html } from "@react-three/drei";
+import { useGalaxyStore } from "../store/useGalaxyStore";
 
 export function HoverLabel() {
   const { packages, hoveredIndex, labeledPackageIds } = useGalaxyStore();
@@ -18,11 +18,11 @@ export function HoverLabel() {
       center
       zIndexRange={[0, 0]}
       style={{
-        color: 'white',
-        fontSize: '12px',
-        pointerEvents: 'none',
-        transform: 'translateY(20px)',
-        whiteSpace: 'nowrap',
+        color: "white",
+        fontSize: "12px",
+        pointerEvents: "none",
+        transform: "translateY(20px)",
+        whiteSpace: "nowrap",
       }}
     >
       {pkg.name}

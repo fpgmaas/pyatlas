@@ -1,17 +1,22 @@
-import { useGalaxyStore } from '../store/useGalaxyStore';
-import { X, ExternalLink } from 'lucide-react';
-import { formatDownloads } from '../utils/formatDownloads';
+import { useGalaxyStore } from "../store/useGalaxyStore";
+import { X, ExternalLink } from "lucide-react";
+import { formatDownloads } from "../utils/formatDownloads";
 
 export function PackageDetail() {
-  const { selectedPackageId, packages, clusters, setSelectedPackageId } = useGalaxyStore();
+  const { selectedPackageId, packages, clusters, setSelectedPackageId } =
+    useGalaxyStore();
 
-  const selectedPackage = packages.find(p => p.id === selectedPackageId);
-  const cluster = selectedPackage ? clusters.find(c => c.clusterId === selectedPackage.clusterId) : null;
+  const selectedPackage = packages.find((p) => p.id === selectedPackageId);
+  const cluster = selectedPackage
+    ? clusters.find((c) => c.clusterId === selectedPackage.clusterId)
+    : null;
 
   if (!selectedPackage) {
     return (
       <div className="bg-gray-900/95 backdrop-blur-md rounded-lg px-4 py-4 sm:px-6 sm:py-4 shadow-2xl w-full max-w-md sm:w-96 border border-gray-700/50">
-        <p className="text-gray-400 text-sm">Click on a package to view details</p>
+        <p className="text-gray-400 text-sm">
+          Click on a package to view details
+        </p>
       </div>
     );
   }
@@ -48,9 +53,7 @@ export function PackageDetail() {
           <label className="text-gray-400 text-xs uppercase tracking-wide mb-1 block">
             Cluster
           </label>
-          <p className="text-white text-sm">
-            {cluster.label}
-          </p>
+          <p className="text-white text-sm">{cluster.label}</p>
         </div>
       )}
 
@@ -70,7 +73,7 @@ export function PackageDetail() {
           Description
         </label>
         <p className="text-gray-300 text-sm leading-relaxed">
-          {selectedPackage.summary || 'No description available'}
+          {selectedPackage.summary || "No description available"}
         </p>
       </div>
     </div>

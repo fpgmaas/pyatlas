@@ -31,16 +31,18 @@ class ClusterMetadataGenerator:
             total_downloads = self._calculate_total_weekly_downloads(df, cluster_id)
             bounds = self._calculate_bounds(df, cluster_id)
 
-            metadata_rows.append({
-                self.cluster_id_column: cluster_id,
-                "centroid_x": centroid[0],
-                "centroid_y": centroid[1],
-                "total_weekly_downloads": total_downloads,
-                "min_x": bounds["min_x"],
-                "max_x": bounds["max_x"],
-                "min_y": bounds["min_y"],
-                "max_y": bounds["max_y"],
-            })
+            metadata_rows.append(
+                {
+                    self.cluster_id_column: cluster_id,
+                    "centroid_x": centroid[0],
+                    "centroid_y": centroid[1],
+                    "total_weekly_downloads": total_downloads,
+                    "min_x": bounds["min_x"],
+                    "max_x": bounds["max_x"],
+                    "min_y": bounds["min_y"],
+                    "max_y": bounds["max_y"],
+                }
+            )
             logger.info(f"Calculated metadata for cluster {cluster_id}")
 
         # Handle noise cluster (-1) separately
@@ -48,16 +50,18 @@ class ClusterMetadataGenerator:
             centroid = self._calculate_centroid(df, "-1")
             total_downloads = self._calculate_total_weekly_downloads(df, "-1")
             bounds = self._calculate_bounds(df, "-1")
-            metadata_rows.append({
-                self.cluster_id_column: "-1",
-                "centroid_x": centroid[0],
-                "centroid_y": centroid[1],
-                "total_weekly_downloads": total_downloads,
-                "min_x": bounds["min_x"],
-                "max_x": bounds["max_x"],
-                "min_y": bounds["min_y"],
-                "max_y": bounds["max_y"],
-            })
+            metadata_rows.append(
+                {
+                    self.cluster_id_column: "-1",
+                    "centroid_x": centroid[0],
+                    "centroid_y": centroid[1],
+                    "total_weekly_downloads": total_downloads,
+                    "min_x": bounds["min_x"],
+                    "max_x": bounds["max_x"],
+                    "min_y": bounds["min_y"],
+                    "max_y": bounds["max_y"],
+                }
+            )
             logger.info("Calculated metadata for noise cluster (-1)")
 
         return pl.DataFrame(metadata_rows)
@@ -118,10 +122,12 @@ class ClusterLabeler:
 
         for cluster_id in cluster_ids:
             label = self._generate_label_for_cluster(df, cluster_id, client, config.openai.model_name)
-            label_rows.append({
-                self.cluster_id_column: cluster_id,
-                "cluster_label": label,
-            })
+            label_rows.append(
+                {
+                    self.cluster_id_column: cluster_id,
+                    "cluster_label": label,
+                }
+            )
             logger.info(f"Generated label for cluster {cluster_id}: {label}")
 
         return pl.DataFrame(label_rows)
@@ -160,8 +166,8 @@ class ClusterLabeler:
                 logger.warning(f"Empty output_text for cluster {cluster_id}")
                 return f"Cluster {cluster_id}"
 
-        except Exception as e:
-            logger.error(f"Error generating label for cluster {cluster_id}: {e}")
+        except Exception:
+            logger.exception(f"Error generating label for cluster {cluster_id}.")
             return f"Cluster {cluster_id}"
 
     def _get_cluster_data(self, df: pl.DataFrame, cluster_id: str) -> pl.DataFrame:
@@ -201,4 +207,3 @@ class ClusterLabeler:
         if len(text) <= self.max_total_chars:
             return text
         return text[: self.max_total_chars] + "..."
-

@@ -1,10 +1,11 @@
-import hdbscan
+from dataclasses import dataclass
 
-from sklearn.preprocessing import normalize
+import hdbscan
 import numpy as np
 import polars as pl
-from dataclasses import dataclass
 import umap
+from sklearn.preprocessing import normalize
+
 
 @dataclass
 class ClusterIdGenerator:
@@ -26,7 +27,7 @@ class ClusterIdGenerator:
             metric="euclidean",
             cluster_selection_method=self.cluster_selection_method,
             cluster_selection_epsilon=self.cluster_selection_epsilon,
-            cluster_selection_persistence=0.1
+            cluster_selection_persistence=0.1,
         )
         labels = clusterer.fit_predict(norm_data)
         df = df.with_columns(cluster_id=pl.Series("cluster_id", labels)).with_columns(
@@ -42,9 +43,9 @@ class ClusterIdGenerator:
         normalized_embeddings = normalize(embeddings, norm="l2")
 
         umap_reducer = umap.UMAP(
-            n_components=16, # higher values -> less clusters
-            n_neighbors= 10, # not so sensitive to this parameter
-            min_dist= 0.03,
+            n_components=16,  # higher values -> less clusters
+            n_neighbors=10,  # not so sensitive to this parameter
+            min_dist=0.03,
             metric="euclidean",
             random_state=0,
         )

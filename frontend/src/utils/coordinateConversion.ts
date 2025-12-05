@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export interface ScreenCoordinates {
   canvasX: number;
@@ -15,12 +15,12 @@ const scratchVec = new THREE.Vector3();
 export function worldToCanvasCoords(
   worldPos: THREE.Vector3,
   camera: THREE.Camera,
-  canvasSize: { width: number; height: number }
+  canvasSize: { width: number; height: number },
 ): ScreenCoordinates {
   scratchVec.copy(worldPos).project(camera);
 
-  const screenX = (scratchVec.x + 1) / 2 * canvasSize.width;
-  const screenY = -(scratchVec.y - 1) / 2 * canvasSize.height;
+  const screenX = ((scratchVec.x + 1) / 2) * canvasSize.width;
+  const screenY = (-(scratchVec.y - 1) / 2) * canvasSize.height;
 
   return { canvasX: screenX, canvasY: screenY };
 }
@@ -34,7 +34,7 @@ export function getCanvasPointDistance(
   mouseClientY: number,
   camera: THREE.Camera,
   canvasRect: DOMRect,
-  canvasSize: { width: number; height: number }
+  canvasSize: { width: number; height: number },
 ): number {
   const screenCoords = worldToCanvasCoords(worldPos, camera, canvasSize);
 

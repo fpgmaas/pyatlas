@@ -1,12 +1,12 @@
-import { useThree, useFrame } from '@react-three/fiber';
-import { useRef, useCallback } from 'react';
-import * as THREE from 'three';
+import { useThree, useFrame } from "@react-three/fiber";
+import { useRef, useCallback } from "react";
+import * as THREE from "three";
 
 export type EasingFunction = (t: number) => number;
 
 export interface CameraAnimationOptions {
-  zoom?: number;          // Target zoom level (default: 5)
-  duration?: number;      // Animation duration in ms (default: 1000)
+  zoom?: number; // Target zoom level (default: 5)
+  duration?: number; // Animation duration in ms (default: 1000)
   easing?: EasingFunction; // Easing function (default: cubicInOut)
 }
 
@@ -40,16 +40,20 @@ export function useCameraAnimation() {
 
     if (three.controls) {
       // @ts-expect-error - controls.target exists on OrbitControls
-      three.controls.target.lerpVectors(startPosition.current, targetPosition.current, eased);
+      three.controls.target.lerpVectors(
+        startPosition.current,
+        targetPosition.current,
+        eased,
+      );
       // @ts-expect-error - controls.update exists on OrbitControls
       three.controls.update();
     }
 
-    if (three.camera.type === 'OrthographicCamera') {
+    if (three.camera.type === "OrthographicCamera") {
       (three.camera as THREE.OrthographicCamera).zoom = THREE.MathUtils.lerp(
         startZoom.current,
         targetZoom.current,
-        eased
+        eased,
       );
       three.camera.updateProjectionMatrix();
     }
@@ -61,36 +65,35 @@ export function useCameraAnimation() {
     }
   });
 
-  const animateTo = useCallback((
-    x: number,
-    y: number,
-    optionsOrZoom?: CameraAnimationOptions | number
-  ) => {
+  const animateTo = useCallback(
+    (x: number, y: number, optionsOrZoom?: CameraAnimationOptions | number) => {
+      // Support both old signature (number) and new signature (options object)
+      const options =
+        typeof optionsOrZoom === "number"
+          ? { zoom: optionsOrZoom }
+          : optionsOrZoom || {};
 
-    // Support both old signature (number) and new signature (options object)
-    const options = typeof optionsOrZoom === 'number'
-      ? { zoom: optionsOrZoom }
-      : optionsOrZoom || {};
+      const finalOptions = { ...DEFAULT_OPTIONS, ...options };
 
-    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
+      if (!three.controls) {
+        console.warn(
+          "[useCameraAnimation] No controls available, animation skipped",
+        );
+        return;
+      }
 
-
-    if (!three.controls) {
-      console.warn('[useCameraAnimation] No controls available, animation skipped');
-      return;
-    }
-
-    // @ts-expect-error - controls.target exists on OrbitControls
-    const currentTarget = three.controls.target;
-    startPosition.current.copy(currentTarget);
-    startZoom.current = (three.camera as THREE.OrthographicCamera).zoom;
-    targetPosition.current = new THREE.Vector3(x, y, 0);
-    targetZoom.current = finalOptions.zoom;
-    animationDuration.current = finalOptions.duration;
-    easingFunction.current = finalOptions.easing;
-    progress.current = 0;
-
-  }, [three]);
+      // @ts-expect-error - controls.target exists on OrbitControls
+      const currentTarget = three.controls.target;
+      startPosition.current.copy(currentTarget);
+      startZoom.current = (three.camera as THREE.OrthographicCamera).zoom;
+      targetPosition.current = new THREE.Vector3(x, y, 0);
+      targetZoom.current = finalOptions.zoom;
+      animationDuration.current = finalOptions.duration;
+      easingFunction.current = finalOptions.easing;
+      progress.current = 0;
+    },
+    [three],
+  );
 
   return { animateTo };
 }

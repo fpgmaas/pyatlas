@@ -81,9 +81,9 @@ def create_plot_with_labels(df: pl.DataFrame, cluster_metadata: pl.DataFrame):
     )
 
     fig.update_traces(
-        marker=dict(
-            line=dict(width=0.4, color="rgba(0,0,0,0.25)"),
-        ),
+        marker={
+            "line": {"width": 0.4, "color": "rgba(0,0,0,0.25)"},
+        },
         hovertemplate=(
             "<b>%{hovertext}</b><br>"
             "<b>%{customdata[2]}</b><br>"
@@ -100,22 +100,22 @@ def create_plot_with_labels(df: pl.DataFrame, cluster_metadata: pl.DataFrame):
     annotations = []
     for row in cluster_metadata_str.iter_rows(named=True):
         annotations.append(
-            dict(
-                x=row["centroid_x"],
-                y=row["centroid_y"],
-                text=row["cluster_label"],
-                showarrow=False,
-                font=dict(size=12, color="black", family="Arial, sans-serif"),
-                bgcolor="rgba(255, 255, 255, 0.7)",
-                bordercolor="rgba(0, 0, 0, 0.3)",
-                borderwidth=1,
-                borderpad=4,
-            )
+            {
+                "x": row["centroid_x"],
+                "y": row["centroid_y"],
+                "text": row["cluster_label"],
+                "showarrow": False,
+                "font": {"size": 12, "color": "black", "family": "Arial, sans-serif"},
+                "bgcolor": "rgba(255, 255, 255, 0.7)",
+                "bordercolor": "rgba(0, 0, 0, 0.3)",
+                "borderwidth": 1,
+                "borderpad": 4,
+            }
         )
 
     fig.update_layout(
         template="plotly_white",
-        margin=dict(l=20, r=20, t=60, b=40),
+        margin={"l": 20, "r": 20, "t": 60, "b": 40},
         xaxis_title="Component 1",
         yaxis_title="Component 2",
         legend_title_text="Cluster",

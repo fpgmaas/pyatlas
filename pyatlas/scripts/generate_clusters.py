@@ -34,7 +34,6 @@ def generate_clusters():
     df = ClusterIdGenerator().generate_cluster_ids(df, "embeddings")
     df = ClusterCoordinatesGenerator().generate_coordinates(df, "embeddings", "cluster_id")
 
-
     # Write output
     clustered_dataset_path = config.storage.data_folder / config.storage.clustered_dataset_csv
 

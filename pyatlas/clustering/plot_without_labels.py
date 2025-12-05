@@ -50,9 +50,9 @@ def create_plot(df):
     )
 
     fig.update_traces(
-        marker=dict(
-            line=dict(width=0.4, color="rgba(0,0,0,0.25)"),
-        ),
+        marker={
+            "line": {"width": 0.4, "color": "rgba(0,0,0,0.25)"},
+        },
         hovertemplate=(
             "<b>%{hovertext}</b><br>"
             "<b>%{customdata[2]}</b><br>"
@@ -65,7 +65,7 @@ def create_plot(df):
 
     fig.update_layout(
         template="plotly_white",
-        margin=dict(l=20, r=20, t=60, b=40),
+        margin={"l": 20, "r": 20, "t": 60, "b": 40},
         xaxis_title="Component 1",
         yaxis_title="Component 2",
         legend_title_text="Cluster",

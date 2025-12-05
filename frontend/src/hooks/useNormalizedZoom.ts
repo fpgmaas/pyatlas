@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { useThree } from '@react-three/fiber';
+import { useEffect, useRef } from "react";
+import { useThree } from "@react-three/fiber";
 
 const TOUCHPAD_DAMPENING = 0.3;
 const RAPID_EVENT_THRESHOLD_MS = 50;
@@ -49,7 +49,7 @@ export function useNormalizedZoom() {
       event.stopPropagation();
 
       // Create a new wheel event with normalized delta
-      const normalizedEvent = new WheelEvent('wheel', {
+      const normalizedEvent = new WheelEvent("wheel", {
         deltaX: event.deltaX,
         deltaY: delta,
         deltaZ: event.deltaZ,
@@ -70,17 +70,21 @@ export function useNormalizedZoom() {
       });
 
       // Mark as normalized to prevent infinite loop
-      (normalizedEvent as WheelEvent & { _normalized: boolean })._normalized = true;
+      (normalizedEvent as WheelEvent & { _normalized: boolean })._normalized =
+        true;
 
       // Dispatch to OrbitControls
       canvas.dispatchEvent(normalizedEvent);
     };
 
     // Capture phase to intercept before OrbitControls
-    canvas.addEventListener('wheel', handleWheel, { capture: true, passive: false });
+    canvas.addEventListener("wheel", handleWheel, {
+      capture: true,
+      passive: false,
+    });
 
     return () => {
-      canvas.removeEventListener('wheel', handleWheel, { capture: true });
+      canvas.removeEventListener("wheel", handleWheel, { capture: true });
     };
   }, [gl]);
 }

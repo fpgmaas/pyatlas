@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import type { Package, Cluster } from '../types';
-import type { ViewportBounds } from '../hooks/useViewportBounds';
+import { create } from "zustand";
+import type { Package, Cluster } from "../types";
+import type { ViewportBounds } from "../hooks/useViewportBounds";
 
 export interface CameraAnimationRequest {
   x: number;
@@ -51,7 +51,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   visibleClusterIds: new Set(), // Viewport-based cluster culling
   selectedPackageId: null,
   hoveredIndex: null,
-  searchQuery: '',
+  searchQuery: "",
   searchResults: [],
   currentZoom: 1.6,
   viewportBounds: null,
@@ -63,29 +63,36 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
 
   setPackages: (packages) => set({ packages }),
   setClusters: (clusters) => {
-    const clusterIds = new Set(clusters.map(c => c.clusterId));
-    set({ clusters, selectedClusterIds: clusterIds, visibleClusterIds: clusterIds });
+    const clusterIds = new Set(clusters.map((c) => c.clusterId));
+    set({
+      clusters,
+      selectedClusterIds: clusterIds,
+      visibleClusterIds: clusterIds,
+    });
   },
   setVisibleClusterIds: (ids) => set({ visibleClusterIds: ids }),
   setSelectedClusterIds: (ids) => set({ selectedClusterIds: ids }),
-  toggleCluster: (clusterId) => set((state) => {
-    const newSet = new Set(state.selectedClusterIds);
-    if (newSet.has(clusterId)) {
-      newSet.delete(clusterId);
-    } else {
-      newSet.add(clusterId);
-    }
-    return { selectedClusterIds: newSet };
-  }),
+  toggleCluster: (clusterId) =>
+    set((state) => {
+      const newSet = new Set(state.selectedClusterIds);
+      if (newSet.has(clusterId)) {
+        newSet.delete(clusterId);
+      } else {
+        newSet.add(clusterId);
+      }
+      return { selectedClusterIds: newSet };
+    }),
   setSelectedPackageId: (id) => set({ selectedPackageId: id }),
   setHoveredIndex: (index) => set({ hoveredIndex: index }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSearchResults: (results) => set({ searchResults: results }),
-  setCurrentZoom: (zoom) => set({ currentZoom: zoom, shouldShowLabels: zoom >= 4 }),
+  setCurrentZoom: (zoom) =>
+    set({ currentZoom: zoom, shouldShowLabels: zoom >= 4 }),
   setViewportBounds: (bounds) => set({ viewportBounds: bounds }),
   setVisiblePackageIds: (ids) => set({ visiblePackageIds: ids }),
   setLabeledPackageIds: (ids) => set({ labeledPackageIds: ids }),
   requestCameraAnimation: (request) => set({ cameraAnimationRequest: request }),
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
-  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  toggleSidebar: () =>
+    set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 }));

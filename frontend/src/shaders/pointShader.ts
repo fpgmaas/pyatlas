@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export const vertexShader = `
 attribute float size;
@@ -130,7 +130,7 @@ export function createPointShaderMaterial(): THREE.ShaderMaterial {
     depthWrite: false,
     blending: THREE.NormalBlending,
     uniforms: {
-      time: { value: 0.0 }
-    }
+      time: { value: 0.0 },
+    },
   });
 }

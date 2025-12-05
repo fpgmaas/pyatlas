@@ -24,7 +24,7 @@ def main():
 
     logging.info("\n\nGENERATING CLUSTERS -------------\n")
     generate_clusters()
-    
+
     logging.info("\n\nCALCULATING CLUSTER LABELS -------------\n")
     calculate_cluster_labels()
 

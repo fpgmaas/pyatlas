@@ -1,8 +1,8 @@
-import { useThree, useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
-import * as THREE from 'three';
-import { useGalaxyStore } from '../store/useGalaxyStore';
-import type { Package, Cluster } from '../types';
+import { useThree, useFrame } from "@react-three/fiber";
+import { useRef } from "react";
+import * as THREE from "three";
+import { useGalaxyStore } from "../store/useGalaxyStore";
+import type { Package, Cluster } from "../types";
 
 export interface ViewportBounds {
   minX: number;
@@ -14,9 +14,9 @@ export interface ViewportBounds {
 // Performance configuration
 const PERF_CONFIG = {
   CLUSTER_UPDATE_INTERVAL: 500, // ms
-  LABEL_UPDATE_INTERVAL: 50,    // ms
-  SPATIAL_THRESHOLD: 0.05,      // 5% of viewport size as minimum change to trigger update
-  PADDING_FACTOR: 0.1,          // 10% of viewport for padding
+  LABEL_UPDATE_INTERVAL: 50, // ms
+  SPATIAL_THRESHOLD: 0.05, // 5% of viewport size as minimum change to trigger update
+  PADDING_FACTOR: 0.1, // 10% of viewport for padding
 };
 
 // Reusable vector for computing camera intersection (avoids allocation in render loop)
@@ -47,7 +47,7 @@ function computeBounds(cam: THREE.OrthographicCamera): ViewportBounds {
 function didBoundsChange(
   prev: ViewportBounds | null,
   current: ViewportBounds,
-  threshold: number
+  threshold: number,
 ): boolean {
   if (!prev) return true;
   return (
@@ -62,7 +62,7 @@ function didBoundsChange(
 function boundsIntersect(
   viewport: ViewportBounds,
   bounds: { minX: number; maxX: number; minY: number; maxY: number },
-  padding: number = 0
+  padding: number = 0,
 ): boolean {
   return !(
     viewport.maxX < bounds.minX - padding ||
@@ -76,7 +76,7 @@ function boundsIntersect(
 function computeVisibleClusters(
   clusters: Cluster[],
   viewport: ViewportBounds,
-  padding: number
+  padding: number,
 ): Set<number> {
   const result = new Set<number>();
   for (const cluster of clusters) {
@@ -86,7 +86,6 @@ function computeVisibleClusters(
   }
   return result;
 }
-
 
 // Helper: Check if two sets have equal contents
 function setsEqual<T>(a: Set<T>, b: Set<T>): boolean {
@@ -102,7 +101,7 @@ function computeVisiblePackages(
   packages: Package[],
   selectedClusterIds: Set<number>,
   viewport: ViewportBounds,
-  padding: number
+  padding: number,
 ): Set<number> {
   const result = new Set<number>();
   const viewMinX = viewport.minX - padding;
@@ -149,7 +148,7 @@ export function useViewportBounds() {
   const prevSelectedClusterIds = useRef<Set<number>>(selectedClusterIds);
 
   useFrame(() => {
-    if (camera.type !== 'OrthographicCamera') return;
+    if (camera.type !== "OrthographicCamera") return;
     const cam = camera as THREE.OrthographicCamera;
 
     const now = performance.now();
@@ -159,16 +158,24 @@ export function useViewportBounds() {
     // This ensures updates trigger appropriately at all zoom levels
     const viewportWidth = currentBounds.maxX - currentBounds.minX;
     const viewportHeight = currentBounds.maxY - currentBounds.minY;
-    const dynamicThreshold = Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.SPATIAL_THRESHOLD;
+    const dynamicThreshold =
+      Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.SPATIAL_THRESHOLD;
 
-    const boundsChanged = didBoundsChange(lastBounds.current, currentBounds, dynamicThreshold);
+    const boundsChanged = didBoundsChange(
+      lastBounds.current,
+      currentBounds,
+      dynamicThreshold,
+    );
 
     // Detect if label visibility just changed (especially false → true)
     const labelsJustEnabled = !prevShouldShowLabels.current && shouldShowLabels;
     prevShouldShowLabels.current = shouldShowLabels;
 
     // Detect if cluster selection changed
-    const clusterSelectionChanged = !setsEqual(prevSelectedClusterIds.current, selectedClusterIds);
+    const clusterSelectionChanged = !setsEqual(
+      prevSelectedClusterIds.current,
+      selectedClusterIds,
+    );
     if (clusterSelectionChanged) {
       prevSelectedClusterIds.current = selectedClusterIds;
     }
@@ -177,8 +184,10 @@ export function useViewportBounds() {
     const bypassThrottle = labelsJustEnabled || clusterSelectionChanged;
 
     // Step 1: Always update clusters (cheap operation) with 100ms throttle
-    const shouldUpdateClusters = bypassThrottle ||
-      (now - lastUpdateTime.current >= PERF_CONFIG.CLUSTER_UPDATE_INTERVAL && boundsChanged);
+    const shouldUpdateClusters =
+      bypassThrottle ||
+      (now - lastUpdateTime.current >= PERF_CONFIG.CLUSTER_UPDATE_INTERVAL &&
+        boundsChanged);
 
     if (shouldUpdateClusters) {
       // Update tracking state
@@ -189,18 +198,20 @@ export function useViewportBounds() {
       // Calculate dynamic padding (10% of viewport size)
       const viewportWidth = currentBounds.maxX - currentBounds.minX;
       const viewportHeight = currentBounds.maxY - currentBounds.minY;
-      const padding = Math.max(0.1, Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.PADDING_FACTOR);
+      const padding = Math.max(
+        0.1,
+        Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.PADDING_FACTOR,
+      );
 
       // Compute visible clusters
       const visibleClusterIdsSet = computeVisibleClusters(
         clusters,
         currentBounds,
-        padding
+        padding,
       );
 
       // Only update store if contents changed
       if (!setsEqual(visibleClusterIdsSet, lastVisibleClusterIds.current)) {
-
         lastVisibleClusterIds.current = visibleClusterIdsSet;
         setVisibleClusterIds(visibleClusterIdsSet);
       }
@@ -208,8 +219,11 @@ export function useViewportBounds() {
 
     // Step 2: Update labels less frequently (expensive operation) with throttle
     if (shouldShowLabels) {
-      const shouldUpdateLabels = bypassThrottle ||
-        (now - lastLabelUpdateTime.current >= PERF_CONFIG.LABEL_UPDATE_INTERVAL && boundsChanged);
+      const shouldUpdateLabels =
+        bypassThrottle ||
+        (now - lastLabelUpdateTime.current >=
+          PERF_CONFIG.LABEL_UPDATE_INTERVAL &&
+          boundsChanged);
 
       if (shouldUpdateLabels) {
         lastLabelUpdateTime.current = now;
@@ -219,14 +233,15 @@ export function useViewportBounds() {
         // (minimum floor of 0.1 was causing huge padding at high zoom levels)
         const viewportWidth = currentBounds.maxX - currentBounds.minX;
         const viewportHeight = currentBounds.maxY - currentBounds.minY;
-        const padding = Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.PADDING_FACTOR;
+        const padding =
+          Math.min(viewportWidth, viewportHeight) * PERF_CONFIG.PADDING_FACTOR;
 
         // Compute visible packages with simple bounds check
         const visiblePackageIdsSet = computeVisiblePackages(
           packages,
           selectedClusterIds,
           currentBounds,
-          padding
+          padding,
         );
 
         // Only update store if contents changed

@@ -8,14 +8,11 @@ from sklearn.preprocessing import normalize
 
 @dataclass
 class ClusterCoordinatesGenerator:
-
     def generate_coordinates(self, df: pl.DataFrame, embeddings_column: str, cluster_id_column: str):
         embeddings = np.asarray(df[embeddings_column].to_list(), dtype=np.float32)
         cluster_ids = np.asarray(df[cluster_id_column].to_list(), dtype=np.int16)
 
-        coordinates = self._supervised_cluster_with_umap(
-            embeddings, cluster_ids
-        )
+        coordinates = self._supervised_cluster_with_umap(embeddings, cluster_ids)
 
         # To reduce empty space in the plot in two dimensions. Otherwise a single outlier group squashes the
         # others together visually.
@@ -41,15 +38,13 @@ class ClusterCoordinatesGenerator:
         return scaled + center
 
     @staticmethod
-    def _supervised_cluster_with_umap(
-        embeddings: np.array, cluster_ids: np.array
-    ) -> np.array:
+    def _supervised_cluster_with_umap(embeddings: np.array, cluster_ids: np.array) -> np.array:
         normalized_embeddings = normalize(embeddings, norm="l2")
 
         umap_reducer = umap.UMAP(
             n_components=2,
-            n_neighbors= 12,
-            min_dist= 0.6,
+            n_neighbors=12,
+            min_dist=0.6,
             repulsion_strength=0.3,
             metric="euclidean",
             random_state=0,
@@ -58,4 +53,3 @@ class ClusterCoordinatesGenerator:
         )
         coords = umap_reducer.fit_transform(normalized_embeddings, y=cluster_ids)
         return coords
-

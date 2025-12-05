@@ -1,10 +1,10 @@
-import { useRef, useMemo, useEffect, useCallback } from 'react';
-import * as THREE from 'three';
-import { useFrame, useThree } from '@react-three/fiber';
-import { useGalaxyStore } from '../store/useGalaxyStore';
-import { getClusterColor } from '../utils/colorPalette';
-import { precomputeSizes } from '../utils/sizeScaling';
-import { createPointShaderMaterial } from '../shaders/pointShader';
+import { useRef, useMemo, useEffect, useCallback } from "react";
+import * as THREE from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useGalaxyStore } from "../store/useGalaxyStore";
+import { getClusterColor } from "../utils/colorPalette";
+import { precomputeSizes } from "../utils/sizeScaling";
+import { createPointShaderMaterial } from "../shaders/pointShader";
 
 const HOVER_THROTTLE_MS = 32;
 const CAMERA_MOVE_THRESHOLD = 0.001;
@@ -52,11 +52,11 @@ export function PackagePoints() {
     });
 
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    geometry.setAttribute('hovered', new THREE.BufferAttribute(hovered, 1));
-    geometry.setAttribute('selected', new THREE.BufferAttribute(selected, 1));
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
+    geometry.setAttribute("hovered", new THREE.BufferAttribute(hovered, 1));
+    geometry.setAttribute("selected", new THREE.BufferAttribute(selected, 1));
 
     const material = createPointShaderMaterial();
 
@@ -86,7 +86,8 @@ export function PackagePoints() {
   // Handle hover state - incremental update (only 2 entries instead of all)
   useEffect(() => {
     if (!pointsRef.current) return;
-    const hoveredAttr = pointsRef.current.geometry.attributes.hovered as THREE.BufferAttribute;
+    const hoveredAttr = pointsRef.current.geometry.attributes
+      .hovered as THREE.BufferAttribute;
 
     // Turn off previous hovered
     if (prevHoveredIndex.current !== null) {
@@ -105,15 +106,19 @@ export function PackagePoints() {
   // Handle selection state - incremental update (only 2 entries instead of all)
   useEffect(() => {
     if (!pointsRef.current) return;
-    const selectedAttr = pointsRef.current.geometry.attributes.selected as THREE.BufferAttribute;
+    const selectedAttr = pointsRef.current.geometry.attributes
+      .selected as THREE.BufferAttribute;
 
     // Find index of selected package
     const selectedIndex = selectedPackageId
-      ? packages.findIndex(pkg => pkg.id === selectedPackageId)
+      ? packages.findIndex((pkg) => pkg.id === selectedPackageId)
       : -1;
 
     // Turn off previous selected
-    if (prevSelectedIndex.current !== null && prevSelectedIndex.current !== -1) {
+    if (
+      prevSelectedIndex.current !== null &&
+      prevSelectedIndex.current !== -1
+    ) {
       selectedAttr.setX(prevSelectedIndex.current, 0);
     }
 
@@ -155,15 +160,15 @@ export function PackagePoints() {
         setHoveredIndex(idx);
       }
 
-      document.body.style.cursor = 'pointer';
+      document.body.style.cursor = "pointer";
     },
-    [packages, selectedClusterIds, hoveredIndex, setHoveredIndex]
+    [packages, selectedClusterIds, hoveredIndex, setHoveredIndex],
   );
 
   const handlePointerOut = useCallback(() => {
     if (hoveredIndex !== null) {
       setHoveredIndex(null);
-      document.body.style.cursor = 'default';
+      document.body.style.cursor = "default";
     }
   }, [hoveredIndex, setHoveredIndex]);
 
@@ -179,7 +184,7 @@ export function PackagePoints() {
 
       setSelectedPackageId(pkg.id);
     },
-    [packages, selectedClusterIds, setSelectedPackageId]
+    [packages, selectedClusterIds, setSelectedPackageId],
   );
 
   // Update time uniform, raycaster threshold, and detect camera movement
@@ -201,20 +206,25 @@ export function PackagePoints() {
 
     // Detect camera movement
     const target = (controls as any)?.target;
-    const currentTarget = target ? new THREE.Vector3(target.x, target.y, target.z) : cam.position.clone();
+    const currentTarget = target
+      ? new THREE.Vector3(target.x, target.y, target.z)
+      : cam.position.clone();
     const currentZoom = cam.zoom;
 
     const dx = Math.abs(currentTarget.x - prevCameraTarget.current.x);
     const dy = Math.abs(currentTarget.y - prevCameraTarget.current.y);
     const dz = Math.abs(currentZoom - prevCameraZoom.current);
 
-    const isMoving = dx > CAMERA_MOVE_THRESHOLD || dy > CAMERA_MOVE_THRESHOLD || dz > CAMERA_MOVE_THRESHOLD;
+    const isMoving =
+      dx > CAMERA_MOVE_THRESHOLD ||
+      dy > CAMERA_MOVE_THRESHOLD ||
+      dz > CAMERA_MOVE_THRESHOLD;
     isCameraMovingRef.current = isMoving;
 
     // Clear hover when camera is moving
     if (isMoving && hoveredIndex !== null) {
       setHoveredIndex(null);
-      document.body.style.cursor = 'default';
+      document.body.style.cursor = "default";
     }
 
     prevCameraTarget.current.copy(currentTarget);

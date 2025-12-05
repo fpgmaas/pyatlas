@@ -1,19 +1,19 @@
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, OrthographicCamera } from '@react-three/drei';
-import { useEffect } from 'react';
-import * as THREE from 'three';
-import { useDataBounds } from '../hooks/useDataBounds';
-import type { Bounds } from '../utils/dataBounds';
-import { PackagePoints } from './PackagePoints';
-import { HoverLabel } from './HoverLabel';
-import { PackageLabels } from './PackageLabels';
-import { ClusterLabels } from './ClusterLabels';
-import { useCameraAnimation } from '../hooks/useCameraAnimation';
-import { useZoomTracker } from '../hooks/useZoomTracker';
-import { useNormalizedZoom } from '../hooks/useNormalizedZoom';
-import { useViewportBounds } from '../hooks/useViewportBounds';
-import { useGalaxyStore } from '../store/useGalaxyStore';
-import { CAMERA_ZOOM_LEVELS } from '../utils/cameraConstants';
+import { Canvas, useThree } from "@react-three/fiber";
+import { OrbitControls, OrthographicCamera } from "@react-three/drei";
+import { useEffect } from "react";
+import * as THREE from "three";
+import { useDataBounds } from "../hooks/useDataBounds";
+import type { Bounds } from "../utils/dataBounds";
+import { PackagePoints } from "./PackagePoints";
+import { HoverLabel } from "./HoverLabel";
+import { PackageLabels } from "./PackageLabels";
+import { ClusterLabels } from "./ClusterLabels";
+import { useCameraAnimation } from "../hooks/useCameraAnimation";
+import { useZoomTracker } from "../hooks/useZoomTracker";
+import { useNormalizedZoom } from "../hooks/useNormalizedZoom";
+import { useViewportBounds } from "../hooks/useViewportBounds";
+import { useGalaxyStore } from "../store/useGalaxyStore";
+import { CAMERA_ZOOM_LEVELS } from "../utils/cameraConstants";
 
 function ZoomDebug() {
   const zoom = useGalaxyStore((s) => s.currentZoom);
@@ -30,7 +30,7 @@ function CameraSetup({ bounds }: { bounds: Bounds }) {
 
   useEffect(() => {
     const updateCamera = () => {
-      if (camera.type !== 'OrthographicCamera') return;
+      if (camera.type !== "OrthographicCamera") return;
       const cam = camera as THREE.OrthographicCamera;
 
       const aspect = size.width / size.height;
@@ -46,7 +46,7 @@ function CameraSetup({ bounds }: { bounds: Bounds }) {
       } else {
         cam.left = -viewWidth / 2;
         cam.right = viewWidth / 2;
-        cam.top = (viewWidth / 2) / aspect;
+        cam.top = viewWidth / 2 / aspect;
         cam.bottom = -(viewWidth / 2) / aspect;
       }
 
@@ -72,7 +72,6 @@ function CameraAnimationController() {
   useViewportBounds();
 
   useEffect(() => {
-
     // Only process if we have both a request AND controls are ready
     if (cameraAnimationRequest && controls) {
       let targetY = cameraAnimationRequest.y;
@@ -86,18 +85,24 @@ function CameraAnimationController() {
         targetY = cameraAnimationRequest.y - offsetPercent * visibleHeight;
       }
 
-      animateTo(
-        cameraAnimationRequest.x,
-        targetY,
-        { zoom: cameraAnimationRequest.zoom }
-      );
+      animateTo(cameraAnimationRequest.x, targetY, {
+        zoom: cameraAnimationRequest.zoom,
+      });
 
       requestCameraAnimation(null); // Clear the request
     } else if (cameraAnimationRequest && !controls) {
-      console.warn('[CameraAnimationController] Animation requested but controls not ready yet - will retry when controls become available');
+      console.warn(
+        "[CameraAnimationController] Animation requested but controls not ready yet - will retry when controls become available",
+      );
       // Don't clear the request - it will be retried when controls becomes truthy
     }
-  }, [cameraAnimationRequest, animateTo, requestCameraAnimation, controls, camera]);
+  }, [
+    cameraAnimationRequest,
+    animateTo,
+    requestCameraAnimation,
+    controls,
+    camera,
+  ]);
 
   return null;
 }
@@ -110,8 +115,8 @@ export function GalaxyCanvas() {
   return (
     <div className="w-full h-full relative">
       <ZoomDebug />
-      <Canvas gl={{ alpha: false, antialias: false }} dpr={[1, 1.5]} >
-        <color attach="background" args={['#0a0a0a']} />
+      <Canvas gl={{ alpha: false, antialias: false }} dpr={[1, 1.5]}>
+        <color attach="background" args={["#0a0a0a"]} />
 
         <OrthographicCamera
           makeDefault
@@ -133,13 +138,13 @@ export function GalaxyCanvas() {
           panSpeed={1}
           touches={{
             ONE: THREE.TOUCH.PAN,
-            TWO: THREE.TOUCH.DOLLY_PAN
+            TWO: THREE.TOUCH.DOLLY_PAN,
           }}
           zoomToCursor={true}
           mouseButtons={{
             LEFT: THREE.MOUSE.PAN,
             MIDDLE: THREE.MOUSE.DOLLY,
-            RIGHT: THREE.MOUSE.PAN
+            RIGHT: THREE.MOUSE.PAN,
           }}
         />
 
