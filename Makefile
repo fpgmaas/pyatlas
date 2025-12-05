@@ -12,6 +12,7 @@ check: ## Run code quality tools.
 	@uv run pre-commit run -a
 	@echo "🚀 Checking for obsolete dependencies: Running deptry"
 	@uv run deptry .
+	@uv run ty check
 
 .PHONY: test
 test: ## Test the code with pytest

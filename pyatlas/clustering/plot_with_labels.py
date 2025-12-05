@@ -1,3 +1,5 @@
+from typing import cast
+
 import plotly.express as px
 import polars as pl
 
@@ -31,8 +33,8 @@ def create_dataset_for_labeled_plot(df: pl.DataFrame, cluster_metadata: pl.DataF
     )
 
     log_dl = (projected["weekly_downloads"] + 1).log10()
-    log_min = float(log_dl.min())
-    log_max = float(log_dl.max())
+    log_min = cast(float, log_dl.min())
+    log_max = cast(float, log_dl.max())
     denom = log_max - log_min if log_max > log_min else 1.0
 
     # --- size mapping params ---

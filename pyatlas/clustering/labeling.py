@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from typing import cast
 
 import polars as pl
 from openai import OpenAI
@@ -78,8 +79,8 @@ class ClusterMetadataGenerator:
     def _calculate_centroid(self, df: pl.DataFrame, cluster_id: str) -> tuple[float, float]:
         """Calculate the centroid (mean x, y) of a cluster."""
         cluster_data = self._get_cluster_data(df, cluster_id)
-        centroid_x = cluster_data[self.x_column].mean()
-        centroid_y = cluster_data[self.y_column].mean()
+        centroid_x = cast(float, cluster_data[self.x_column].mean())
+        centroid_y = cast(float, cluster_data[self.y_column].mean())
         return (centroid_x, centroid_y)
 
     def _calculate_total_weekly_downloads(self, df: pl.DataFrame, cluster_id: str) -> int:
@@ -92,10 +93,10 @@ class ClusterMetadataGenerator:
         """Calculate the min and max x, y coordinates for a cluster."""
         cluster_data = self._get_cluster_data(df, cluster_id)
         return {
-            "min_x": cluster_data[self.x_column].min(),
-            "max_x": cluster_data[self.x_column].max(),
-            "min_y": cluster_data[self.y_column].min(),
-            "max_y": cluster_data[self.y_column].max(),
+            "min_x": cast(float, cluster_data[self.x_column].min()),
+            "max_x": cast(float, cluster_data[self.x_column].max()),
+            "min_y": cast(float, cluster_data[self.y_column].min()),
+            "max_y": cast(float, cluster_data[self.y_column].max()),
         }
 
 

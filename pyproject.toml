@@ -3,7 +3,7 @@ name = "pyatlas"
 version = "0.0.1"
 description = "PyAtlas helps you find PyPI packages through natural language prompts with the help of Large Language Models (LLMs)."
 authors = [{ name = "Florian Maas", email = "ffpgmaas@gmail.com" }]
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 readme = "README.md"
 dependencies = [
     "beautifulsoup4>=4.12.3,<5",
@@ -39,6 +39,7 @@ dev = [
     "pre-commit>=3.4.0,<4",
     "tox>=4.11.1,<5",
     "marimo>=0.17.6",
+    "ty>=0.0.1a31",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -120,3 +121,6 @@ extend_exclude = [
 [tool.deptry.per_rule_ignores]
 DEP002 = ["lxml", "uvicorn", "pyarrow"]
 DEP003 = ["marimo"]
+
+[tool.ty.environment]
+root = ["./pyatlas"]

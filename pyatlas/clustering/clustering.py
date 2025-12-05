@@ -38,8 +38,8 @@ class ClusterIdGenerator:
 
     @staticmethod
     def _unsupervised_cluster_with_umap(
-        embeddings: np.array,
-    ) -> np.array:
+        embeddings: np.ndarray,
+    ) -> np.ndarray:
         normalized_embeddings = normalize(embeddings, norm="l2")
 
         umap_reducer = umap.UMAP(

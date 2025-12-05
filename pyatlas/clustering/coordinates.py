@@ -18,8 +18,8 @@ class ClusterCoordinatesGenerator:
         # others together visually.
         coordinates = self._log_radius_scale(coordinates)
         df = df.with_columns(
-            x=coordinates[:, 0],
-            y=coordinates[:, 1],
+            x=pl.Series(coordinates[:, 0]),
+            y=pl.Series(coordinates[:, 1]),
         )
         return df
 
@@ -38,7 +38,7 @@ class ClusterCoordinatesGenerator:
         return scaled + center
 
     @staticmethod
-    def _supervised_cluster_with_umap(embeddings: np.array, cluster_ids: np.array) -> np.array:
+    def _supervised_cluster_with_umap(embeddings: np.ndarray, cluster_ids: np.ndarray) -> np.ndarray:
         normalized_embeddings = normalize(embeddings, norm="l2")
 
         umap_reducer = umap.UMAP(

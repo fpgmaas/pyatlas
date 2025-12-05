@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import polars as pl
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
@@ -47,12 +48,12 @@ class VectorEmbeddingCreator:
         df = df.with_columns(pl.Series(self.embedding_column_name, all_embeddings))
         return df
 
-    def _generate_embeddings(self, chunk: pl.DataFrame, text_column: str) -> list:
+    def _generate_embeddings(self, chunk: pl.DataFrame, text_column: str) -> np.ndarray:
         embeddings = self.model.encode(list(chunk[text_column]), show_progress_bar=False)
         return embeddings
 
     @staticmethod
-    def _split_dataframe_in_batches(df: pl.DataFrame, batch_size: int) -> list:
+    def _split_dataframe_in_batches(df: pl.DataFrame, batch_size: int) -> list[pl.DataFrame]:
         """
         Splits a Polars DataFrame into batches.
         """
