@@ -114,9 +114,10 @@ export function PackagePoints() {
       .selected as THREE.BufferAttribute;
 
     // Find index of selected package
-    const selectedIndex = selectedPackageId
-      ? packages.findIndex((pkg) => pkg.id === selectedPackageId)
-      : -1;
+    const selectedIndex =
+      selectedPackageId !== null
+        ? packages.findIndex((pkg) => pkg.id === selectedPackageId)
+        : -1;
 
     // Turn off previous selected
     if (
