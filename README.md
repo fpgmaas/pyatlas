@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://pyatlas.io">
-    <img src="public/screenshot.png" alt="Screenshot of PyAtlas" width="708">
+    <img src="public/screenshot.png" alt="Screenshot of PyAtlas" width="699">
   </a>
 </p>
 
