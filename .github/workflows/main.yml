@@ -27,6 +27,9 @@ jobs:
       - name: Inspect dependencies
         run: uv run deptry .
 
+      - name: Type checking
+        run: uv run ty check
+
       - name: Check lock file consistency
         run: uv sync --locked
 
