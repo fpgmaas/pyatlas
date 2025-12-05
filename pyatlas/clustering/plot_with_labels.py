@@ -17,10 +17,8 @@ def create_dataset_for_labeled_plot(df: pl.DataFrame, cluster_metadata: pl.DataF
     df = df.with_columns(pl.col("cluster_id").cast(pl.String).alias("cluster_id"))
     cluster_metadata = cluster_metadata.with_columns(pl.col("cluster_id").cast(pl.String).alias("cluster_id"))
 
-    # Join cluster labels to the main dataset
     df = df.join(cluster_metadata.select(["cluster_id", "cluster_label"]), on="cluster_id", how="left")
 
-    # Handle missing labels (e.g., for noise cluster -1)
     df = df.with_columns(
         pl.when(pl.col("cluster_label").is_null())
         .then(pl.lit("Unclustered"))
@@ -37,14 +35,11 @@ def create_dataset_for_labeled_plot(df: pl.DataFrame, cluster_metadata: pl.DataF
     log_max = cast(float, log_dl.max())
     denom = log_max - log_min if log_max > log_min else 1.0
 
-    # --- size mapping params ---
-    min_size = 16  # smaller low-download dots
-    max_size = 128  # much bigger high-download dots
+    min_size = 16
+    max_size = 128
     gamma = 1  # >1: emphasise high end, <1: emphasise low end
 
-    # Normalize to 0..1
     norm = (log_dl - log_min) / denom
-    # Non-linear mapping: push more contrast to the top end
     norm = norm.clip(0, 1) ** gamma
 
     size_vals = min_size + (max_size - min_size) * norm
@@ -68,18 +63,17 @@ def create_plot_with_labels(df: pl.DataFrame, cluster_metadata: pl.DataFrame):
     Returns:
         Plotly figure with scatter plot and cluster labels
     """
-    # Create the scatter plot
     fig = px.scatter(
         df,
         x="x",
         y="y",
         hover_name="name",
-        color="cluster_label",  # color by cluster label
-        size="size",  # marker size from log(downloads)
+        color="cluster_label",
+        size="size",
         custom_data=["weekly_downloads", "cluster_id", "summary", "cluster_label"],
         title="Embedding projection with cluster labels",
         opacity=0.5,
-        height=1000,  # taller figure
+        height=1000,
     )
 
     fig.update_traces(
@@ -96,7 +90,6 @@ def create_plot_with_labels(df: pl.DataFrame, cluster_metadata: pl.DataFrame):
         ),
     )
 
-    # Add cluster labels as text annotations at centroid positions
     cluster_metadata_str = cluster_metadata.with_columns(pl.col("cluster_id").cast(pl.String))
 
     annotations = []
@@ -121,7 +114,6 @@ def create_plot_with_labels(df: pl.DataFrame, cluster_metadata: pl.DataFrame):
         xaxis_title="Component 1",
         yaxis_title="Component 2",
         legend_title_text="Cluster",
-        # Keep aspect ratio so distances feel Euclidean
         yaxis_scaleanchor="x",
         yaxis_scaleratio=1,
         annotations=annotations,

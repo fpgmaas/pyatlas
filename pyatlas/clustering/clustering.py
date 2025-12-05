@@ -9,6 +9,20 @@ from sklearn.preprocessing import normalize
 
 @dataclass
 class ClusterIdGenerator:
+    """Generates cluster IDs for data points using UMAP dimensionality reduction and HDBSCAN clustering.
+
+    This class reduces high-dimensional embeddings using UMAP, then applies HDBSCAN
+    to identify dense clusters. Points that don't belong to any cluster are assigned
+    a cluster ID of -1.
+
+    Attributes:
+        min_cluster_size: Minimum number of points required to form a cluster.
+        min_samples: Number of samples in a neighborhood for a point to be a core point.
+        cluster_selection_method: Method used to select clusters from the condensed tree.
+        cluster_selection_epsilon: Distance threshold for merging clusters. Values around
+            0.01 provide best results; higher values result in fewer clusters.
+    """
+
     min_cluster_size: int = 8
     min_samples: int = 2
     cluster_selection_method: str = "leaf"
@@ -17,6 +31,20 @@ class ClusterIdGenerator:
     cluster_selection_epsilon: float = 0.0085
 
     def generate_cluster_ids(self, df: pl.DataFrame, embeddings_column: str):
+        """Assigns cluster IDs to each row in the DataFrame based on embedding similarity.
+
+        Extracts embeddings from the specified column, reduces dimensionality with UMAP,
+        normalizes the result, and clusters using HDBSCAN. The resulting cluster IDs are
+        added as a new string column named 'cluster_id'.
+
+        Args:
+            df: Input DataFrame containing an embeddings column.
+            embeddings_column: Name of the column containing embedding vectors.
+
+        Returns:
+            The input DataFrame with an additional 'cluster_id' column. Noise points
+            are assigned a cluster ID of '-1'.
+        """
         embeddings = np.asarray(df[embeddings_column].to_list(), dtype=np.float32)
         coords_for_hdbscan = self._unsupervised_cluster_with_umap(embeddings)
         norm_data = normalize(coords_for_hdbscan, norm="l2")
@@ -40,6 +68,17 @@ class ClusterIdGenerator:
     def _unsupervised_cluster_with_umap(
         embeddings: np.ndarray,
     ) -> np.ndarray:
+        """Reduces embedding dimensionality using UMAP for downstream clustering.
+
+        Normalizes the input embeddings with L2 normalization, then applies UMAP to
+        project them into a 16-dimensional space suitable for HDBSCAN clustering.
+
+        Args:
+            embeddings: High-dimensional embedding vectors to reduce.
+
+        Returns:
+            Low-dimensional coordinates suitable for clustering.
+        """
         normalized_embeddings = normalize(embeddings, norm="l2")
 
         umap_reducer = umap.UMAP(

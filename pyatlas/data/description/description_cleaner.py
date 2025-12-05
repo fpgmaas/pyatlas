@@ -32,7 +32,6 @@ class DescriptionCleaner:
         Extracts plain text from package descriptions in the specified DataFrame column.
         """
 
-        # Process with progress bar
         results = []
         total = len(df)
 
@@ -47,21 +46,17 @@ class DescriptionCleaner:
         description = row.get(input_col)
         content_type_str = row.get(self.content_type_column)
 
-        # Handle None/empty descriptions
         if description is None or not str(description).strip():
             return ""
 
         try:
-            # Detect content type
             detected_type = self.detector.detect(description, content_type=content_type_str)
 
-            # Render and extract text
             extracted = render_and_extract_text(description, detected_type)
 
             return extracted or ""  # noqa: TRY300
 
         except Exception as exc:
-            # Log warning with some context, but don't break the pipeline
             logger.warning(
                 "Failed to extract description text (content_type=%r). Returning empty string.",
                 content_type_str,

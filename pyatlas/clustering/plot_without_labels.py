@@ -16,14 +16,11 @@ def create_dataset_for_unlabeled_plot(df: pl.DataFrame) -> pl.DataFrame:
     log_max = cast(float, log_dl.max())
     denom = log_max - log_min if log_max > log_min else 1.0
 
-    # --- size mapping params ---
-    min_size = 16  # smaller low-download dots
-    max_size = 128  # much bigger high-download dots
+    min_size = 16
+    max_size = 128
     gamma = 1  # >1: emphasise high end, <1: emphasise low end
 
-    # Normalize to 0..1
     norm = (log_dl - log_min) / denom
-    # Non-linear mapping: push more contrast to the top end
     norm = norm.clip(0, 1) ** gamma
 
     size_vals = min_size + (max_size - min_size) * norm
@@ -43,12 +40,12 @@ def create_plot(df):
         x="x",
         y="y",
         hover_name="name",
-        color="cluster_id",  # color by cluster
-        size="size",  # marker size from log(downloads)
+        color="cluster_id",
+        size="size",
         custom_data=["weekly_downloads", "cluster_id", "summary"],
         title="Embedding projection",
         opacity=0.5,
-        height=1000,  # taller figure
+        height=1000,
     )
 
     fig.update_traces(
@@ -71,7 +68,6 @@ def create_plot(df):
         xaxis_title="Component 1",
         yaxis_title="Component 2",
         legend_title_text="Cluster",
-        # Keep aspect ratio so distances feel Euclidean
         yaxis_scaleanchor="x",
         yaxis_scaleratio=1,
     )

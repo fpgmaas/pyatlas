@@ -14,7 +14,6 @@ def generate_json_outputs():
 
     config = Config.from_toml()
 
-    # Load the source CSVs
     clustered_dataset_path = config.storage.data_folder / config.storage.clustered_dataset_csv
     cluster_metadata_path = config.storage.data_folder / config.storage.cluster_metadata_csv
     cluster_labels_path = config.storage.data_folder / config.storage.cluster_labels_csv
@@ -25,7 +24,6 @@ def generate_json_outputs():
 
     df_clusters = df_cluster_labels.join(df_clusters, on="cluster_id", how="outer")
 
-    # Generate packages.json
     packages = []
     for idx, row in enumerate(df_packages.iter_rows(named=True)):
         packages.append(
@@ -40,7 +38,6 @@ def generate_json_outputs():
             }
         )
 
-    # Generate clusters.json
     clusters = []
     for row in df_clusters.iter_rows(named=True):
         clusters.append(
@@ -57,7 +54,6 @@ def generate_json_outputs():
             }
         )
 
-    # Write output files
     packages_json_path = config.storage.data_folder / config.storage.packages_json
     clusters_json_path = config.storage.data_folder / config.storage.clusters_json
 
