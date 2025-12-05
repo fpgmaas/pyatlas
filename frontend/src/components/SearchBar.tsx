@@ -30,6 +30,7 @@ export function SearchBar() {
         keys: ["name", "summary"],
         threshold: 0.2,
         includeScore: true,
+        ignoreLocation: true,
       }),
     [packages],
   );
