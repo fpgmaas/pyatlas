@@ -22,8 +22,8 @@ void main() {
   // density 0.0 = zoomed in (few visible) -> full brightness
   // density 1.0 = zoomed out (many visible) -> very dim
   float densityFactor = smoothstep(0.0, 0.8, vDensity);
-  float haloBrightness = mix(1.0, 0.05, densityFactor);
-  float coreBrightness = mix(1.0, 0.3, densityFactor);
+  float haloBrightness = mix(1.0, 0.15, densityFactor);
+  float coreBrightness = mix(1.0, 0.45, densityFactor);
 
   // === Star geometry ===
   // Natural star: bright core with exponential falloff
