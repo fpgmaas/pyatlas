@@ -16,7 +16,7 @@ export function Chip({
   variant = "default",
 }: ChipProps) {
   const baseClass = `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium
-                     border bg-gray-900/80 border-gray-700/60 backdrop-blur
+                     border bg-gray-900/80 border-gray-700/60 backdrop-blur cursor-pointer
                      hover:bg-gray-800/90 transition-all duration-100
                      hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-indigo-500`;
 

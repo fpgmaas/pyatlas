@@ -18,3 +18,11 @@ export const CAMERA_ANIMATION_DURATION = {
   NORMAL: 1000,
   SLOW: 1500,
 } as const;
+
+/**
+ * Default speed settings for camera controls
+ */
+export const CAMERA_SPEED_DEFAULTS = {
+  ZOOM: 2.5,
+  PAN: 1,
+} as const;

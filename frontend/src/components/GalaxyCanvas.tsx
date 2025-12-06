@@ -14,7 +14,10 @@ import { useZoomTracker } from "../hooks/useZoomTracker";
 import { useNormalizedZoom } from "../hooks/useNormalizedZoom";
 import { useViewportBounds } from "../hooks/useViewportBounds";
 import { useGalaxyStore } from "../store/useGalaxyStore";
-import { CAMERA_ZOOM_LEVELS } from "../utils/cameraConstants";
+import {
+  CAMERA_ZOOM_LEVELS,
+  CAMERA_SPEED_DEFAULTS,
+} from "../utils/cameraConstants";
 
 function ZoomDebug() {
   const zoom = useGalaxyStore((s) => s.currentZoom);
@@ -87,6 +90,35 @@ function CameraAnimationController() {
   return null;
 }
 
+function CameraControls({ bounds }: { bounds: Bounds }) {
+  const zoomMultiplier = useGalaxyStore((s) => s.zoomSpeedMultiplier);
+  const panMultiplier = useGalaxyStore((s) => s.panSpeedMultiplier);
+
+  return (
+    <OrbitControls
+      makeDefault
+      target={[bounds.centerX, bounds.centerY, 0]}
+      enableRotate={false}
+      enablePan={true}
+      enableZoom={true}
+      minZoom={CAMERA_ZOOM_LEVELS.MIN}
+      maxZoom={CAMERA_ZOOM_LEVELS.MAX}
+      zoomSpeed={CAMERA_SPEED_DEFAULTS.ZOOM * zoomMultiplier}
+      panSpeed={CAMERA_SPEED_DEFAULTS.PAN * panMultiplier}
+      touches={{
+        ONE: THREE.TOUCH.PAN,
+        TWO: THREE.TOUCH.DOLLY_PAN,
+      }}
+      zoomToCursor={true}
+      mouseButtons={{
+        LEFT: THREE.MOUSE.PAN,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.PAN,
+      }}
+    />
+  );
+}
+
 export function GalaxyCanvas() {
   const bounds = useDataBounds();
 
@@ -105,28 +137,7 @@ export function GalaxyCanvas() {
         />
 
         <CameraSetup bounds={bounds} />
-
-        <OrbitControls
-          makeDefault
-          target={[bounds.centerX, bounds.centerY, 0]}
-          enableRotate={false}
-          enablePan={true}
-          enableZoom={true}
-          minZoom={CAMERA_ZOOM_LEVELS.MIN}
-          maxZoom={CAMERA_ZOOM_LEVELS.MAX}
-          zoomSpeed={2.5}
-          panSpeed={1}
-          touches={{
-            ONE: THREE.TOUCH.PAN,
-            TWO: THREE.TOUCH.DOLLY_PAN,
-          }}
-          zoomToCursor={true}
-          mouseButtons={{
-            LEFT: THREE.MOUSE.PAN,
-            MIDDLE: THREE.MOUSE.DOLLY,
-            RIGHT: THREE.MOUSE.PAN,
-          }}
-        />
+        <CameraControls bounds={bounds} />
 
         <NormalizedZoomController />
 

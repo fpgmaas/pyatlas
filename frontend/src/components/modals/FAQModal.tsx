@@ -23,21 +23,25 @@ export function FAQModal() {
       <div className="space-y-4">
         <FAQItem
           question="What is PyAtlas?"
-          answer="PyAtlas is an interactive visualization of the top 10,000 Python packages on PyPI, organized by their functionality and relationships."
+          answer="PyAtlas is an interactive map of the top 10,000 Python packages on PyPI. Packages with similar functionality are positioned close together, making it easy to discover alternatives or related tools."
         />
         <FAQItem
-          question="How are clusters determined?"
-          answer="Packages are grouped into clusters based on their descriptions and dependencies using machine learning techniques. Each cluster represents packages with similar functionality."
+          question="How does this work?"
+          answer="Package descriptions are converted into vector embeddings using Sentence Transformers. These embeddings are reduced to 2D coordinates using UMAP, while HDBSCAN groups packages into clusters. Cluster labels are generated using OpenAI's gpt-5-mini."
         />
         <FAQItem
           question="How is popularity measured?"
-          answer="Package popularity is measured by weekly downloads from PyPI. The size of each point represents relative popularity."
+          answer="Package popularity is based on weekly downloads from PyPI. The size of each star represents its relative popularity."
         />
         <FAQItem
-          question="How can I contribute?"
+          question="What are the constellations?"
+          answer="The constellations are only for aesthetics. They connect the most popular packages in a cluster and don't serve any actual function."
+        />
+        <FAQItem
+          question="Where can I learn more?"
           answer={
             <>
-              PyAtlas is open source! Visit our{" "}
+              PyAtlas is open source! Visit the{" "}
               <a
                 href="https://github.com/fpgmaas/pyatlas"
                 target="_blank"
@@ -46,7 +50,7 @@ export function FAQModal() {
               >
                 GitHub repository
               </a>{" "}
-              to contribute or report issues.
+              for technical details, to contribute, or to report issues.
             </>
           }
         />

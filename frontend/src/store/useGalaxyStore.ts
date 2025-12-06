@@ -10,6 +10,12 @@ export interface CameraAnimationRequest {
 
 export type ModalId = "controls" | "clusters" | "faq" | null;
 
+// Speed multipliers (1.0 = default, 0.5 = half speed, 2.0 = double speed)
+export const SPEED_DEFAULTS = {
+  zoomMultiplier: 1.0,
+  panMultiplier: 1.0,
+} as const;
+
 interface GalaxyStore {
   packages: Package[];
   clusters: Cluster[];
@@ -28,6 +34,8 @@ interface GalaxyStore {
   cameraAnimationRequest: CameraAnimationRequest | null;
   isSidebarOpen: boolean;
   activeModal: ModalId;
+  zoomSpeedMultiplier: number;
+  panSpeedMultiplier: number;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -47,6 +55,8 @@ interface GalaxyStore {
   setSidebarOpen: (isOpen: boolean) => void;
   toggleSidebar: () => void;
   setActiveModal: (modal: ModalId) => void;
+  setZoomSpeedMultiplier: (multiplier: number) => void;
+  setPanSpeedMultiplier: (multiplier: number) => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
@@ -67,6 +77,8 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   cameraAnimationRequest: null,
   isSidebarOpen: false,
   activeModal: null,
+  zoomSpeedMultiplier: SPEED_DEFAULTS.zoomMultiplier,
+  panSpeedMultiplier: SPEED_DEFAULTS.panMultiplier,
 
   setPackages: (packages) => set({ packages }),
   setClusters: (clusters) => {
@@ -104,4 +116,8 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   toggleSidebar: () =>
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
   setActiveModal: (modal) => set({ activeModal: modal }),
+  setZoomSpeedMultiplier: (multiplier) =>
+    set({ zoomSpeedMultiplier: multiplier }),
+  setPanSpeedMultiplier: (multiplier) =>
+    set({ panSpeedMultiplier: multiplier }),
 }));
