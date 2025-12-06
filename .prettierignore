@@ -1,0 +1,4 @@
+# Shader files
+*.vert
+*.frag
+*.glsl

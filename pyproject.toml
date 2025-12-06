@@ -1,49 +1,63 @@
-[tool.poetry]
-name = "pypi_scout"
+[project]
+name = "pyatlas"
 version = "0.0.1"
-description = "PyPI Scout helps you find PyPI packages through natural language prompts with the help of Large Language Models (LLMs)."
-authors = ["Florian Maas <ffpgmaas@gmail.com>"]
-repository = "https://github.com/fpgmaas/pypi-scout"
-documentation = "https://fpgmaas.github.io/pypi-scout/"
+description = "PyAtlas helps you find PyPI packages through natural language prompts with the help of Large Language Models (LLMs)."
+authors = [{ name = "Florian Maas", email = "ffpgmaas@gmail.com" }]
+requires-python = ">=3.10,<4.0"
 readme = "README.md"
-packages = [
-  {include = "pypi_scout"}
+dependencies = [
+    "beautifulsoup4>=4.12.3,<5",
+    "polars>=0.20.31,<0.21",
+    "sentence-transformers>=3.0.1,<4",
+    "lxml>=5.2.2,<6",
+    "python-dotenv>=1.0.1,<2",
+    "tqdm>=4.66.4,<5",
+    "pydantic>=2.7.4,<3",
+    "pydantic-settings>=2.0.0,<3",
+    "uvicorn>=0.30.1,<0.31",
+    "gdown>=5.2.0,<6",
+    "numpy>=2.0.0,<3",
+    "scikit-learn>=1.5.0,<2",
+    "readme-renderer[md]>=44.0",
+    "plotly>=6.5.0",
+    "pyarrow>=21.0.0",
+    "umap-learn>=0.5.9.post2",
+    "hdbscan>=0.8.40",
+    "openai>=1.0.0,<2",
+    "scipy>=1.15.3",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<4.0"
-beautifulsoup4 = "^4.12.3"
-polars = "^0.20.31"
-sentence-transformers = "^3.0.1"
-lxml = "^5.2.2"
-python-dotenv = "^1.0.1"
-tqdm = "^4.66.4"
-fastapi = "^0.111.0"
-pydantic = "^2.7.4"
-uvicorn = "^0.30.1"
-gdown = "^5.2.0"
-azure-storage-blob = "^12.20.0"
-slowapi = "^0.1.9"
-starlette = "^0.37.2"
-numpy = "^2.0.0"
-scikit-learn = "^1.5.0"
+[project.urls]
+Repository = "https://github.com/fpgmaas/pyatlas"
+Documentation = "https://fpgmaas.github.io/pyatlas/"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
-pytest-cov = "^4.0.0"
-pytest-mock = "^3.14.0"
-deptry = "^0.12.0"
-pre-commit = "^3.4.0"
-tox = "^4.11.1"
+[dependency-groups]
+dev = [
+    "pytest>=7.2.0,<8",
+    "pytest-cov>=4.0.0,<5",
+    "pytest-mock>=3.14.0,<4",
+    "deptry>=0.12.0,<0.13",
+    "pre-commit>=3.4.0,<4",
+    "tox>=4.11.1,<5",
+    "marimo>=0.17.6",
+    "ty>=0.0.1a31",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["pyatlas"]
+
+[tool.hatch.build.targets.wheel]
+include = ["pyatlas"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.ruff]
+extend-exclude = ["notebooks"]
 target-version = "py37"
 line-length = 120
 fix = true
@@ -84,6 +98,7 @@ ignore = [
     "E501",
     # DoNotAssignLambda
     "E731",
+    "TRY003",
 ]
 
 [tool.ruff.format]
@@ -94,8 +109,7 @@ skip_empty = true
 
 [tool.coverage.run]
 branch = true
-source = ["pypi_scout"]
-
+source = ["pyatlas"]
 
 [tool.ruff.per-file-ignores]
 "tests/*" = ["S101"]
@@ -106,4 +120,8 @@ extend_exclude = [
 ]
 
 [tool.deptry.per_rule_ignores]
-DEP002 = ["lxml", "uvicorn"]
+DEP002 = ["lxml", "uvicorn", "pyarrow"]
+DEP003 = ["marimo"]
+
+[tool.ty.environment]
+root = ["./pyatlas"]
