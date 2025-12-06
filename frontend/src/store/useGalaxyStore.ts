@@ -3,9 +3,10 @@ import type { Package, Cluster, Constellation } from "../types";
 import type { ViewportBounds } from "../hooks/useViewportBounds";
 
 export interface CameraAnimationRequest {
-  x: number;
-  y: number;
+  x?: number;
+  y?: number;
   zoom: number;
+  duration?: number;
 }
 
 export type ModalId = "controls" | "clusters" | "faq" | null;

@@ -79,9 +79,16 @@ function CameraAnimationController() {
     if (!cameraAnimationRequest) return;
 
     if (controls) {
-      // Simple animation to the target position and zoom
-      animateTo(cameraAnimationRequest.x, cameraAnimationRequest.y, {
+      const ctrl = controls as any;
+      // Use provided x/y or keep current target position (for zoom-only animations)
+      const targetX = cameraAnimationRequest.x ?? ctrl.target.x;
+      const targetY = cameraAnimationRequest.y ?? ctrl.target.y;
+
+      animateTo(targetX, targetY, {
         zoom: cameraAnimationRequest.zoom,
+        ...(cameraAnimationRequest.duration !== undefined && {
+          duration: cameraAnimationRequest.duration,
+        }),
       });
       requestCameraAnimation(null);
     }

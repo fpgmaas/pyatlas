@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar/Sidebar";
 import { PackageDetail } from "../PackageDetail";
 import { SearchBar } from "../SearchBar";
 import { FloatingGitHubButton } from "../shared/FloatingGitHubButton";
+import { ZoomControls } from "../shared/ZoomControls";
 import { useGalaxyStore } from "../../store/useGalaxyStore";
 
 function CollapsedTopBar() {
@@ -49,8 +50,11 @@ export function DesktopLayout() {
         <PackageDetail />
       </div>
 
-      {/* Floating GitHub button - only visible when sidebar is closed */}
-      {!isSidebarOpen && <FloatingGitHubButton />}
+      {/* Bottom right controls */}
+      <div className="fixed bottom-4 right-4 z-40 flex items-end gap-2">
+        {!isSidebarOpen && <FloatingGitHubButton />}
+        <ZoomControls />
+      </div>
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { TopBar } from "./TopBar";
 import { PackageDetail } from "../PackageDetail";
 import { FloatingGitHubButton } from "../shared/FloatingGitHubButton";
+import { ZoomControls } from "../shared/ZoomControls";
 
 export function MobileLayout() {
   return (
@@ -12,9 +13,12 @@ export function MobileLayout() {
         <PackageDetail />
       </div>
 
-      {/* Floating GitHub button - only visible on medium screens (sm: and up) */}
-      <div className="hidden sm:block">
-        <FloatingGitHubButton />
+      {/* Bottom right controls - zoom always visible, GitHub only on sm+ */}
+      <div className="fixed bottom-4 right-3 z-40 flex items-end gap-2">
+        <div className="hidden sm:block">
+          <FloatingGitHubButton />
+        </div>
+        <ZoomControls />
       </div>
     </>
   );
