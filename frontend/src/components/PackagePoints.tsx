@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useCallback } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
-import { useGalaxyStore } from "../store/useGalaxyStore";
+import { useGalaxyStore, HIGHLIGHT_TIMING } from "../store/useGalaxyStore";
 import { getClusterColor } from "../utils/colorPalette";
 import { precomputeSizes } from "../utils/sizeScaling";
 import { createInstancedQuadMaterial } from "../shaders/instancedQuadShader";
@@ -16,10 +16,14 @@ export function PackagePoints() {
   const selectedPackageId = useGalaxyStore((s) => s.selectedPackageId);
   const setSelectedPackageId = useGalaxyStore((s) => s.setSelectedPackageId);
   const setHoveredIndex = useGalaxyStore((s) => s.setHoveredIndex);
+  const highlightedClusterId = useGalaxyStore((s) => s.highlightedClusterId);
+  const highlightStartTime = useGalaxyStore((s) => s.highlightStartTime);
+  const setHighlightedCluster = useGalaxyStore((s) => s.setHighlightedCluster);
   const { camera, size } = useThree();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const prevHoveredIndex = useRef<number | null>(null);
   const prevSelectedIndex = useRef<number | null>(null);
+  const prevHighlightedClusterId = useRef<number | null>(null);
 
   // Compute total data bounds for density calculation
   const dataBounds = useMemo(() => computeBounds(packages), [packages]);
@@ -53,6 +57,7 @@ export function PackagePoints() {
     const sizes = new Float32Array(instanceCount);
     const hovered = new Float32Array(instanceCount);
     const selected = new Float32Array(instanceCount);
+    const highlighted = new Float32Array(instanceCount);
     const sizeMap = precomputeSizes(packages);
 
     packages.forEach((pkg, i) => {
@@ -64,6 +69,7 @@ export function PackagePoints() {
       sizes[i] = sizeMap.get(pkg.id) || 16;
       hovered[i] = 0;
       selected[i] = 0;
+      highlighted[i] = 0;
     });
 
     // Attach as InstancedBufferAttributes
@@ -82,6 +88,10 @@ export function PackagePoints() {
     geometry.setAttribute(
       "instanceSelected",
       new THREE.InstancedBufferAttribute(selected, 1),
+    );
+    geometry.setAttribute(
+      "instanceHighlighted",
+      new THREE.InstancedBufferAttribute(highlighted, 1),
     );
 
     const material = createInstancedQuadMaterial();
@@ -190,6 +200,35 @@ export function PackagePoints() {
     selectedAttr.needsUpdate = true;
     prevSelectedIndex.current = selectedIndex !== -1 ? selectedIndex : null;
   }, [selectedPackageId, packages]);
+
+  // Handle cluster highlight state - update all packages in the cluster
+  useEffect(() => {
+    if (!meshRef.current) return;
+    const highlightedAttr = meshRef.current.geometry.getAttribute(
+      "instanceHighlighted",
+    ) as THREE.InstancedBufferAttribute;
+
+    // Clear previous highlighted cluster
+    if (prevHighlightedClusterId.current !== null) {
+      packages.forEach((pkg, i) => {
+        if (pkg.clusterId === prevHighlightedClusterId.current) {
+          highlightedAttr.setX(i, 0);
+        }
+      });
+    }
+
+    // Set new highlighted cluster
+    if (highlightedClusterId !== null) {
+      packages.forEach((pkg, i) => {
+        if (pkg.clusterId === highlightedClusterId) {
+          highlightedAttr.setX(i, 1);
+        }
+      });
+    }
+
+    highlightedAttr.needsUpdate = true;
+    prevHighlightedClusterId.current = highlightedClusterId;
+  }, [highlightedClusterId, packages]);
 
   // Find closest package using spatial index + zoom-aware threshold
   const findClosestPackage = useCallback(
@@ -304,6 +343,22 @@ export function PackagePoints() {
 
     if (mat.uniforms?.density) {
       mat.uniforms.density.value = normalizedDensity;
+    }
+
+    // Update highlight progress
+    if (mat.uniforms?.highlightProgress) {
+      if (highlightStartTime !== null && highlightedClusterId !== null) {
+        const elapsed = performance.now() - highlightStartTime;
+        const progress = Math.min(1.0, elapsed / HIGHLIGHT_TIMING.TOTAL);
+        mat.uniforms.highlightProgress.value = progress;
+
+        // Auto-clear highlight when animation completes
+        if (progress >= 1.0) {
+          setHighlightedCluster(null);
+        }
+      } else {
+        mat.uniforms.highlightProgress.value = 0.0;
+      }
     }
   });
 

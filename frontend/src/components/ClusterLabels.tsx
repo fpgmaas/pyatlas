@@ -6,7 +6,7 @@ import { useIsMobile } from "../hooks/useIsMobile";
 export function ClusterLabels() {
   const clusters = useGalaxyStore((s) => s.clusters);
   const selectedClusterIds = useGalaxyStore((s) => s.selectedClusterIds);
-  const toggleCluster = useGalaxyStore((s) => s.toggleCluster);
+  const focusOnCluster = useGalaxyStore((s) => s.focusOnCluster);
   const currentZoom = useGalaxyStore((s) => s.currentZoom);
   const isMobile = useIsMobile();
 
@@ -30,7 +30,7 @@ export function ClusterLabels() {
   const handleClick = (clusterId: number) => (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    toggleCluster(clusterId);
+    focusOnCluster(clusterId);
   };
 
   return (

@@ -16,6 +16,14 @@ export const SPEED_DEFAULTS = {
   panMultiplier: 1.0,
 } as const;
 
+// Highlight animation timing (in ms)
+export const HIGHLIGHT_TIMING = {
+  FADE_IN: 200, // Quick brightness boost
+  HOLD: 500, // Hold at peak
+  FADE_OUT: 1500, // Gradual return to normal
+  TOTAL: 2200, // Total duration
+} as const;
+
 interface GalaxyStore {
   packages: Package[];
   clusters: Cluster[];
@@ -36,6 +44,8 @@ interface GalaxyStore {
   activeModal: ModalId;
   zoomSpeedMultiplier: number;
   panSpeedMultiplier: number;
+  highlightedClusterId: number | null;
+  highlightStartTime: number | null;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -57,6 +67,8 @@ interface GalaxyStore {
   setActiveModal: (modal: ModalId) => void;
   setZoomSpeedMultiplier: (multiplier: number) => void;
   setPanSpeedMultiplier: (multiplier: number) => void;
+  setHighlightedCluster: (clusterId: number | null) => void;
+  focusOnCluster: (clusterId: number) => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
@@ -79,6 +91,8 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   activeModal: null,
   zoomSpeedMultiplier: SPEED_DEFAULTS.zoomMultiplier,
   panSpeedMultiplier: SPEED_DEFAULTS.panMultiplier,
+  highlightedClusterId: null,
+  highlightStartTime: null,
 
   setPackages: (packages) => set({ packages }),
   setClusters: (clusters) => {
@@ -120,4 +134,35 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
     set({ zoomSpeedMultiplier: multiplier }),
   setPanSpeedMultiplier: (multiplier) =>
     set({ panSpeedMultiplier: multiplier }),
+  setHighlightedCluster: (clusterId) =>
+    set({
+      highlightedClusterId: clusterId,
+      highlightStartTime: clusterId !== null ? performance.now() : null,
+    }),
+  focusOnCluster: (clusterId) =>
+    set((state) => {
+      // Find the cluster to get its centroid
+      const cluster = state.clusters.find((c) => c.clusterId === clusterId);
+      if (!cluster) return {};
+
+      // If cluster is hidden, make it visible
+      let newSelectedClusterIds = state.selectedClusterIds;
+      if (!state.selectedClusterIds.has(clusterId)) {
+        newSelectedClusterIds = new Set(state.selectedClusterIds);
+        newSelectedClusterIds.add(clusterId);
+      }
+
+      return {
+        selectedClusterIds: newSelectedClusterIds,
+        // Request camera animation to cluster centroid
+        cameraAnimationRequest: {
+          x: cluster.centroidX,
+          y: cluster.centroidY,
+          zoom: 8, // CAMERA_ZOOM_LEVELS.CLUSTER
+        },
+        // Trigger highlight
+        highlightedClusterId: clusterId,
+        highlightStartTime: performance.now(),
+      };
+    }),
 }));

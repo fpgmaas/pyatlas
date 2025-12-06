@@ -2,11 +2,35 @@ import { useMemo } from "react";
 import { useGalaxyStore } from "../../store/useGalaxyStore";
 import { getClusterColor } from "../../utils/colorPalette";
 
+// Crosshairs/target icon for "move to" action
+function CrosshairsIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="22" y1="12" x2="18" y2="12" />
+      <line x1="6" y1="12" x2="2" y2="12" />
+      <line x1="12" y1="6" x2="12" y2="2" />
+      <line x1="12" y1="22" x2="12" y2="18" />
+    </svg>
+  );
+}
+
 export function ClusterList() {
   const clusters = useGalaxyStore((s) => s.clusters);
   const selectedClusterIds = useGalaxyStore((s) => s.selectedClusterIds);
   const toggleCluster = useGalaxyStore((s) => s.toggleCluster);
   const setSelectedClusterIds = useGalaxyStore((s) => s.setSelectedClusterIds);
+  const focusOnCluster = useGalaxyStore((s) => s.focusOnCluster);
+  const setActiveModal = useGalaxyStore((s) => s.setActiveModal);
 
   // Sort clusters alphabetically
   const sortedClusters = useMemo(() => {
@@ -26,6 +50,12 @@ export function ClusterList() {
       const allIds = new Set(clusters.map((c) => c.clusterId));
       setSelectedClusterIds(allIds);
     }
+  };
+
+  // Move to cluster (close modal and focus)
+  const handleMoveToCluster = (clusterId: number) => {
+    setActiveModal(null); // Close the modal
+    focusOnCluster(clusterId);
   };
 
   // Empty state
@@ -64,13 +94,12 @@ export function ClusterList() {
           const isSelected = selectedClusterIds.has(cluster.clusterId);
 
           return (
-            <label
+            <div
               key={cluster.clusterId}
               className="flex items-center gap-3 py-2.5 px-3 rounded-lg
-                hover:bg-gray-800/30 transition-colors cursor-pointer
-                focus-within:ring-2 focus-within:ring-blue-500/50"
+                hover:bg-gray-800/30 transition-colors"
             >
-              {/* Checkbox */}
+              {/* Checkbox for visibility toggle */}
               <input
                 type="checkbox"
                 checked={isSelected}
@@ -78,7 +107,7 @@ export function ClusterList() {
                 aria-label={`Toggle ${cluster.label} cluster visibility`}
                 className="w-4 h-4 rounded border-gray-600 text-blue-500
                   focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0
-                  bg-gray-800/70 cursor-pointer"
+                  bg-gray-800/70 cursor-pointer flex-shrink-0"
               />
 
               {/* Color Indicator */}
@@ -92,7 +121,19 @@ export function ClusterList() {
               <span className="text-sm text-gray-300 flex-1 truncate select-none">
                 {cluster.label}
               </span>
-            </label>
+
+              {/* Move to cluster button */}
+              <button
+                onClick={() => handleMoveToCluster(cluster.clusterId)}
+                aria-label={`Move to ${cluster.label} cluster`}
+                title="Move to cluster"
+                className="p-1.5 rounded-md text-gray-400 hover:text-white
+                  hover:bg-gray-700/50 transition-colors flex-shrink-0
+                  focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              >
+                <CrosshairsIcon />
+              </button>
+            </div>
           );
         })}
       </div>

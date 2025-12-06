@@ -17,6 +17,7 @@ export function createInstancedQuadMaterial(): THREE.ShaderMaterial {
       zoom: { value: 1.0 },
       frustumHeight: { value: 1.0 },
       resolution: { value: new THREE.Vector2(1, 1) },
+      highlightProgress: { value: 0.0 },
     },
   });
 }
