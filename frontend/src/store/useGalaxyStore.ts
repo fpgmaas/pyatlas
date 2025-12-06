@@ -8,6 +8,8 @@ export interface CameraAnimationRequest {
   zoom: number;
 }
 
+export type ModalId = "controls" | "clusters" | "faq" | null;
+
 interface GalaxyStore {
   packages: Package[];
   clusters: Cluster[];
@@ -25,6 +27,7 @@ interface GalaxyStore {
   labeledPackageIds: Set<number>;
   cameraAnimationRequest: CameraAnimationRequest | null;
   isSidebarOpen: boolean;
+  activeModal: ModalId;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -43,6 +46,7 @@ interface GalaxyStore {
   requestCameraAnimation: (request: CameraAnimationRequest | null) => void;
   setSidebarOpen: (isOpen: boolean) => void;
   toggleSidebar: () => void;
+  setActiveModal: (modal: ModalId) => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
@@ -62,6 +66,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   labeledPackageIds: new Set(),
   cameraAnimationRequest: null,
   isSidebarOpen: false,
+  activeModal: null,
 
   setPackages: (packages) => set({ packages }),
   setClusters: (clusters) => {
@@ -98,4 +103,5 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
   toggleSidebar: () =>
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  setActiveModal: (modal) => set({ activeModal: modal }),
 }));

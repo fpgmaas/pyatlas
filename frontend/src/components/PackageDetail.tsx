@@ -13,7 +13,7 @@ export function PackageDetail() {
 
   if (!selectedPackage) {
     return (
-      <div className="bg-gray-900/95 backdrop-blur-md rounded-lg px-4 py-4 sm:px-6 sm:py-4 shadow-2xl w-full max-w-md sm:w-96 border border-gray-700/50">
+      <div className="bg-gray-900/95 backdrop-blur-md rounded-lg px-4 py-4 sm:px-6 sm:py-4 shadow-2xl w-full sm:w-96 border border-gray-700/50">
         <p className="text-gray-400 text-sm">
           Click on a package to view details
         </p>
@@ -22,7 +22,7 @@ export function PackageDetail() {
   }
 
   return (
-    <div className="bg-gray-900/95 backdrop-blur-md rounded-lg px-4 py-4 sm:px-6 sm:py-4 shadow-2xl w-full max-w-md sm:w-96 border border-gray-700/50 relative">
+    <div className="bg-gray-900/95 backdrop-blur-md rounded-lg px-4 py-4 sm:px-6 sm:py-4 shadow-2xl w-full sm:w-96 border border-gray-700/50 relative">
       {/* Close button - absolute top-right */}
       <button
         onClick={() => setSelectedPackageId(null)}

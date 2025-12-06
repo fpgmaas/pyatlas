@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { GalaxyCanvas } from "./components/GalaxyCanvas";
-import { Sidebar } from "./components/Sidebar";
-import { PackageDetail } from "./components/PackageDetail";
+import { MobileLayout } from "./components/layout/MobileLayout";
+import { DesktopLayout } from "./components/layout/DesktopLayout";
+import { Modals } from "./components/modals/Modals";
 import { useGalaxyStore } from "./store/useGalaxyStore";
+import { useIsMobile } from "./hooks/useIsMobile";
 import {
   loadPackages,
   loadClusters,
@@ -10,8 +12,8 @@ import {
 } from "./utils/dataLoader";
 
 function App() {
-  const { setPackages, setClusters, setConstellations, isSidebarOpen } =
-    useGalaxyStore();
+  const { setPackages, setClusters, setConstellations } = useGalaxyStore();
+  const isMobile = useIsMobile(1024); // lg breakpoint
 
   useEffect(() => {
     // Load data on mount
@@ -35,28 +37,17 @@ function App() {
 
   return (
     <div
-      className="w-full bg-black overflow-hidden flex"
-      style={{ height: "100svh" }}
+      className="w-full bg-black overflow-hidden"
+      style={{ height: "100svh", touchAction: "none" }}
     >
-      <Sidebar />
+      {/* Canvas layer */}
+      <GalaxyCanvas />
 
-      {/* Main Canvas Area */}
-      <main
-        className="flex-1 h-full relative min-w-0"
-        style={{ touchAction: "none" }}
-      >
-        <GalaxyCanvas />
+      {/* Layout layer - responsive */}
+      {isMobile ? <MobileLayout /> : <DesktopLayout />}
 
-        {/* Package Detail - Responsive positioning with safe area support */}
-        {/* Hidden on mobile when sidebar is open to avoid overlap */}
-        <div
-          className={`absolute left-4 right-4 sm:left-auto sm:right-6 bottom-4 pointer-events-auto z-50 ${
-            isSidebarOpen ? "hidden lg:block" : ""
-          }`}
-        >
-          <PackageDetail />
-        </div>
-      </main>
+      {/* Global modals - single mount point */}
+      <Modals />
     </div>
   );
 }
