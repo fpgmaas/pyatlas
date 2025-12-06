@@ -37,7 +37,7 @@ class ClusterConstellationsGenerator:
     weekly_downloads_column: str = "weekly_downloads"
     name_column: str = "name"
     top_percent: float = TOP_PERCENT_PACKAGES
-    min_packages: float = MIN_PACKAGES_FOR_CONSTELLATION
+    min_packages: int = MIN_PACKAGES_FOR_CONSTELLATION
     cutoff_length_frac: float = CUTOFF_LENGTH_FRAC
 
     def generate_constellations(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -65,10 +65,10 @@ class ClusterConstellationsGenerator:
             return pl.DataFrame(all_edges)
 
         # Filter out edges that are too long in normalized coordinate space
-        min_x = float(df[self.x_column].min())
-        max_x = float(df[self.x_column].max())
-        min_y = float(df[self.y_column].min())
-        max_y = float(df[self.y_column].max())
+        min_x = float(df[self.x_column].min())  # type: ignore[arg-type]
+        max_x = float(df[self.x_column].max())  # type: ignore[arg-type]
+        min_y = float(df[self.y_column].min())  # type: ignore[arg-type]
+        max_y = float(df[self.y_column].max())  # type: ignore[arg-type]
         range_x = max_x - min_x
         range_y = max_y - min_y
 

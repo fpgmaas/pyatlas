@@ -1,10 +1,11 @@
 import { useRef, useMemo, useEffect, useCallback } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
+import type { ThreeEvent } from "@react-three/fiber";
 import { useGalaxyStore } from "../store/useGalaxyStore";
 import { getClusterColor } from "../utils/colorPalette";
 import { precomputeSizes } from "../utils/sizeScaling";
-import { createPointShaderMaterial } from "../shaders/pointShader";
+import { createInstancedQuadMaterial } from "../shaders/instancedQuadShader";
 import { computeBounds } from "../utils/dataBounds";
 
 const HOVER_THROTTLE_MS = 32;
@@ -17,8 +18,8 @@ export function PackagePoints() {
   const selectedPackageId = useGalaxyStore((s) => s.selectedPackageId);
   const setSelectedPackageId = useGalaxyStore((s) => s.setSelectedPackageId);
   const setHoveredIndex = useGalaxyStore((s) => s.setHoveredIndex);
-  const { camera, raycaster, size, controls } = useThree();
-  const pointsRef = useRef<THREE.Points>(null);
+  const { camera, size, controls } = useThree();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
   const prevHoveredIndex = useRef<number | null>(null);
   const prevSelectedIndex = useRef<number | null>(null);
   const lastHoverTimeRef = useRef(0);
@@ -31,20 +32,32 @@ export function PackagePoints() {
   // Compute total data bounds for density calculation
   const dataBounds = useMemo(() => computeBounds(packages), [packages]);
 
-  // Precompute positions, colors, sizes
-  const { geometry, material, baseSizes } = useMemo(() => {
-    const positions = new Float32Array(packages.length * 3);
-    const colors = new Float32Array(packages.length * 3);
-    const sizes = new Float32Array(packages.length);
-    const hovered = new Float32Array(packages.length);
-    const selected = new Float32Array(packages.length);
+  // Precompute geometry, material, and mesh
+  const { mesh, baseSizes } = useMemo(() => {
+    if (packages.length === 0) {
+      // Return empty mesh for empty packages
+      const emptyGeometry = new THREE.PlaneGeometry(1, 1);
+      const emptyMaterial = createInstancedQuadMaterial();
+      const emptyMesh = new THREE.InstancedMesh(
+        emptyGeometry,
+        emptyMaterial,
+        0,
+      );
+      return { mesh: emptyMesh, baseSizes: new Map<number, number>() };
+    }
+
+    // Base geometry: 1x1 plane centered at origin
+    const geometry = new THREE.PlaneGeometry(1, 1);
+
+    // Per-instance data
+    const instanceCount = packages.length;
+    const colors = new Float32Array(instanceCount * 3);
+    const sizes = new Float32Array(instanceCount);
+    const hovered = new Float32Array(instanceCount);
+    const selected = new Float32Array(instanceCount);
     const sizeMap = precomputeSizes(packages);
 
     packages.forEach((pkg, i) => {
-      positions[i * 3] = pkg.x;
-      positions[i * 3 + 1] = pkg.y;
-      positions[i * 3 + 2] = 0;
-
       const color = new THREE.Color(getClusterColor(pkg.clusterId));
       colors[i * 3] = color.r;
       colors[i * 3 + 1] = color.g;
@@ -55,14 +68,49 @@ export function PackagePoints() {
       selected[i] = 0;
     });
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
-    geometry.setAttribute("hovered", new THREE.BufferAttribute(hovered, 1));
-    geometry.setAttribute("selected", new THREE.BufferAttribute(selected, 1));
+    // Attach as InstancedBufferAttributes
+    geometry.setAttribute(
+      "instanceColor",
+      new THREE.InstancedBufferAttribute(colors, 3),
+    );
+    geometry.setAttribute(
+      "instanceSize",
+      new THREE.InstancedBufferAttribute(sizes, 1),
+    );
+    geometry.setAttribute(
+      "instanceHovered",
+      new THREE.InstancedBufferAttribute(hovered, 1),
+    );
+    geometry.setAttribute(
+      "instanceSelected",
+      new THREE.InstancedBufferAttribute(selected, 1),
+    );
 
-    const material = createPointShaderMaterial();
+    const material = createInstancedQuadMaterial();
+
+    // Create InstancedMesh
+    const mesh = new THREE.InstancedMesh(geometry, material, instanceCount);
+
+    // Set instance matrices with position (required for raycasting to work)
+    const matrix = new THREE.Matrix4();
+    packages.forEach((pkg, i) => {
+      matrix.setPosition(pkg.x, pkg.y, 0);
+      mesh.setMatrixAt(i, matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+
+    // Set bounding sphere for frustum culling
+    if (dataBounds) {
+      const centerX = (dataBounds.minX + dataBounds.maxX) / 2;
+      const centerY = (dataBounds.minY + dataBounds.maxY) / 2;
+      const radius =
+        Math.max(dataBounds.width, dataBounds.height) / 2 +
+        100; /* padding for glow */
+      geometry.boundingSphere = new THREE.Sphere(
+        new THREE.Vector3(centerX, centerY, 0),
+        radius,
+      );
+    }
 
     // Store base sizes in a Map for easy lookup
     const baseSizes = new Map<number, number>();
@@ -70,14 +118,16 @@ export function PackagePoints() {
       baseSizes.set(pkg.id, sizeMap.get(pkg.id) || 16);
     });
 
-    return { geometry, material, baseSizes };
-  }, [packages]);
+    return { mesh, baseSizes };
+  }, [packages, dataBounds]);
 
   // Handle visibility filtering
   useEffect(() => {
-    if (!pointsRef.current) return;
-    const geom = pointsRef.current.geometry;
-    const sizeAttr = geom.attributes.size as THREE.BufferAttribute;
+    if (!meshRef.current) return;
+    const geom = meshRef.current.geometry;
+    const sizeAttr = geom.getAttribute(
+      "instanceSize",
+    ) as THREE.InstancedBufferAttribute;
 
     packages.forEach((pkg, i) => {
       const baseSize = baseSizes.get(pkg.id) || 16;
@@ -89,9 +139,10 @@ export function PackagePoints() {
 
   // Handle hover state - incremental update (only 2 entries instead of all)
   useEffect(() => {
-    if (!pointsRef.current) return;
-    const hoveredAttr = pointsRef.current.geometry.attributes
-      .hovered as THREE.BufferAttribute;
+    if (!meshRef.current) return;
+    const hoveredAttr = meshRef.current.geometry.getAttribute(
+      "instanceHovered",
+    ) as THREE.InstancedBufferAttribute;
 
     // Turn off previous hovered
     if (prevHoveredIndex.current !== null) {
@@ -109,9 +160,10 @@ export function PackagePoints() {
 
   // Handle selection state - incremental update (only 2 entries instead of all)
   useEffect(() => {
-    if (!pointsRef.current) return;
-    const selectedAttr = pointsRef.current.geometry.attributes
-      .selected as THREE.BufferAttribute;
+    if (!meshRef.current) return;
+    const selectedAttr = meshRef.current.geometry.getAttribute(
+      "instanceSelected",
+    ) as THREE.InstancedBufferAttribute;
 
     // Find index of selected package
     const selectedIndex =
@@ -136,9 +188,61 @@ export function PackagePoints() {
     prevSelectedIndex.current = selectedIndex !== -1 ? selectedIndex : null;
   }, [selectedPackageId, packages]);
 
-  // R3F pointer event handlers - use event.index from raycaster
+  // Find the closest visible package to a point
+  const findClosestPackage = useCallback(
+    (point: THREE.Vector3) => {
+      let closestIdx = -1;
+      let closestDistSq = Infinity;
+
+      for (let i = 0; i < packages.length; i++) {
+        const pkg = packages[i];
+        // Skip hidden clusters
+        if (!selectedClusterIds.has(pkg.clusterId)) continue;
+        // Skip packages with size 0 (hidden)
+        const dx = pkg.x - point.x;
+        const dy = pkg.y - point.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < closestDistSq) {
+          closestDistSq = distSq;
+          closestIdx = i;
+        }
+      }
+
+      return closestIdx;
+    },
+    [packages, selectedClusterIds],
+  );
+
+  // Convert mouse event to world position (stable, doesn't depend on quad geometry)
+  const getWorldPosition = useCallback(
+    (event: ThreeEvent<PointerEvent>): THREE.Vector3 | null => {
+      const cam = camera as THREE.OrthographicCamera;
+      // event.pointer is normalized device coordinates (-1 to 1)
+      const x = event.pointer.x;
+      const y = event.pointer.y;
+
+      // Convert NDC to world space for orthographic camera
+      const worldX =
+        ((x + 1) / 2) * ((cam.right - cam.left) / cam.zoom) +
+        cam.position.x -
+        (cam.right - cam.left) / cam.zoom / 2;
+      const worldY =
+        ((y + 1) / 2) * ((cam.top - cam.bottom) / cam.zoom) +
+        cam.position.y -
+        (cam.top - cam.bottom) / cam.zoom / 2;
+
+      return new THREE.Vector3(worldX, worldY, 0);
+    },
+    [camera],
+  );
+
+  // Track current hover state in ref to avoid dependency issues
+  const currentHoveredRef = useRef<number | null>(null);
+  currentHoveredRef.current = hoveredIndex;
+
+  // R3F pointer event handlers
   const handlePointerMove = useCallback(
-    (event: { index?: number }) => {
+    (event: ThreeEvent<PointerEvent>) => {
       // Skip hover processing while camera is moving
       if (isCameraMovingRef.current) return;
 
@@ -146,82 +250,131 @@ export function PackagePoints() {
       if (now - lastHoverTimeRef.current < HOVER_THROTTLE_MS) return;
       lastHoverTimeRef.current = now;
 
-      // R3F + Raycaster give you the vertex index on event.index
-      const idx = event.index;
-      if (idx == null || idx < 0 || idx >= packages.length) {
-        if (hoveredIndex !== null) setHoveredIndex(null);
+      // Get world position from mouse (stable, not dependent on geometry)
+      const worldPos = getWorldPosition(event);
+      if (!worldPos) {
+        if (currentHoveredRef.current !== null) setHoveredIndex(null);
         return;
       }
+
+      const idx = findClosestPackage(worldPos);
+
+      if (idx < 0 || idx >= packages.length) {
+        if (currentHoveredRef.current !== null) setHoveredIndex(null);
+        return;
+      }
+
+      // Check distance threshold based on zoom
+      // Use hysteresis: larger threshold to stay hovered, smaller to enter
+      const cam = camera as THREE.OrthographicCamera;
+      const worldUnitsPerPixel = (cam.right - cam.left) / cam.zoom / size.width;
+      const isCurrentlyHovered = currentHoveredRef.current === idx;
+      const maxDist = worldUnitsPerPixel * (isCurrentlyHovered ? 40 : 30); // hysteresis
 
       const pkg = packages[idx];
+      const dx = pkg.x - worldPos.x;
+      const dy = pkg.y - worldPos.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Respect cluster visibility
-      if (!selectedClusterIds.has(pkg.clusterId)) {
-        if (hoveredIndex !== null) setHoveredIndex(null);
+      if (dist > maxDist) {
+        if (currentHoveredRef.current !== null) setHoveredIndex(null);
+        document.body.style.cursor = "default";
         return;
       }
 
-      if (hoveredIndex !== idx) {
+      if (currentHoveredRef.current !== idx) {
         setHoveredIndex(idx);
       }
 
       document.body.style.cursor = "pointer";
     },
-    [packages, selectedClusterIds, hoveredIndex, setHoveredIndex],
+    [
+      packages,
+      setHoveredIndex,
+      findClosestPackage,
+      getWorldPosition,
+      camera,
+      size.width,
+    ],
   );
 
   const handlePointerOut = useCallback(() => {
-    if (hoveredIndex !== null) {
+    if (currentHoveredRef.current !== null) {
       setHoveredIndex(null);
       document.body.style.cursor = "default";
     }
-  }, [hoveredIndex, setHoveredIndex]);
+  }, [setHoveredIndex]);
 
   const handleClick = useCallback(
-    (event: { index?: number }) => {
-      const idx = event.index;
-      if (idx == null || idx < 0 || idx >= packages.length) return;
+    (event: ThreeEvent<PointerEvent>) => {
+      // Get world position from mouse
+      const worldPos = getWorldPosition(event);
+      if (!worldPos) return;
 
+      const idx = findClosestPackage(worldPos);
+
+      if (idx < 0 || idx >= packages.length) return;
+
+      // Check distance threshold based on zoom
+      const cam = camera as THREE.OrthographicCamera;
+      const worldUnitsPerPixel = (cam.right - cam.left) / cam.zoom / size.width;
+      const maxDist = 30 * worldUnitsPerPixel;
       const pkg = packages[idx];
+      const dx = pkg.x - worldPos.x;
+      const dy = pkg.y - worldPos.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Respect cluster visibility
-      if (!selectedClusterIds.has(pkg.clusterId)) return;
+      if (dist > maxDist) return;
 
       setSelectedPackageId(pkg.id);
     },
-    [packages, selectedClusterIds, setSelectedPackageId],
+    [
+      packages,
+      findClosestPackage,
+      getWorldPosition,
+      setSelectedPackageId,
+      camera,
+      size.width,
+    ],
   );
 
-  // Update time uniform, raycaster threshold, density, and detect camera movement
+  // Update uniforms and detect camera movement
   useFrame((state) => {
-    if (!pointsRef.current) return;
+    if (!meshRef.current) return;
 
-    const mat = pointsRef.current.material as THREE.ShaderMaterial;
+    const mat = meshRef.current.material as THREE.ShaderMaterial;
+
+    // Time for animation
     if (mat.uniforms?.time) {
       mat.uniforms.time.value = state.clock.elapsedTime;
     }
 
-    // Update raycaster threshold based on camera zoom
-    // For orthographic camera, convert screen pixels to world units
     const cam = camera as THREE.OrthographicCamera;
-    const visibleWidth = (cam.right - cam.left) / cam.zoom;
-    const visibleHeight = (cam.top - cam.bottom) / cam.zoom;
-    const worldUnitsPerPixel = visibleWidth / size.width;
-    // Use a reasonable point radius in pixels (e.g., 20px) converted to world units
-    raycaster.params.Points.threshold = 20 * worldUnitsPerPixel;
+
+    // Update zoom uniform
+    if (mat.uniforms?.zoom) {
+      mat.uniforms.zoom.value = cam.zoom;
+    }
+
+    // Update frustumHeight for pixel-to-world conversion
+    if (mat.uniforms?.frustumHeight) {
+      mat.uniforms.frustumHeight.value = (cam.top - cam.bottom) / cam.zoom;
+    }
+
+    // Update resolution
+    if (mat.uniforms?.resolution) {
+      mat.uniforms.resolution.value.set(size.width, size.height);
+    }
 
     // Calculate density based on viewport coverage of total data
-    // When zoomed out (seeing whole map): high density -> dim halos
-    // When zoomed in (seeing small portion): low density -> bright halos
+    const visibleWidth = (cam.right - cam.left) / cam.zoom;
+    const visibleHeight = (cam.top - cam.bottom) / cam.zoom;
     const viewportArea = visibleWidth * visibleHeight;
     const totalDataArea = dataBounds
       ? dataBounds.width * dataBounds.height
       : viewportArea;
 
-    // Coverage ratio: 1.0 = seeing entire map, 0.0 = zoomed in on tiny area
     const coverageRatio = Math.min(1.0, viewportArea / totalDataArea);
-
-    // Use sqrt for smoother transition - brightness increases faster as you zoom in
     const normalizedDensity = Math.sqrt(coverageRatio);
 
     if (mat.uniforms?.density) {
@@ -235,11 +388,6 @@ export function PackagePoints() {
       : cam.position.clone();
     const currentZoom = cam.zoom;
 
-    // Update zoom uniform for point scaling
-    if (mat.uniforms?.zoom) {
-      mat.uniforms.zoom.value = currentZoom;
-    }
-
     const dx = Math.abs(currentTarget.x - prevCameraTarget.current.x);
     const dy = Math.abs(currentTarget.y - prevCameraTarget.current.y);
     const dz = Math.abs(currentZoom - prevCameraZoom.current);
@@ -250,8 +398,8 @@ export function PackagePoints() {
       dz > CAMERA_MOVE_THRESHOLD;
     isCameraMovingRef.current = isMoving;
 
-    // Clear hover when camera is moving
-    if (isMoving && hoveredIndex !== null) {
+    // Clear hover when camera is moving (use ref to avoid stale closure)
+    if (isMoving && currentHoveredRef.current !== null) {
       setHoveredIndex(null);
       document.body.style.cursor = "default";
     }
@@ -260,14 +408,36 @@ export function PackagePoints() {
     prevCameraZoom.current = currentZoom;
   });
 
+  // Create an invisible plane that covers the data bounds for stable hover detection
+  const hoverPlane = useMemo(() => {
+    if (!dataBounds) return null;
+    const width = dataBounds.width + 200;
+    const height = dataBounds.height + 200;
+    const geometry = new THREE.PlaneGeometry(width, height);
+    const material = new THREE.MeshBasicMaterial({
+      visible: false,
+      side: THREE.DoubleSide,
+    });
+    const plane = new THREE.Mesh(geometry, material);
+    plane.position.set(
+      (dataBounds.minX + dataBounds.maxX) / 2,
+      (dataBounds.minY + dataBounds.maxY) / 2,
+      -0.1, // Slightly behind the points
+    );
+    return plane;
+  }, [dataBounds]);
+
   return (
-    <points
-      ref={pointsRef}
-      geometry={geometry}
-      material={material}
-      onPointerMove={handlePointerMove}
-      onPointerOut={handlePointerOut}
-      onClick={handleClick}
-    />
+    <>
+      {hoverPlane && (
+        <primitive
+          object={hoverPlane}
+          onPointerMove={handlePointerMove}
+          onPointerOut={handlePointerOut}
+          onClick={handleClick}
+        />
+      )}
+      <primitive ref={meshRef} object={mesh} />
+    </>
   );
 }
