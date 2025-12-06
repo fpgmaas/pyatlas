@@ -7,9 +7,7 @@ import { getClusterColor } from "../utils/colorPalette";
 import { precomputeSizes } from "../utils/sizeScaling";
 import { createInstancedQuadMaterial } from "../shaders/instancedQuadShader";
 import { computeBounds } from "../utils/dataBounds";
-
-const HOVER_THROTTLE_MS = 32;
-const CAMERA_MOVE_THRESHOLD = 0.001;
+import { PackageGrid } from "../utils/PackageGrid";
 
 export function PackagePoints() {
   const packages = useGalaxyStore((s) => s.packages);
@@ -18,19 +16,19 @@ export function PackagePoints() {
   const selectedPackageId = useGalaxyStore((s) => s.selectedPackageId);
   const setSelectedPackageId = useGalaxyStore((s) => s.setSelectedPackageId);
   const setHoveredIndex = useGalaxyStore((s) => s.setHoveredIndex);
-  const { camera, size, controls } = useThree();
+  const { camera, size } = useThree();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const prevHoveredIndex = useRef<number | null>(null);
   const prevSelectedIndex = useRef<number | null>(null);
-  const lastHoverTimeRef = useRef(0);
-
-  // Camera movement detection refs
-  const prevCameraTarget = useRef(new THREE.Vector3());
-  const prevCameraZoom = useRef(0);
-  const isCameraMovingRef = useRef(false);
 
   // Compute total data bounds for density calculation
   const dataBounds = useMemo(() => computeBounds(packages), [packages]);
+
+  // Build spatial index for efficient picking
+  const grid = useMemo(
+    () => new PackageGrid(packages, /* cellSize= */ 50),
+    [packages],
+  );
 
   // Precompute geometry, material, and mesh
   const { mesh, baseSizes } = useMemo(() => {
@@ -91,10 +89,15 @@ export function PackagePoints() {
     // Create InstancedMesh
     const mesh = new THREE.InstancedMesh(geometry, material, instanceCount);
 
-    // Set instance matrices with position (required for raycasting to work)
+    // Set instance matrices with position only (no scale needed for raycasting)
     const matrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3(1, 1, 1);
+
     packages.forEach((pkg, i) => {
-      matrix.setPosition(pkg.x, pkg.y, 0);
+      position.set(pkg.x, pkg.y, 0);
+      matrix.compose(position, quaternion, scale);
       mesh.setMatrixAt(i, matrix);
     });
     mesh.instanceMatrix.needsUpdate = true;
@@ -188,157 +191,79 @@ export function PackagePoints() {
     prevSelectedIndex.current = selectedIndex !== -1 ? selectedIndex : null;
   }, [selectedPackageId, packages]);
 
-  // Find the closest visible package to a point
+  // Find closest package using spatial index + zoom-aware threshold
   const findClosestPackage = useCallback(
-    (point: THREE.Vector3) => {
-      let closestIdx = -1;
-      let closestDistSq = Infinity;
+    (worldPos: THREE.Vector3, maxPixels: number): number => {
+      const cam = camera as THREE.OrthographicCamera;
 
-      for (let i = 0; i < packages.length; i++) {
-        const pkg = packages[i];
+      const worldUnitsPerPixel = (cam.right - cam.left) / cam.zoom / size.width;
+      const maxWorldDist = maxPixels * worldUnitsPerPixel;
+
+      // Query only nearby candidates using the grid
+      const candidates = grid.query(worldPos.x, worldPos.y, maxWorldDist);
+
+      let closestIdx = -1;
+      let closestDistSq = maxWorldDist * maxWorldDist;
+
+      for (const idx of candidates) {
+        const pkg = packages[idx];
+
         // Skip hidden clusters
         if (!selectedClusterIds.has(pkg.clusterId)) continue;
-        // Skip packages with size 0 (hidden)
-        const dx = pkg.x - point.x;
-        const dy = pkg.y - point.y;
+
+        const dx = pkg.x - worldPos.x;
+        const dy = pkg.y - worldPos.y;
         const distSq = dx * dx + dy * dy;
+
         if (distSq < closestDistSq) {
           closestDistSq = distSq;
-          closestIdx = i;
+          closestIdx = idx;
         }
       }
 
       return closestIdx;
     },
-    [packages, selectedClusterIds],
+    [camera, size.width, grid, packages, selectedClusterIds],
   );
 
-  // Convert mouse event to world position (stable, doesn't depend on quad geometry)
-  const getWorldPosition = useCallback(
-    (event: ThreeEvent<PointerEvent>): THREE.Vector3 | null => {
-      const cam = camera as THREE.OrthographicCamera;
-      // event.pointer is normalized device coordinates (-1 to 1)
-      const x = event.pointer.x;
-      const y = event.pointer.y;
-
-      // Convert NDC to world space for orthographic camera
-      const worldX =
-        ((x + 1) / 2) * ((cam.right - cam.left) / cam.zoom) +
-        cam.position.x -
-        (cam.right - cam.left) / cam.zoom / 2;
-      const worldY =
-        ((y + 1) / 2) * ((cam.top - cam.bottom) / cam.zoom) +
-        cam.position.y -
-        (cam.top - cam.bottom) / cam.zoom / 2;
-
-      return new THREE.Vector3(worldX, worldY, 0);
-    },
-    [camera],
-  );
-
-  // Track current hover state in ref to avoid dependency issues
-  const currentHoveredRef = useRef<number | null>(null);
-  currentHoveredRef.current = hoveredIndex;
-
-  // R3F pointer event handlers
+  // Hover handler using event.point + spatial index
   const handlePointerMove = useCallback(
     (event: ThreeEvent<PointerEvent>) => {
-      // Skip hover processing while camera is moving
-      if (isCameraMovingRef.current) return;
+      const worldPos = event.point;
+      const idx = findClosestPackage(worldPos, 30); // 30px radius
 
-      const now = performance.now();
-      if (now - lastHoverTimeRef.current < HOVER_THROTTLE_MS) return;
-      lastHoverTimeRef.current = now;
-
-      // Get world position from mouse (stable, not dependent on geometry)
-      const worldPos = getWorldPosition(event);
-      if (!worldPos) {
-        if (currentHoveredRef.current !== null) setHoveredIndex(null);
-        return;
-      }
-
-      const idx = findClosestPackage(worldPos);
-
-      if (idx < 0 || idx >= packages.length) {
-        if (currentHoveredRef.current !== null) setHoveredIndex(null);
-        return;
-      }
-
-      // Check distance threshold based on zoom
-      // Use hysteresis: larger threshold to stay hovered, smaller to enter
-      const cam = camera as THREE.OrthographicCamera;
-      const worldUnitsPerPixel = (cam.right - cam.left) / cam.zoom / size.width;
-      const isCurrentlyHovered = currentHoveredRef.current === idx;
-      const maxDist = worldUnitsPerPixel * (isCurrentlyHovered ? 40 : 30); // hysteresis
-
-      const pkg = packages[idx];
-      const dx = pkg.x - worldPos.x;
-      const dy = pkg.y - worldPos.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist > maxDist) {
-        if (currentHoveredRef.current !== null) setHoveredIndex(null);
+      if (idx === -1) {
+        setHoveredIndex(null);
         document.body.style.cursor = "default";
         return;
       }
 
-      if (currentHoveredRef.current !== idx) {
-        setHoveredIndex(idx);
-      }
-
+      setHoveredIndex(idx);
       document.body.style.cursor = "pointer";
     },
-    [
-      packages,
-      setHoveredIndex,
-      findClosestPackage,
-      getWorldPosition,
-      camera,
-      size.width,
-    ],
+    [findClosestPackage, setHoveredIndex],
   );
 
+  // Pointer out handler
   const handlePointerOut = useCallback(() => {
-    if (currentHoveredRef.current !== null) {
-      setHoveredIndex(null);
-      document.body.style.cursor = "default";
-    }
+    setHoveredIndex(null);
+    document.body.style.cursor = "default";
   }, [setHoveredIndex]);
 
+  // Click handler using event.point + spatial index
   const handleClick = useCallback(
     (event: ThreeEvent<PointerEvent>) => {
-      // Get world position from mouse
-      const worldPos = getWorldPosition(event);
-      if (!worldPos) return;
+      const worldPos = event.point;
+      const idx = findClosestPackage(worldPos, 30);
+      if (idx === -1) return;
 
-      const idx = findClosestPackage(worldPos);
-
-      if (idx < 0 || idx >= packages.length) return;
-
-      // Check distance threshold based on zoom
-      const cam = camera as THREE.OrthographicCamera;
-      const worldUnitsPerPixel = (cam.right - cam.left) / cam.zoom / size.width;
-      const maxDist = 30 * worldUnitsPerPixel;
       const pkg = packages[idx];
-      const dx = pkg.x - worldPos.x;
-      const dy = pkg.y - worldPos.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist > maxDist) return;
-
       setSelectedPackageId(pkg.id);
     },
-    [
-      packages,
-      findClosestPackage,
-      getWorldPosition,
-      setSelectedPackageId,
-      camera,
-      size.width,
-    ],
+    [findClosestPackage, packages, setSelectedPackageId],
   );
 
-  // Update uniforms and detect camera movement
+  // Update shader uniforms
   useFrame((state) => {
     if (!meshRef.current) return;
 
@@ -380,35 +305,9 @@ export function PackagePoints() {
     if (mat.uniforms?.density) {
       mat.uniforms.density.value = normalizedDensity;
     }
-
-    // Detect camera movement
-    const target = (controls as any)?.target;
-    const currentTarget = target
-      ? new THREE.Vector3(target.x, target.y, target.z)
-      : cam.position.clone();
-    const currentZoom = cam.zoom;
-
-    const dx = Math.abs(currentTarget.x - prevCameraTarget.current.x);
-    const dy = Math.abs(currentTarget.y - prevCameraTarget.current.y);
-    const dz = Math.abs(currentZoom - prevCameraZoom.current);
-
-    const isMoving =
-      dx > CAMERA_MOVE_THRESHOLD ||
-      dy > CAMERA_MOVE_THRESHOLD ||
-      dz > CAMERA_MOVE_THRESHOLD;
-    isCameraMovingRef.current = isMoving;
-
-    // Clear hover when camera is moving (use ref to avoid stale closure)
-    if (isMoving && currentHoveredRef.current !== null) {
-      setHoveredIndex(null);
-      document.body.style.cursor = "default";
-    }
-
-    prevCameraTarget.current.copy(currentTarget);
-    prevCameraZoom.current = currentZoom;
   });
 
-  // Create an invisible plane that covers the data bounds for stable hover detection
+  // Invisible hover plane for reliable raycasting
   const hoverPlane = useMemo(() => {
     if (!dataBounds) return null;
     const width = dataBounds.width + 200;
@@ -429,6 +328,7 @@ export function PackagePoints() {
 
   return (
     <>
+      {/* Invisible hover plane for picking - all pointer events go here */}
       {hoverPlane && (
         <primitive
           object={hoverPlane}
@@ -437,6 +337,7 @@ export function PackagePoints() {
           onClick={handleClick}
         />
       )}
+      {/* InstancedMesh for rendering only - no pointer events */}
       <primitive ref={meshRef} object={mesh} />
     </>
   );

@@ -6,7 +6,6 @@ import { sortByDownloads } from "../utils/packageUtils";
 import { CAMERA_ZOOM_LEVELS } from "../utils/cameraConstants";
 import { TrendingUp } from "lucide-react";
 import { formatDownloads } from "../utils/formatDownloads";
-import { useIsMobile } from "../hooks/useIsMobile";
 
 export function SearchBar() {
   const {
@@ -19,7 +18,6 @@ export function SearchBar() {
     toggleCluster,
     setSidebarOpen,
   } = useGalaxyStore();
-  const isMobile = useIsMobile(768);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Package[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -58,12 +56,10 @@ export function SearchBar() {
     }
 
     // Request camera animation to package location
-    // On mobile, position at 75% from bottom to keep above PackageDetails panel
     requestCameraAnimation({
       x: pkg.x,
       y: pkg.y,
       zoom: CAMERA_ZOOM_LEVELS.PACKAGE,
-      screenYPercent: isMobile ? 0.75 : undefined,
     });
 
     // Update selection state (for detail panel)

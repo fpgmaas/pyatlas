@@ -6,7 +6,7 @@ export type EasingFunction = (t: number) => number;
 
 export interface CameraAnimationOptions {
   zoom?: number; // Target zoom level (default: 5)
-  duration?: number; // Animation duration in ms (default: 1000)
+  duration?: number; // Animation duration in ms (default: 800)
   easing?: EasingFunction; // Easing function (default: cubicInOut)
 }
 
@@ -15,53 +15,57 @@ const cubicInOut: EasingFunction = (t: number) =>
 
 const DEFAULT_OPTIONS: Required<CameraAnimationOptions> = {
   zoom: 5,
-  duration: 1000,
+  duration: 800,
   easing: cubicInOut,
 };
 
 export function useCameraAnimation() {
-  const three = useThree();
-  const targetPosition = useRef<THREE.Vector3 | null>(null);
-  const targetZoom = useRef<number | null>(null);
-  const startPosition = useRef(new THREE.Vector3());
+  const { camera, controls } = useThree();
+
+  const startTarget = useRef(new THREE.Vector3());
+  const endTarget = useRef(new THREE.Vector3());
   const startZoom = useRef(1);
+  const endZoom = useRef(1);
   const progress = useRef(0);
-  const animationDuration = useRef(1000);
-  const easingFunction = useRef<EasingFunction>(cubicInOut);
+  const duration = useRef(800);
+  const easing = useRef<EasingFunction>(cubicInOut);
+  const active = useRef(false);
+  const cameraOffset = useRef(new THREE.Vector3());
 
-  useFrame((_state, delta) => {
-    if (!targetPosition.current || !targetZoom.current) return;
+  useFrame((_, delta) => {
+    if (!active.current) return;
 
-    progress.current += (delta * 1000) / animationDuration.current;
+    const cam = camera as THREE.OrthographicCamera;
+    const ctrl = controls as any;
+
+    if (!ctrl) {
+      active.current = false;
+      return;
+    }
+
+    progress.current += (delta * 1000) / duration.current;
     const t = Math.min(progress.current, 1);
+    const k = easing.current(t);
 
-    // Apply easing function
-    const eased = easingFunction.current(t);
+    // Interpolate target
+    const target = new THREE.Vector3().lerpVectors(
+      startTarget.current,
+      endTarget.current,
+      k,
+    );
+    ctrl.target.copy(target);
 
-    if (three.controls) {
-      // @ts-expect-error - controls.target exists on OrbitControls
-      three.controls.target.lerpVectors(
-        startPosition.current,
-        targetPosition.current,
-        eased,
-      );
-      // @ts-expect-error - controls.update exists on OrbitControls
-      three.controls.update();
-    }
+    // Keep camera at fixed offset relative to target
+    cam.position.copy(target.clone().add(cameraOffset.current));
 
-    if (three.camera.type === "OrthographicCamera") {
-      (three.camera as THREE.OrthographicCamera).zoom = THREE.MathUtils.lerp(
-        startZoom.current,
-        targetZoom.current,
-        eased,
-      );
-      three.camera.updateProjectionMatrix();
-    }
+    // Interpolate zoom
+    cam.zoom = THREE.MathUtils.lerp(startZoom.current, endZoom.current, k);
+    cam.updateProjectionMatrix();
+
+    ctrl.update();
 
     if (t >= 1) {
-      targetPosition.current = null;
-      targetZoom.current = null;
-      progress.current = 0;
+      active.current = false;
     }
   });
 
@@ -75,24 +79,32 @@ export function useCameraAnimation() {
 
       const finalOptions = { ...DEFAULT_OPTIONS, ...options };
 
-      if (!three.controls) {
+      const ctrl = controls as any;
+      if (!ctrl) {
         console.warn(
           "[useCameraAnimation] No controls available, animation skipped",
         );
         return;
       }
 
-      // @ts-expect-error - controls.target exists on OrbitControls
-      const currentTarget = three.controls.target;
-      startPosition.current.copy(currentTarget);
-      startZoom.current = (three.camera as THREE.OrthographicCamera).zoom;
-      targetPosition.current = new THREE.Vector3(x, y, 0);
-      targetZoom.current = finalOptions.zoom;
-      animationDuration.current = finalOptions.duration;
-      easingFunction.current = finalOptions.easing;
+      const cam = camera as THREE.OrthographicCamera;
+
+      // Read current state
+      startTarget.current.copy(ctrl.target);
+      endTarget.current.set(x, y, 0);
+
+      startZoom.current = cam.zoom;
+      endZoom.current = finalOptions.zoom;
+
+      // Camera offset (keep distance/orientation stable)
+      cameraOffset.current.copy(cam.position.clone().sub(ctrl.target));
+
       progress.current = 0;
+      duration.current = finalOptions.duration;
+      easing.current = finalOptions.easing;
+      active.current = true;
     },
-    [three],
+    [camera, controls],
   );
 
   return { animateTo };
