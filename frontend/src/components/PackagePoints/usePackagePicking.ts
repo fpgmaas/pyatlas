@@ -18,6 +18,9 @@ export function usePackagePicking(
   const { camera, size } = useThree();
   const setHoveredIndex = useGalaxyStore((s) => s.setHoveredIndex);
   const setSelectedPackageId = useGalaxyStore((s) => s.setSelectedPackageId);
+  const setPackageDetailExpanded = useGalaxyStore(
+    (s) => s.setPackageDetailExpanded,
+  );
 
   // Find closest package using spatial index + zoom-aware threshold
   const findClosestPackage = useCallback(
@@ -87,8 +90,14 @@ export function usePackagePicking(
 
       const pkg = packages[idx];
       setSelectedPackageId(pkg.id);
+      setPackageDetailExpanded(true); // Always expand on manual click
     },
-    [findClosestPackage, packages, setSelectedPackageId],
+    [
+      findClosestPackage,
+      packages,
+      setSelectedPackageId,
+      setPackageDetailExpanded,
+    ],
   );
 
   return { handlePointerMove, handlePointerOut, handleClick };
