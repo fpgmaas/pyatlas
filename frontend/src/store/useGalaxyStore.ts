@@ -47,6 +47,7 @@ interface GalaxyStore {
   panSpeedMultiplier: number;
   highlightedClusterId: number | null;
   highlightStartTime: number | null;
+  packageDetailExpanded: boolean;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -70,6 +71,7 @@ interface GalaxyStore {
   setPanSpeedMultiplier: (multiplier: number) => void;
   setHighlightedCluster: (clusterId: number | null) => void;
   focusOnCluster: (clusterId: number) => void;
+  setPackageDetailExpanded: (expanded: boolean) => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
@@ -94,6 +96,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   panSpeedMultiplier: SPEED_DEFAULTS.panMultiplier,
   highlightedClusterId: null,
   highlightStartTime: null,
+  packageDetailExpanded: true,
 
   setPackages: (packages) => set({ packages }),
   setClusters: (clusters) => {
@@ -166,4 +169,6 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
         highlightStartTime: performance.now(),
       };
     }),
+  setPackageDetailExpanded: (expanded) =>
+    set({ packageDetailExpanded: expanded }),
 }));

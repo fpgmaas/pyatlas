@@ -6,6 +6,7 @@ import { sortByDownloads } from "../utils/packageUtils";
 import { CAMERA_ZOOM_LEVELS } from "../utils/cameraConstants";
 import { TrendingUp } from "lucide-react";
 import { formatDownloads } from "../utils/formatDownloads";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 export function SearchBar() {
   const {
@@ -17,7 +18,9 @@ export function SearchBar() {
     selectedClusterIds,
     toggleCluster,
     setSidebarOpen,
+    setPackageDetailExpanded,
   } = useGalaxyStore();
+  const isMobile = useIsMobile(1024);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Package[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -64,6 +67,10 @@ export function SearchBar() {
 
     // Update selection state (for detail panel)
     setSelectedPackageId(pkg.id);
+
+    // On mobile, collapse PackageDetail so the point is visible
+    // On desktop, keep it expanded
+    setPackageDetailExpanded(!isMobile);
 
     // Close sidebar on mobile after selection
     setSidebarOpen(false);
