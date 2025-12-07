@@ -123,8 +123,11 @@ void main() {
       intensity = 1.0 - smoothstep(0.32, 1.0, vHighlightProgress);
     }
 
-    // Apply brightness boost
-    float highlightBoost = exp(-normalizedDist * 2.0) * 0.6 * intensity;
+    // Apply brightness boost - wider glow for smaller points, reduced intensity for larger
+    float sizeForHighlight = clamp((vSize - 12.0) / 68.0, 0.0, 1.0);
+    float highlightFalloff = mix(1.2, 2.0, sizeForHighlight);  // 1.2 for small, 2.0 for large
+    float highlightIntensity = mix(0.6, 0.35, sizeForHighlight);  // 0.6 for small, 0.35 for large
+    float highlightBoost = exp(-normalizedDist * highlightFalloff) * highlightIntensity * intensity;
     vec3 warmWhite = vec3(1.0, 0.98, 0.94);
     finalColor.rgb = mix(finalColor.rgb, warmWhite, highlightBoost);
     finalColor.a = max(finalColor.a, finalColor.a + highlightBoost * 0.4);
