@@ -7,7 +7,7 @@ const ZOOM_FACTOR = 1.4;
 export function ZoomControls() {
   const currentZoom = useGalaxyStore((s) => s.currentZoom);
   const requestCameraAnimation = useGalaxyStore(
-    (s) => s.requestCameraAnimation
+    (s) => s.requestCameraAnimation,
   );
 
   const handleZoom = (direction: "in" | "out") => {
@@ -25,7 +25,7 @@ export function ZoomControls() {
     bg-gray-900/95 border border-gray-700/60 backdrop-blur-md
     text-gray-200 hover:bg-gray-800/95 hover:text-white
     transition-colors duration-100
-    focus:outline-none focus:ring-2 focus:ring-indigo-500
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
     disabled:opacity-40 disabled:cursor-not-allowed
   `;
 
