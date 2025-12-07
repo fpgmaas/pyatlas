@@ -23,7 +23,7 @@ function ZoomDebug() {
   const zoom = useGalaxyStore((s) => s.currentZoom);
   if (!import.meta.env.DEV) return null;
   return (
-    <div className="absolute top-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded z-50">
+    <div className="absolute top-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded z-999">
       Zoom: {zoom.toFixed(2)}
     </div>
   );
