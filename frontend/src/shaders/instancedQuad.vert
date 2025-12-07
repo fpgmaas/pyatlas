@@ -47,19 +47,23 @@ void main() {
   // At zoom 1: scale = 1.0, at zoom 25: scale ~= 1.8
   float zoomScale = 0.8 + 0.2 * sqrt(zoom);
 
+  // Reduce point size on smaller screens to prevent overlap when zoomed in
+  // Reference: 1200px width = 1.0 scale, smaller screens get smaller points
+  float screenScale = clamp(resolution.x / 1200.0, 0.5, 1.0);
+
   // Calculate world size from pixel size
   // frustumHeight / resolution.y gives world units per pixel
   float pixelToWorld = frustumHeight / resolution.y;
 
   // Point size with space for soft glow
-  float worldSize = instanceSize * 1.3 * zoomScale * pixelToWorld;
+  float worldSize = instanceSize * 1.3 * zoomScale * screenScale * pixelToWorld;
 
   if (instanceSelected > 0.5) {
     // Selected: larger for emphasis
-    worldSize = instanceSize * 1.8 * zoomScale * pixelToWorld;
+    worldSize = instanceSize * 1.8 * zoomScale * screenScale * pixelToWorld;
   } else if (instanceHovered > 0.5) {
     // Hovered: same size as normal (no shrinking to prevent flicker)
-    worldSize = instanceSize * 1.3 * zoomScale * pixelToWorld;
+    worldSize = instanceSize * 1.3 * zoomScale * screenScale * pixelToWorld;
   }
 
   // Billboard transformation
