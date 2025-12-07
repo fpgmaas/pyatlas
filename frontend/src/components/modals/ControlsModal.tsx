@@ -105,8 +105,8 @@ export function ControlsModal() {
           />
           <ControlItem
             icon={Tag}
-            desktopLabel="Click cluster label to toggle"
-            mobileLabel="Tap cluster label to toggle"
+            desktopLabel="Click cluster label to highlight"
+            mobileLabel="Tap cluster label to highlight"
           />
         </div>
 

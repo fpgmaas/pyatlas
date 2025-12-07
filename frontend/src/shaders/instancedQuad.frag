@@ -2,6 +2,8 @@ varying vec2 vUv;
 varying vec3 vColor;
 varying float vHovered;
 varying float vSelected;
+varying float vHighlighted;
+varying float vHighlightProgress;
 varying float vTime;
 varying float vSize;
 varying float vDensity;
@@ -101,6 +103,31 @@ void main() {
     float hoverBoost = exp(-normalizedDist * 2.5) * 0.4;
     finalColor.rgb = mix(finalColor.rgb, vec3(1.0), hoverBoost);
     finalColor.a = max(finalColor.a, finalColor.a + hoverBoost * 0.3);
+  }
+
+  // === Cluster highlight effect (brightness pulse with fade) ===
+  if (vHighlighted > 0.5 && vHighlightProgress > 0.0) {
+    // Compute intensity based on progress (quick fade in, longer fade out)
+    // Progress 0.0-0.09: fade in (200ms / 2200ms)
+    // Progress 0.09-0.32: hold at peak (500ms / 2200ms)
+    // Progress 0.32-1.0: fade out (1500ms / 2200ms)
+    float intensity = 0.0;
+    if (vHighlightProgress < 0.09) {
+      // Fade in: quick ramp up
+      intensity = smoothstep(0.0, 0.09, vHighlightProgress);
+    } else if (vHighlightProgress < 0.32) {
+      // Hold at peak
+      intensity = 1.0;
+    } else {
+      // Fade out: slower decay
+      intensity = 1.0 - smoothstep(0.32, 1.0, vHighlightProgress);
+    }
+
+    // Apply brightness boost
+    float highlightBoost = exp(-normalizedDist * 2.0) * 0.6 * intensity;
+    vec3 warmWhite = vec3(1.0, 0.98, 0.94);
+    finalColor.rgb = mix(finalColor.rgb, warmWhite, highlightBoost);
+    finalColor.a = max(finalColor.a, finalColor.a + highlightBoost * 0.4);
   }
 
   gl_FragColor = finalColor;

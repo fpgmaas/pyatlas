@@ -3,6 +3,7 @@ attribute vec3 instanceColor;
 attribute float instanceSize;
 attribute float instanceHovered;
 attribute float instanceSelected;
+attribute float instanceHighlighted;
 
 // Uniforms
 uniform float time;
@@ -10,12 +11,15 @@ uniform float density;
 uniform float zoom;
 uniform float frustumHeight;
 uniform vec2 resolution;
+uniform float highlightProgress;
 
 // Varyings to fragment shader
 varying vec2 vUv;
 varying vec3 vColor;
 varying float vHovered;
 varying float vSelected;
+varying float vHighlighted;
+varying float vHighlightProgress;
 varying float vTime;
 varying float vSize;
 varying float vDensity;
@@ -26,6 +30,8 @@ void main() {
   vColor = instanceColor;
   vHovered = instanceHovered;
   vSelected = instanceSelected;
+  vHighlighted = instanceHighlighted;
+  vHighlightProgress = highlightProgress;
   vTime = time;
   vSize = instanceSize;
   vDensity = density;
