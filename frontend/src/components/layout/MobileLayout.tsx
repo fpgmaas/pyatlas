@@ -15,12 +15,14 @@ export function MobileLayout() {
       {/* Bottom layout container */}
       <div className="fixed bottom-3 left-3 right-3 sm:right-auto z-40 pointer-events-none">
         {/* Mobile: stack vertically, sm+: side by side */}
-        <div className="flex flex-col sm:flex-row items-end sm:items-end gap-2 pointer-events-auto">
+        <div className="flex flex-col sm:flex-row items-end sm:items-end gap-2">
           {/* Zoom controls - above on mobile, beside on sm+ */}
-          <div className="self-end sm:order-2 sm:hidden">
+          <div className="self-end sm:order-2 sm:hidden pointer-events-auto">
             <ZoomControls />
           </div>
-          {welcomeDismissed ? <PackageDetail /> : <WelcomeBanner />}
+          <div className="pointer-events-auto">
+            {welcomeDismissed ? <PackageDetail /> : <WelcomeBanner />}
+          </div>
         </div>
       </div>
 
