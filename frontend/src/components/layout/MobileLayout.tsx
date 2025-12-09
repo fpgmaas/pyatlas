@@ -1,9 +1,13 @@
 import { TopBar } from "./TopBar";
 import { PackageDetail } from "../PackageDetail";
+import { WelcomeBanner } from "../WelcomeBanner";
 import { FloatingGitHubButton } from "../shared/FloatingGitHubButton";
 import { ZoomControls } from "../shared/ZoomControls";
+import { useGalaxyStore } from "../../store/useGalaxyStore";
 
 export function MobileLayout() {
+  const welcomeDismissed = useGalaxyStore((s) => s.welcomeDismissed);
+
   return (
     <>
       <TopBar />
@@ -16,7 +20,7 @@ export function MobileLayout() {
           <div className="self-end sm:order-2 sm:hidden">
             <ZoomControls />
           </div>
-          <PackageDetail />
+          {welcomeDismissed ? <PackageDetail /> : <WelcomeBanner />}
         </div>
       </div>
 

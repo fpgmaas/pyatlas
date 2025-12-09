@@ -48,6 +48,7 @@ interface GalaxyStore {
   highlightedClusterId: number | null;
   highlightStartTime: number | null;
   packageDetailExpanded: boolean;
+  welcomeDismissed: boolean;
 
   setPackages: (packages: Package[]) => void;
   setClusters: (clusters: Cluster[]) => void;
@@ -72,6 +73,7 @@ interface GalaxyStore {
   setHighlightedCluster: (clusterId: number | null) => void;
   focusOnCluster: (clusterId: number) => void;
   setPackageDetailExpanded: (expanded: boolean) => void;
+  dismissWelcome: () => void;
 }
 
 export const useGalaxyStore = create<GalaxyStore>((set) => ({
@@ -97,6 +99,7 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
   highlightedClusterId: null,
   highlightStartTime: null,
   packageDetailExpanded: true,
+  welcomeDismissed: false,
 
   setPackages: (packages) => set({ packages }),
   setClusters: (clusters) => {
@@ -120,7 +123,11 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
       }
       return { selectedClusterIds: newSet };
     }),
-  setSelectedPackageId: (id) => set({ selectedPackageId: id }),
+  setSelectedPackageId: (id) =>
+    set((state) => ({
+      selectedPackageId: id,
+      welcomeDismissed: id !== null ? true : state.welcomeDismissed,
+    })),
   setHoveredIndex: (index) => set({ hoveredIndex: index }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSearchResults: (results) => set({ searchResults: results }),
@@ -171,4 +178,5 @@ export const useGalaxyStore = create<GalaxyStore>((set) => ({
     }),
   setPackageDetailExpanded: (expanded) =>
     set({ packageDetailExpanded: expanded }),
+  dismissWelcome: () => set({ welcomeDismissed: true }),
 }));
