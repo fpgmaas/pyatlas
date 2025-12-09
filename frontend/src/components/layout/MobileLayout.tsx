@@ -20,7 +20,7 @@ export function MobileLayout() {
           <div className="self-end sm:order-2 sm:hidden pointer-events-auto">
             <ZoomControls />
           </div>
-          <div className="pointer-events-auto">
+          <div className="pointer-events-auto w-full sm:w-auto">
             {welcomeDismissed ? <PackageDetail /> : <WelcomeBanner />}
           </div>
         </div>
