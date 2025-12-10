@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar/Sidebar";
 import { PackageDetail } from "../PackageDetail";
+import { WelcomeBanner } from "../WelcomeBanner";
 import { SearchBar } from "../SearchBar";
 import { FloatingGitHubButton } from "../shared/FloatingGitHubButton";
 import { ZoomControls } from "../shared/ZoomControls";
@@ -33,6 +34,7 @@ function CollapsedTopBar() {
 
 export function DesktopLayout() {
   const isSidebarOpen = useGalaxyStore((s) => s.isSidebarOpen);
+  const welcomeDismissed = useGalaxyStore((s) => s.welcomeDismissed);
 
   return (
     <>
@@ -42,12 +44,12 @@ export function DesktopLayout() {
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Package Detail - positioned next to sidebar when open */}
+      {/* Welcome Banner or Package Detail - positioned next to sidebar when open */}
       <div
         className={`fixed bottom-6 z-40 pointer-events-auto transition-[left] duration-300 ease-in-out
                     ${isSidebarOpen ? "left-[344px]" : "left-6"}`}
       >
-        <PackageDetail />
+        {welcomeDismissed ? <PackageDetail /> : <WelcomeBanner />}
       </div>
 
       {/* Bottom right controls */}

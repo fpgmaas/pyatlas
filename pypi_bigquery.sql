@@ -27,6 +27,7 @@ latest_metadata AS (
 SELECT
   lm.name AS name,
   lm.description AS description,
+  description_content_type,
   lm.summary AS summary,
   lm.version AS latest_version,
   rd.download_count AS number_of_downloads
